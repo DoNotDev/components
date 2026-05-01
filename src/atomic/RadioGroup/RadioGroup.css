@@ -1,0 +1,120 @@
+/* packages/components/src/atomic/RadioGroup/RadioGroup.css */
+
+.dndev-radio-group {
+  /* Uses shared .dndev-control-group pattern from patterns.css */
+  /* Root is display: grid - items are direct children */
+
+  /* Variant colors for checked labels - override base pattern */
+  &[data-variant='primary'] label:has([data-state='checked']) {
+    color: var(--primary);
+  }
+
+  &[data-variant='secondary'] label:has([data-state='checked']) {
+    color: var(--secondary);
+  }
+
+  &[data-variant='muted'] label:has([data-state='checked']) {
+    color: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'] label:has([data-state='checked']) {
+    color: var(--accent);
+  }
+
+  &[data-variant='success'] label:has([data-state='checked']) {
+    color: var(--success);
+  }
+
+  &[data-variant='warning'] label:has([data-state='checked']) {
+    color: var(--warning);
+  }
+
+  &[data-variant='destructive'] label:has([data-state='checked']) {
+    color: var(--destructive);
+  }
+}
+
+.dndev-control[data-type='radio'] {
+  width: var(--font-size-input);
+  height: var(--font-size-input);
+  border-radius: var(--radius-full);
+  border-width: var(--border-hairline);
+  background-color: transparent;
+
+  &[data-state='checked'] {
+    background-color: var(--primary);
+  }
+
+  &[data-variant='primary'][data-state='checked'] {
+    background-color: var(--primary);
+  }
+
+  &[data-variant='secondary'][data-state='checked'] {
+    background-color: var(--secondary);
+  }
+
+  &[data-variant='muted'][data-state='checked'] {
+    background-color: var(--muted);
+  }
+
+  &[data-variant='accent'][data-state='checked'] {
+    background-color: var(--accent);
+  }
+
+  &[data-variant='success'][data-state='checked'] {
+    background-color: var(--success);
+  }
+
+  &[data-variant='warning'][data-state='checked'] {
+    background-color: var(--warning);
+  }
+
+  &[data-variant='destructive'][data-state='checked'] {
+    background-color: var(--destructive);
+  }
+
+  [data-radix-radio-group-indicator] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: var(--radius-full);
+      background-color: var(--primary-foreground);
+    }
+  }
+
+  &[data-variant='primary'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--primary-foreground);
+  }
+
+  &[data-variant='secondary'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--secondary-foreground);
+  }
+
+  &[data-variant='muted'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--accent-foreground);
+  }
+
+  &[data-variant='success'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--success-foreground);
+  }
+
+  &[data-variant='warning'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--warning-foreground);
+  }
+
+  &[data-variant='destructive'] [data-radix-radio-group-indicator]::before {
+    background-color: var(--destructive-foreground);
+  }
+}

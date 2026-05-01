@@ -1,0 +1,64 @@
+/* packages/components/src/atomic/DualCard/DualCard.css */
+
+.dndev-dual-card {
+  width: 100%;
+  padding: var(--gap-lg);
+
+  .dndev-dual-card-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--gap-lg);
+    align-items: stretch;
+  }
+
+  .dndev-dual-card-left,
+  .dndev-dual-card-right {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    min-width: 0;
+
+    .dndev-dual-card-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+
+      .dndev-list {
+        text-align: start;
+      }
+    }
+  }
+
+  .dndev-dual-card-title {
+    margin: 0;
+  }
+
+  .dndev-dual-card-subtitle {
+    margin: 0;
+  }
+
+  .dndev-dual-card-content {
+    flex: 1;
+  }
+
+  .dndev-dual-card-cta {
+    margin-top: auto;
+  }
+
+  .dndev-dual-card-separator {
+    height: 80%;
+    align-self: center;
+  }
+
+  /* Responsive: stack to 1 column on mobile */
+  @media (width < 768px) {
+    .dndev-dual-card-container {
+      grid-template-columns: 1fr;
+      gap: var(--gap-md);
+    }
+
+    .dndev-dual-card-separator {
+      display: none;
+    }
+  }
+}

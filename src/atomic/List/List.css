@@ -1,0 +1,83 @@
+/* packages/components/src/atomic/List/List.css */
+
+.dndev-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  padding-inline-start: 0; /* Controllable via parent/style prop */
+  margin: 0;
+  list-style-position: outside;
+  text-align: start; /* Always start-aligned, even when parent is centered */
+
+  &[data-gap='none'] {
+    gap: var(--gap-none);
+  }
+
+  &[data-gap='tight'] {
+    gap: var(--gap-sm);
+  }
+
+  &[data-gap='medium'] {
+    gap: var(--gap-md);
+  }
+
+  &[data-gap='large'] {
+    gap: var(--gap-lg);
+  }
+
+  /* Modern ::marker approach - only when list-style is not 'none' */
+  &[data-ordered='true'] {
+    list-style-type: decimal;
+  }
+
+  &:not([data-ordered='true']):not([style*='list-style: none']) {
+    list-style-type: disc;
+  }
+
+  /* Density variants */
+  &[data-density='dense'] {
+    gap: var(--gap-none);
+
+    .dndev-list-item {
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  &[data-density='narrow'] {
+    gap: var(--gap-sm);
+
+    .dndev-list-item {
+      font-size: var(--font-size-sm);
+    }
+  }
+
+  &[data-density='expressive'] {
+    gap: var(--gap-md);
+
+    .dndev-list-item {
+      font-size: var(--font-size-base);
+    }
+  }
+
+  /* Always use flex layout for consistent alignment */
+  .dndev-list-item {
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-sm);
+    list-style: none; /* Remove native marker */
+    margin-block: 0;
+    padding-inline-start: 0;
+
+    .dndev-list-item-icon {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .dndev-list-item-content {
+      flex: 1;
+      text-align: start; /* Text aligned start */
+    }
+  }
+}

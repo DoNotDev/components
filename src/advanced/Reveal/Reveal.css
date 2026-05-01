@@ -1,0 +1,84 @@
+/* packages/components/src/advanced/Reveal/Reveal.css */
+
+/* Cleanup keyframe — removes will-change after animation completes for GPU memory */
+@keyframes dndev-reveal-cleanup {
+  to {
+    will-change: auto;
+  }
+}
+
+.dndev-reveal-container {
+  /* Performance */
+  contain: layout style;
+  will-change: contents;
+
+  &.dndev-reveal-visible .dndev-reveal-item {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+
+    /* Performance cleanup */
+    animation: dndev-reveal-cleanup var(--reveal-duration, 0.6s)
+      var(--reveal-easing, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+      will-change: auto;
+    }
+  }
+}
+
+.dndev-reveal-item {
+  /* Default hidden state */
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+
+  /* Performance */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+
+  /* Transitions */
+  transition:
+    opacity var(--reveal-duration, 0.6s)
+      var(--reveal-easing, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--reveal-duration, 0.6s)
+      var(--reveal-easing, cubic-bezier(0.22, 1, 0.36, 1));
+
+  /* Stagger timing */
+  transition-delay: var(--reveal-delay, 0ms);
+
+  /* Direction transforms */
+  &[data-direction='left'] {
+    transform: translate3d(calc(-1 * var(--reveal-distance, 5vw)), 0, 0);
+  }
+
+  &[data-direction='right'] {
+    transform: translate3d(var(--reveal-distance, 5vw), 0, 0);
+  }
+
+  &[data-direction='top'] {
+    transform: translate3d(0, calc(-1 * var(--reveal-distance, 5vw)), 0);
+  }
+
+  &[data-direction='bottom'] {
+    transform: translate3d(0, var(--reveal-distance, 5vw), 0);
+  }
+
+  &[data-direction='fade-in'] {
+    transform: translate3d(0, 0, 0);
+  }
+
+  &[data-visible='true'] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+}

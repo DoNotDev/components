@@ -1,0 +1,69 @@
+/* packages/components/src/atomic/Toggle/Toggle.css */
+
+.dndev-interactive[data-state='off'] {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border: none;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--muted) 80%, black 20%);
+  }
+}
+
+.dndev-interactive[data-state='on'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+
+  &[data-variant='default'],
+  &[data-variant='primary'] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &[data-variant='secondary'] {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
+  &[data-variant='muted'] {
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'] {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  &[data-variant='success'] {
+    background: var(--success);
+    color: var(--success-foreground);
+  }
+
+  &[data-variant='warning'] {
+    background: var(--warning);
+    color: var(--warning-foreground);
+  }
+
+  &[data-variant='destructive'] {
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+  }
+}
+
+.dndev-interactive[data-variant='outline'][data-state='off'] {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+
+  &:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+.dndev-interactive[data-variant='outline'][data-state='on'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+}

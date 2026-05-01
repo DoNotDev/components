@@ -1,0 +1,145 @@
+/* packages/components/src/atomic/Tabs/Tabs.css */
+
+/* Tabs list: use flexbox for natural wrapping, not grid */
+.dndev-grid-component[role='tablist'] {
+  display: flex !important;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: var(--gap-sm);
+}
+
+/* Tab trigger - flexbox sizing */
+.dndev-interactive[data-role='tab-trigger'] {
+  flex: 1 1 auto; /* Grow to fill, shrink to content, wrap naturally */
+  min-width: max-content; /* Don't shrink below content */
+  font-size: var(--font-size-base);
+  word-break: break-word;
+  border: var(--border-hairline) solid var(--line-2); /* Show clickable area */
+
+  /* Fallback (no variant): inactive = primary, active = foreground/card */
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+
+  &[data-state='active'] {
+    /* --card not --background: active tab surface must be opaque (--background can be transparent in some themes) */
+    background-color: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+  }
+
+  /* Default/Primary variant: inactive = primary, active = foreground/card */
+  &[data-variant='default'],
+  &[data-variant='primary'] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--primary);
+    }
+  }
+
+  /* Secondary variant: inactive = secondary, active = foreground/card */
+  &[data-variant='secondary'] {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--secondary);
+    }
+  }
+
+  /* Accent variant: inactive = accent, active = foreground/card */
+  &[data-variant='accent'] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--accent);
+    }
+  }
+
+  /* Muted variant: inactive = muted, active = primary (to contrast) */
+  &[data-variant='muted'] {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+
+    &[data-state='active'] {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--primary);
+    }
+  }
+
+  /* Warning variant: inactive = warning, active = foreground/card */
+  &[data-variant='warning'] {
+    background-color: var(--warning);
+    color: var(--warning-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--warning);
+    }
+  }
+
+  /* Success variant: inactive = success, active = foreground/card */
+  &[data-variant='success'] {
+    background-color: var(--success);
+    color: var(--success-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--success);
+    }
+  }
+
+  /* Destructive variant: inactive = destructive, active = foreground/card */
+  &[data-variant='destructive'] {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+
+    &[data-state='active'] {
+      /* --card not --background: active tab surface must be opaque */
+      background-color: var(--card);
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--destructive);
+    }
+  }
+}
+
+.dndev-tabs-content {
+  margin-top: var(--gap-md);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  &[data-state='inactive'] {
+    display: none;
+  }
+}

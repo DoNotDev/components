@@ -1,0 +1,59 @@
+/* packages/components/src/atomic/Skeleton/Skeleton.css */
+
+.dndev-skeleton {
+  background-color: var(--muted);
+}
+
+.dndev-skeleton-pulse {
+  animation: dndev-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dndev-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--opacity-muted);
+  }
+}
+
+.dndev-skeleton-wave {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--muted-foreground) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: dndev-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes dndev-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.dndev-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    color-mix(in oklab, var(--muted) 80%, var(--foreground) 20%) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: dndev-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes dndev-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

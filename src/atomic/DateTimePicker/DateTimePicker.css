@@ -1,0 +1,27 @@
+/* packages/components/src/atomic/DateTimePicker/DateTimePicker.css */
+
+/**
+ * DateTimePicker Component Styles
+ * Extends DatePicker styles with time-segment-specific layout.
+ * Reuses .dndev-datepicker-* classes from DatePicker.css for shared elements
+ * (field, segment, separator, calendar-btn, popover, native, live).
+ */
+
+/* ===========================
+   CUSTOM INPUT CONTAINER
+   =========================== */
+
+.dndev-datetimepicker-custom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* ===========================
+   DATE / TIME SPACER
+   =========================== */
+
+.dndev-datetimepicker-spacer {
+  width: var(--gap-md);
+  flex-shrink: 0;
+}

@@ -1,0 +1,157 @@
+/* packages/components/src/atomic/Stack/Stack.css */
+
+/*
+ * STACK COMPONENT
+ * Flexible layout container for 1D layouts
+ */
+
+.dndev-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &[data-width='fit'] {
+    width: fit-content;
+  }
+
+  &[data-width='auto'] {
+    width: auto;
+  }
+
+  &[data-centered='true'] {
+    margin-inline: auto;
+  }
+
+  /* Higher specificity to ensure row direction takes precedence */
+  &[data-direction='row'],
+  div&[data-direction='row'] {
+    flex-direction: row;
+  }
+
+  &[data-direction='row-reverse'] {
+    flex-direction: row-reverse;
+  }
+
+  &[data-direction='column-reverse'] {
+    flex-direction: column-reverse;
+  }
+
+  &[data-wrap='wrap'] {
+    flex-wrap: wrap;
+  }
+
+  &[data-wrap='nowrap'] {
+    flex-wrap: nowrap;
+  }
+
+  &[data-wrap='wrap-reverse'] {
+    flex-wrap: wrap-reverse;
+  }
+
+  /* Alignment */
+  &[data-align='start'] {
+    align-items: flex-start;
+  }
+  &[data-align='center'] {
+    align-items: center;
+  }
+  &[data-align='end'] {
+    align-items: flex-end;
+  }
+  &[data-align='stretch'] {
+    align-items: stretch;
+  }
+  &[data-align='baseline'] {
+    align-items: baseline;
+  }
+
+  /* Justification */
+  &[data-justify='start'] {
+    justify-content: flex-start;
+  }
+  &[data-justify='center'] {
+    justify-content: center;
+  }
+  &[data-justify='end'] {
+    justify-content: flex-end;
+  }
+  &[data-justify='between'] {
+    justify-content: space-between;
+  }
+  &[data-justify='around'] {
+    justify-content: space-around;
+  }
+  &[data-justify='evenly'] {
+    justify-content: space-evenly;
+  }
+
+  /* Spacing from CSS variables */
+  &[data-gap='none'] {
+    gap: var(--gap-none);
+  }
+  &[data-gap='tight'] {
+    gap: var(--gap-sm);
+  }
+  &[data-gap='medium'] {
+    gap: var(--gap-md);
+  }
+  &[data-gap='large'] {
+    gap: var(--gap-lg);
+  }
+
+  /* Row direction: allow children to shrink (required for flexbox to work properly) */
+  &[data-direction='row'] > * {
+    min-width: 0;
+  }
+
+  /* Default: hide overflow when nowrap (prevents wrapping) */
+  &[data-direction='row'][data-wrap='nowrap']:not([data-overflow]) > * {
+    overflow: hidden;
+  }
+
+  /* Default: show overflow when wrap is enabled (allows wrapping) */
+  &[data-direction='row'][data-wrap='wrap']:not([data-overflow]) > *,
+  &[data-direction='row'][data-wrap='wrap-reverse']:not([data-overflow]) > * {
+    overflow: visible;
+  }
+
+  /* Override overflow when explicitly set via prop */
+  &[data-direction='row'][data-overflow='hidden'] > * {
+    overflow: hidden;
+  }
+  &[data-direction='row'][data-overflow='visible'] > * {
+    overflow: visible;
+  }
+  &[data-direction='row'][data-overflow='auto'] > * {
+    overflow: auto;
+  }
+  &[data-direction='row'][data-overflow='scroll'] > * {
+    overflow: scroll;
+  }
+
+  /* Rigid: prevent children from shrinking */
+  &[data-rigid='true'] > * {
+    flex-shrink: 0;
+  }
+
+  /* Nowrap: prevent text wrapping in children */
+  &[data-nowrap='true'] > * {
+    white-space: nowrap;
+  }
+
+  /* Force: children respect parent alignment (override align-self) */
+  &[data-force='true'] > * {
+    align-self: inherit !important;
+  }
+
+  /* Text alignment */
+  &[data-text-align='start'] {
+    text-align: start;
+  }
+  &[data-text-align='center'] {
+    text-align: center;
+  }
+  &[data-text-align='end'] {
+    text-align: end;
+  }
+}

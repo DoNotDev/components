@@ -1,0 +1,98 @@
+/* packages/components/src/atomic/VideoPlayer/VideoPlayer.css */
+
+/**
+ * @fileoverview VideoPlayer component styles
+ * @description Styles for video player with modal support for YouTube/Vimeo embeds
+ *
+ * @version 0.0.1
+ * @since 0.0.1
+ * @author AMBROISE PARK Consulting
+ */
+
+/* Container for inline video */
+.dndev-video-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Video iframe */
+.dndev-video-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Thumbnail button trigger */
+.dndev-video-thumbnail {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: block;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+/* SVG placeholder - zero bytes, instant render */
+.dndev-video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Play button overlay */
+.dndev-video-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(from var(--background) r g b / 0.3);
+  transition: background var(--dur-normal) var(--ease-in-out);
+
+  &:hover {
+    background: rgb(from var(--background) r g b / 0.5);
+  }
+}
+
+/* Play icon */
+.dndev-video-play-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--foreground);
+  filter: drop-shadow(0 2px 8px rgb(from var(--background) r g b / 0.5));
+}
+
+/* Loading overlay - shown while iframe loads */
+.dndev-video-loading-overlay {
+  z-index: 1;
+
+  & .dndev-video-play-overlay {
+    background: rgb(from var(--background) r g b / 0.6);
+  }
+}
+
+/* Modal dialog wrapper */
+.dndev-video-dialog {
+  max-width: 90vw;
+
+  & .dndev-modal-body {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  & .dndev-video-frame {
+    aspect-ratio: 16/9;
+    max-height: calc(90vh - 5rem);
+  }
+}

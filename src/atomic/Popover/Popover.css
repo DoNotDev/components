@@ -1,0 +1,13 @@
+/* packages/components/src/atomic/Popover/Popover.css */
+
+/* Popover content width constraints and wrapping */
+/* Targets Radix UI PopoverContent element */
+[data-radix-popover-content],
+.dndev-floating[data-radix-popover-content] {
+  max-width: min(90vw, 400px);
+  width: max-content;
+  min-width: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}

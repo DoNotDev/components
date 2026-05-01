@@ -1,0 +1,433 @@
+/* packages/components/src/styles/variables.css */
+
+:root {
+  /* ===========================
+     BREAKPOINT SYSTEM - SINGLE SOURCE OF TRUTH
+     Used by: CSS @media queries, JavaScript hooks, responsive components
+     Note: CSS variables don't work in @media, so we use hardcoded px values
+     =========================== */
+  --breakpoint-mobile: 768px; /* < 768 = mobile */
+  --breakpoint-tablet: 1024px; /* 768-1023 = tablet */
+  --breakpoint-laptop: 1440px; /* 1024-1439 = laptop (key layout split) */
+  --breakpoint-desktop: 1920px; /* 1440+ = desktop */
+
+  /* ===========================
+     INTERACTIVE ELEMENTS
+     Standard touch-friendly sizing for all interactive components
+     =========================== */
+  --touch-target: 48px;
+  --icon-sm: 16px; /* Nested icon size (inside inputs, action buttons, badges) */
+  --icon-md: 24px; /* Standard standalone icon size */
+  --icon-touch: 32px; /* Large icon size (reserved) */
+
+  /* ===========================
+     SPACING SYSTEM - BASE TOKENS (DEFAULT/STANDARD)
+     Modern gap-based spacing with semantic tokens
+     
+     CRITICAL RULE: 2/4/8 SCALE ONLY
+     All spacing values MUST follow the 2/4/8 scale:
+     - 0.5rem (8px) = gap-2
+     - 1rem (16px) = gap-4  
+     - 2rem (32px) = gap-8
+     - Multiples of 8px are acceptable (3rem=48px, 4rem=64px, 6rem=96px)
+     
+     These are STANDARD density defaults - density system overrides below
+     =========================== */
+
+  /**
+   * Gap system — 4 tiers, viewport-safe.
+   *
+   * Each gap uses min(rem, 2vw) so that on extreme narrow viewports
+   * (<400px) all gaps converge to 2% of viewport width instead of
+   * holding fixed rem values that eat into content. On normal+
+   * screens the rem value wins and the 2vw floor is irrelevant.
+   *
+   * Density overrides below follow the same pattern — their clamp()
+   * values are wrapped in min(..., 2vw) so the viewport floor
+   * applies regardless of density tier.
+   */
+  --gap-none: 0;
+  --gap-sm: min(0.5rem, 2vw); /* 8px or 2vw, whichever is smaller */
+  --gap-md: min(1rem, 2vw); /* 16px or 2vw */
+  --gap-lg: min(2rem, 2vw); /* 32px or 2vw */
+
+  /* ===========================
+     DIALOG SIZE VARIANTS
+     Modal dialog max-widths for different content types
+     =========================== */
+  --dialog-auto: 32rem; /* ~512px - default dialog size */
+  --dialog-form: 28rem; /* ~448px - form dialogs */
+  --dialog-text: 42rem; /* ~672px - text content dialogs */
+  --dialog-image: 56rem; /* ~896px - image dialogs */
+  --dialog-code: 72rem; /* ~1152px - code/content dialogs */
+
+  /* ===========================
+     Z-INDEX SYSTEM - GLOBAL HIERARCHY
+     Single source of truth for stacking order across all components
+     =========================== */
+  --z-header: 100;
+  --z-sidebar: 90;
+  --z-footer: 1;
+  --z-overlay: 40;
+  --z-breadcrumbs: 10;
+  --z-dropdown: 50;
+  --z-modal: 1000;
+  --z-tooltip: 1100;
+  --z-toast: 1200;
+
+  /* ===========================
+     THEME COLORS (HIGH CONTRAST LIGHT DEFAULTS)
+     =========================== */
+  color-scheme: light dark;
+
+  /* Theme flag - defaults to light (0), overridden by themes */
+  --theme-is-dark: 0;
+
+  /* Base colors */
+  --background: #ffffff;
+  --foreground: #000000;
+  --text-color: #000000;
+
+  /* Brand colors */
+  --primary: #00bcd4; /* Cyan */
+  --primary-foreground: #000000;
+  --secondary: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
+  --secondary-foreground: #ffffff;
+  --accent: #ff9800; /* Orange */
+  --accent-foreground: #000000;
+
+  /* Status colors */
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #000000;
+
+  /* UI colors (Computed) */
+  --muted: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --muted-foreground: color-mix(
+    in oklab,
+    var(--foreground) 75%,
+    var(--background)
+  );
+  --border: color-mix(in oklab, var(--foreground) 15%, var(--background));
+  --input: var(--muted);
+  --ring: var(--primary);
+  --placeholder: rgb(from var(--muted-foreground) r g b / 0.6);
+
+  /* Containers (Flat design by default) */
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  /*
+   * Interactive surface — background for inputs (.dndev-input) and outline
+   * buttons (.dndev-interactive[data-variant='outline']). Parallel to --card
+   * for containers. Defaults to transparent so apps opt in via themes.css.
+   */
+  --interactive: transparent;
+
+  /*
+   * Root card snapshot — computed once on :root from --card/--card-foreground,
+   * then inherited unchanged. Variant blocks (e.g. primary) override --card but
+   * never touch these, so data-variant='default' can reset --card back to the
+   * root value even when nested inside another variant.
+   */
+  --card-base: var(--card);
+  --card-foreground-base: var(--card-foreground);
+
+  /* ===========================
+     BORDER RADIUS - 3 VALUES ONLY
+     =========================== */
+  --radius: 0.75rem; /* 12px - default */
+  --radius-none: 0; /* square */
+  --radius-md: var(--radius); /* 12px - default rounded */
+  --radius-full: 9999px; /* pill shape */
+
+  /* Component-specific radius */
+  --radius-interactive: 0; /* Buttons, links = square */
+  --radius-surface: var(--radius-md); /* Cards, dialogs = rounded */
+  --radius-floating: var(--radius-none); /* Dropdowns, popovers = square */
+
+  /* ===========================
+     TYPOGRAPHY
+     =========================== */
+
+  /* DRY: Default font for everything */
+  --font-family: var(--font-sans);
+
+  /* Sans-serif: Inter (2026 standard) */
+  --font-sans:
+    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+    Arial, sans-serif;
+
+  /* Serif: Playfair Display (headlines) */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  /* Headlines use sans by default (serif available for opt-in) */
+  --font-headline: var(--font-sans);
+
+  --font-mono:
+    ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, Monaco,
+    'Liberation Mono', monospace;
+
+  /* Typography Scale - Musical Scale System (STANDARD density defaults - Major Third 1.25×) */
+  --font-size-xs: 0.75rem; /* 12px - captions, shortcuts, meta */
+  --font-size-sm: 0.875rem; /* 14px - small text, captions */
+  --font-size-base: 1rem; /* 16px - body text, DEFAULT */
+  --font-size-input: 16px; /* Form field text - hardcoded for iOS zoom + density-proof */
+  --font-size-lg: 1.25rem; /* 20px - base × 1.25¹ - emphasized text */
+  --font-size-xl: 1.563rem; /* 25px - base × 1.25² - headings */
+  --font-size-2xl: 1.953rem; /* 31px - base × 1.25³ - large headings */
+  --font-size-3xl: 2.441rem; /* 39px - base × 1.25⁴ - hero text */
+
+  /* Line Height - Musical Scale System (matches font scale ratio) */
+  --line-height: 1.25; /* Major Third - Standard density default */
+
+  /* Font Weight - Semantic weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600; /* Bold/strong text */
+  --font-weight-bold: 700;
+
+  /* ===========================
+     PREMIUM VISUAL DNA
+     =========================== */
+
+  /* Hairline lines (translucent, work on light & dark) */
+  --line-1: color-mix(in oklab, var(--foreground) 6%, transparent);
+  --line-2: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --border-hairline: 1px;
+  --border-width: 2px;
+  --border-huge: 3px;
+
+  /* Shadow System - 3 LEVELS: none, md (default), xl */
+  --shadow-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+  --shadow-color-light: color-mix(in oklab, var(--foreground) 8%, transparent);
+  --shadow-color-medium: color-mix(
+    in oklab,
+    var(--foreground) 10%,
+    transparent
+  );
+
+  /* Shadow definitions - RTL versions flip x-offset */
+  --shadow-sm:
+    0.5px 1px 2px -0.5px var(--shadow-color),
+    0.25px 0.5px 1px -0.25px var(--shadow-color-light);
+  --shadow-sm-rtl:
+    -0.5px 1px 2px -0.5px var(--shadow-color),
+    -0.25px 0.5px 1px -0.25px var(--shadow-color-light);
+
+  --shadow-md:
+    1px 2px 4px -1px var(--shadow-color),
+    0.5px 1px 2px -0.5px var(--shadow-color-medium);
+  --shadow-md-rtl:
+    -1px 2px 4px -1px var(--shadow-color),
+    -0.5px 1px 2px -0.5px var(--shadow-color-medium);
+
+  --shadow-xl:
+    6px 12px 24px -6px var(--shadow-color),
+    3px 6px 12px -3px var(--shadow-color-light);
+  --shadow-xl-rtl:
+    -6px 12px 24px -6px var(--shadow-color),
+    -3px 6px 12px -3px var(--shadow-color-light);
+
+  /* Root shadow snapshots — same principle as --card-base (see above) */
+  --shadow-md-base: var(--shadow-md);
+  --shadow-xl-base: var(--shadow-xl);
+
+  /* Per-variant shadows — essences override these with different colors/shapes */
+  --shadow-primary: var(--shadow-md);
+  --shadow-primary-xl: var(--shadow-xl);
+  --shadow-secondary: var(--shadow-md);
+  --shadow-secondary-xl: var(--shadow-xl);
+
+  /* Interactive shadows */
+  --shadow-interactive: 0 0 0 3px
+    color-mix(in oklab, var(--ring) 20%, transparent);
+  --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+  --shadow-none: none;
+
+  /* ===========================
+     ANIMATION SYSTEM
+     =========================== */
+
+  /* Motion easing */
+  --ease-heavy: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Duration tokens */
+  --dur-fast: 0.15s;
+  --dur-normal: 0.3s;
+  --dur-slow: 0.5s;
+  --dur-heavy: 0.7s;
+  --dur-hero: 1s;
+
+  /* Performance hints */
+  --will-change-transform: transform;
+  --will-change-none: auto;
+
+  /* ===========================
+     INTERACTION EFFECTS
+     Micro-interactions for buttons and interactive elements.
+     Set to 0/1 to disable individual effects.
+     =========================== */
+  --hover-lift: 0; /* translateY on hover (0 = disabled) */
+  --click-scale: 0.97; /* scale on click (1 = disabled) */
+  --ripple-opacity: 0.2; /* ripple effect opacity (0 = disabled) */
+
+  /* ===========================
+     OPACITY SYSTEM
+     Standard scale: 0, 0.3, 0.6, 0.9, 1
+     (0 and 1 are hardcoded, only 3 variables needed)
+     =========================== */
+  --opacity-subtle: 0.3;
+  --opacity-muted: 0.6;
+  --opacity-strong: 0.9;
+
+  /* ===========================
+     PANEL/POPOVER WIDTHS
+     Standard widths for contextual panels, popovers, and tooltips
+     =========================== */
+  --panel-width-sm: 16rem; /* 256px - compact panels */
+  --panel-width-md: 20rem; /* 320px - standard panels */
+  --panel-width-lg: 24rem; /* 384px - wide panels */
+  --panel-width-xl: 28rem; /* 448px - extra wide panels */
+
+  /* ===========================
+     CONTENT WIDTH - BASE TOKEN
+     Base token for content width constraints
+     Layout system computes actual --content-width accounting for sidebar
+     =========================== */
+  --max-content-width: 87.5rem; /* 1480px - default ideal max */
+  --content-width: var(
+    --max-content-width
+  ); /* Default: use max (layout overrides) */
+
+  /* Named content width presets — SSOT for PageContainer variants + Section contentWidth */
+  --content-width-standard: min(87.5rem, 100%);
+  --content-width-docs: min(56.25rem, 100%);
+  --content-width-narrow: min(var(--narrow-content-max), 100%);
+}
+
+/* ===========================
+   DENSITY SYSTEM
+   Semantic spacing and typography presets based on context
+   Applied via [data-density] attribute on root or container
+   =========================== */
+
+/* Compact (Admin/Data) - Dense, information-dense layouts - Minor Third (1.2×) */
+[data-density='compact'] {
+  /* Base sizes: Fluid responsiveness for all text, zoom-safe */
+  --font-size-base: clamp(
+    0.875rem,
+    0.8125rem + 0.25vw,
+    0.9375rem
+  ); /* 14-15px fluid */
+  --font-size-lg: clamp(
+    1.05rem,
+    0.9375rem + 0.5vw,
+    1.125rem
+  ); /* 17-18px fluid */
+  --font-size-xl: clamp(
+    1.26rem,
+    1.125rem + 0.75vw,
+    1.375rem
+  ); /* 20-22px fluid */
+  /* Display sizes: Musical scale + fluid responsiveness */
+  --font-size-2xl: clamp(
+    1.512rem,
+    1.375rem + 0.75vw,
+    1.625rem
+  ); /* 24-26px fluid */
+  --font-size-3xl: clamp(1.814rem, 1.625rem + 1vw, 2rem); /* 29-32px fluid */
+  --gap-sm: min(
+    clamp(0.375rem, 0.3125rem + 0.25vw, 0.5rem),
+    2vw
+  ); /* 6-8px fluid, 2vw floor */
+  --gap-md: min(
+    clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem),
+    2vw
+  ); /* 12-14px fluid, 2vw floor */
+  --gap-lg: min(
+    clamp(1.5rem, 1.25rem + 1vw, 1.75rem),
+    2vw
+  ); /* 24-28px fluid, 2vw floor */
+  --line-height: 1.2; /* Minor Third - All text */
+}
+
+/* Standard (Docs/SaaS) - DEFAULT, balanced for readability */
+[data-density='standard'] {
+  /* Base sizes: Fluid responsiveness for all text, zoom-safe */
+  --font-size-base: clamp(
+    1rem,
+    0.9375rem + 0.25vw,
+    1.0625rem
+  ); /* 16-17px fluid */
+  --font-size-lg: clamp(
+    1.25rem,
+    1.125rem + 0.5vw,
+    1.375rem
+  ); /* 20-22px fluid */
+  --font-size-xl: clamp(
+    1.563rem,
+    1.375rem + 0.75vw,
+    1.75rem
+  ); /* 25-28px fluid */
+  /* Display sizes: Musical scale + fluid responsiveness */
+  --font-size-2xl: clamp(1.953rem, 1.75rem + 1vw, 2.25rem); /* 31-36px fluid */
+  --font-size-3xl: clamp(
+    2.441rem,
+    2rem + 1.5vw,
+    3rem
+  ); /* 39-48px fluid - hero text */
+  --gap-sm: min(
+    clamp(0.5rem, 0.4375rem + 0.25vw, 0.625rem),
+    2vw
+  ); /* 8-10px fluid, 2vw floor */
+  --gap-md: min(
+    clamp(1rem, 0.875rem + 0.5vw, 1.25rem),
+    2vw
+  ); /* 16-20px fluid, 2vw floor */
+  --gap-lg: min(
+    clamp(2rem, 1.75rem + 1vw, 2.5rem),
+    2vw
+  ); /* 32-40px fluid, 2vw floor */
+  --line-height: 1.25; /* Major Third - All text */
+}
+
+/* Expressive (Marketing) - Perfect Fourth (1.333×) + Fluid typography (2025 best practice) */
+[data-density='expressive'] {
+  /* Base sizes: Fluid responsiveness for all text, zoom-safe */
+  --font-size-base: clamp(1rem, 0.875rem + 0.5vw, 1.125rem); /* 16-18px fluid */
+  --font-size-lg: clamp(1.25rem, 1rem + 0.75vw, 1.5rem); /* 20-24px fluid */
+  --font-size-xl: clamp(1.5rem, 1rem + 1vw, 2rem); /* 24-32px fluid */
+  /* Display sizes: Musical scale + fluid responsiveness for drama */
+  --font-size-2xl: clamp(
+    2.666rem,
+    2rem + 1.5vw,
+    3.5rem
+  ); /* base × 1.333³ fluid */
+  --font-size-3xl: clamp(
+    3.555rem,
+    2.5rem + 2.5vw,
+    5rem
+  ); /* base × 1.333⁴ fluid */
+  --gap-sm: min(
+    clamp(0.5rem, 0.375rem + 0.25vw, 0.75rem),
+    2vw
+  ); /* 8-12px fluid, 2vw floor */
+  --gap-md: min(
+    clamp(1rem, 0.75rem + 0.5vw, 1.5rem),
+    2vw
+  ); /* 16-24px fluid, 2vw floor */
+  --gap-lg: min(
+    clamp(2rem, 1.5rem + 1vw, 3rem),
+    2vw
+  ); /* 32-48px fluid, 2vw floor */
+  --line-height: 1.33; /* Perfect Fourth - All text */
+}

@@ -1,0 +1,93 @@
+/* packages/components/src/atomic/Accordion/Accordion.css */
+
+.dndev-accordion {
+  width: 100%;
+  min-width: 0;
+}
+
+.dndev-accordion-item {
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+  width: 100%;
+}
+
+.dndev-accordion-header {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.dndev-interactive[data-role='accordion-trigger'] {
+  flex: 1;
+  min-width: 0;
+  min-height: auto;
+  padding: var(--gap-md) 0;
+  justify-content: space-between;
+  background: transparent;
+  color: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+
+  &:hover {
+    background: transparent;
+    text-decoration: underline;
+  }
+
+  &[data-state='open'] svg {
+    transform: rotate(180deg);
+  }
+}
+
+.dndev-accordion-trigger-icon {
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-accordion-content {
+  overflow: hidden;
+  font-size: var(--font-size-base);
+  width: 100%;
+  min-width: 0;
+  text-align: start;
+}
+
+.dndev-accordion-content[data-state='open'] {
+  animation: slideDown var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-accordion-content[data-state='closed'] {
+  animation: slideUp var(--dur-normal) var(--ease-in-out);
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.dndev-accordion-content-inner {
+  padding-bottom: var(--gap-md);
+  padding-top: 0;
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}

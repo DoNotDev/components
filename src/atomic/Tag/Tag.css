@@ -1,0 +1,115 @@
+/* packages/components/src/atomic/Tag/Tag.css */
+
+.dndev-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease-in-out);
+
+  /* Default variant */
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+
+  .dndev-tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-inline-start: 2px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    transition: opacity var(--dur-fast);
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ring);
+    }
+  }
+
+  .dndev-tag-remove-icon {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Sizes */
+.dndev-tag-sm {
+  padding: 0.125rem 0.5rem;
+  font-size: var(--font-size-xs);
+  height: 20px;
+}
+
+.dndev-tag-md {
+  padding: 0.25rem 0.75rem;
+  font-size: var(--font-size-sm);
+  height: 24px;
+}
+
+.dndev-tag-lg {
+  padding: 0.375rem 0.875rem;
+  font-size: var(--font-size-base);
+  height: 32px;
+}
+
+/* Variants */
+.dndev-tag-outline {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.dndev-tag-accent {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  border-color: transparent;
+}
+
+/* Interactive States */
+.dndev-tag-interactive {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+.dndev-tag-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.dndev-tag-sm {
+  .dndev-tag-remove-icon {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+.dndev-tag-lg {
+  .dndev-tag-remove-icon {
+    width: 12px;
+    height: 12px;
+  }
+}

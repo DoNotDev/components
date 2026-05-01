@@ -1,0 +1,27 @@
+/* packages/components/src/atomic/Button/Button.css */
+/* Label styling moved to patterns.css (.dndev-interactive-label) */
+
+/* Loading state */
+[data-loading] {
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* Button spinner - inherits size from button font-size */
+.dndev-button-spinner {
+  flex-shrink: 0;
+}
+
+/* Progress ring for upload percentage */
+.dndev-button-progress {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dndev-progress-ring {
+  width: 1em;
+  height: 1em;
+  transform: rotate(-90deg);
+}

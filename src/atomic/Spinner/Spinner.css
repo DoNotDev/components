@@ -1,0 +1,124 @@
+/* packages/components/src/atomic/Spinner/Spinner.css */
+
+/**
+ * Spinner Component Styles
+ *
+ * Natural sizing - spinner inherits from parent context (1em = parent font-size)
+ * Overlay variant fixed at touch-target size for visibility
+ */
+
+/* Base spinner - natural sizing (inherits from parent) */
+.dndev-spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top-color: var(--primary);
+  border-inline-end-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* Color variants - uses THEME_VARIANT */
+.dndev-spinner[data-variant='default'] {
+  border-top-color: var(--foreground);
+  border-inline-end-color: var(--foreground);
+}
+
+.dndev-spinner[data-variant='muted'] {
+  border-top-color: var(--muted-foreground);
+  border-inline-end-color: var(--muted-foreground);
+}
+
+.dndev-spinner[data-variant='primary'] {
+  border-top-color: var(--primary);
+  border-inline-end-color: var(--primary);
+}
+
+.dndev-spinner[data-variant='secondary'] {
+  border-top-color: var(--secondary);
+  border-inline-end-color: var(--secondary);
+}
+
+.dndev-spinner[data-variant='accent'] {
+  border-top-color: var(--accent);
+  border-inline-end-color: var(--accent);
+}
+
+.dndev-spinner[data-variant='success'] {
+  border-top-color: var(--success);
+  border-inline-end-color: var(--success);
+}
+
+.dndev-spinner[data-variant='warning'] {
+  border-top-color: var(--warning);
+  border-inline-end-color: var(--warning);
+}
+
+.dndev-spinner[data-variant='destructive'] {
+  border-top-color: var(--destructive);
+  border-inline-end-color: var(--destructive);
+}
+
+/* Overlay variant - full-page loading */
+.dndev-spinner-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(from var(--background) r g b / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-overlay, 9999);
+  transition: opacity var(--dur-normal, 0.2s) var(--ease-in-out, ease-in-out);
+}
+
+/* Overlay spinner uses fixed touch-target size */
+.dndev-spinner-overlay .dndev-spinner {
+  width: var(--icon-touch, 48px);
+  height: var(--icon-touch, 48px);
+  border-width: 3px;
+}
+
+/* Container overlay - scoped to parent (position: relative) */
+.dndev-spinner-overlay--container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(from var(--background) r g b / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-overlay, 9999);
+  transition: opacity var(--dur-normal, 0.2s) var(--ease-in-out, ease-in-out);
+}
+
+.dndev-spinner-overlay--container .dndev-spinner {
+  width: var(--icon-lg, 32px);
+  height: var(--icon-lg, 32px);
+  border-width: 3px;
+}
+
+/* Spinner content wrapper (spinner + message) */
+.dndev-spinner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-md, 12px);
+}
+
+/* Message text below spinner */
+.dndev-spinner-message {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

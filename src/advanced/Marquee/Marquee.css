@@ -1,0 +1,35 @@
+/* packages/components/src/advanced/Marquee/Marquee.css */
+
+/* Marquee track */
+[data-marquee-track] {
+  will-change: var(--will-change-transform);
+  animation: universal-marquee var(--marquee-duration, 0ms)
+    var(--marquee-easing, linear) infinite;
+  animation-direction: var(--marquee-direction, normal);
+
+  /* Vertical marquee */
+  &[data-marquee-direction='vertical'] {
+    --transform-start: translateY(0);
+    --transform-end: translateY(calc(-1 * var(--marquee-distance, 0px)));
+  }
+
+  /* Bounce behavior */
+  &[data-marquee-behavior='bounce'] {
+    animation-name: universal-float;
+    --transform-start: translateX(0);
+    --transform-mid: translateX(calc(-1 * var(--marquee-distance, 0px)));
+    --opacity-start: 1;
+    --opacity-mid: 1;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .group:hover &,
+  .group:focus-within & {
+    animation-play-state: paused;
+  }
+}

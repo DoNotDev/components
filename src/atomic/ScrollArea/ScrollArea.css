@@ -1,0 +1,57 @@
+/* packages/components/src/atomic/ScrollArea/ScrollArea.css */
+
+.dndev-scroll-area {
+  position: relative;
+  overflow: hidden;
+}
+
+.dndev-scroll-area-viewport {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+}
+
+/* Radix injects `display:table; min-width:100%` as inline style on the viewport's
+   direct child. A display:table element sizes to its content's min-content width,
+   ignoring max-width:100% (Chrome resolves the % against the table's own bloated
+   width, not the viewport). contain:inline-size prevents content-based sizing:
+   the table stays at min-width:100% = viewport width regardless of descendant content. */
+.dndev-scroll-area-viewport > div {
+  contain: inline-size;
+}
+
+.dndev-scroll-bar {
+  display: flex;
+  touch-action: none;
+  user-select: none;
+  transition: colors var(--dur-fast) var(--ease-in-out);
+
+  &[data-orientation='vertical'] {
+    height: 100%;
+    width: 0.625rem;
+    border-inline-start: var(--border-hairline) solid transparent;
+    padding: var(--border-hairline);
+  }
+
+  &[data-orientation='horizontal'] {
+    height: 0.625rem;
+    border-top: var(--border-hairline) solid transparent;
+    padding: var(--border-hairline);
+  }
+}
+
+.dndev-scroll-bar-thumb {
+  position: relative;
+  border-radius: var(--radius-full);
+  background-color: var(--border);
+
+  &[data-orientation='vertical'] {
+    flex: 1;
+  }
+}
+
+/* Scrollbar on end side (right in LTR, left in RTL) */
+.dndev-scroll-area-end .dndev-scroll-bar[data-orientation='vertical'] {
+  inset-inline-end: 0;
+  inset-inline-start: auto;
+}

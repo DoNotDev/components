@@ -1,0 +1,47 @@
+/* packages/components/src/atomic/DescriptionList/DescriptionList.css */
+
+.dndev-description-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  text-align: start;
+
+  &[data-orientation='horizontal'] {
+    gap: var(--gap-lg);
+
+    .dndev-description-item {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .dndev-description-term {
+      flex-shrink: 0;
+      min-width: 120px;
+    }
+
+    .dndev-description-details {
+      flex: 1;
+      text-align: end;
+    }
+  }
+
+  .dndev-description-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .dndev-description-term {
+    display: block;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--muted-foreground);
+  }
+
+  .dndev-description-details {
+    font-size: var(--font-size-base);
+    color: inherit;
+    margin: 0;
+  }
+}

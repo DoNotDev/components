@@ -1,0 +1,199 @@
+/* packages/components/src/atomic/Combobox/Combobox.css */
+
+/* ──────────────────────────────────────────────────
+   Trailing icon group — flex row inside the input area
+   ────────────────────────────────────────────────── */
+
+.dndev-combobox-trailing {
+  position: absolute;
+  inset-inline-end: var(--gap-sm);
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight, 4px);
+  z-index: 1;
+  pointer-events: none; /* pass clicks through to input by default */
+}
+
+/* Input padding: reserve space for trailing content.
+   --combobox-pad-end is set as an inline CSS variable on .dndev-combobox-wrapper. */
+.dndev-combobox-wrapper .dndev-input {
+  padding-inline-end: var(--combobox-pad-end);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* Action buttons — extends shared .dndev-inline-action-btn from patterns.css.
+   Only Combobox-specific overrides here. */
+.dndev-combobox-action-btn {
+  pointer-events: auto; /* re-enable clicks (trailing container is pointer-events: none) */
+}
+
+/* Create button accent color */
+.dndev-combobox-action-btn--create {
+  color: var(--primary);
+}
+
+/* Clear button */
+.dndev-combobox-action-btn--clear {
+  color: var(--muted-foreground);
+}
+
+/* Chevron toggle — extends .dndev-inline-action-btn from patterns.css
+   (same pattern as RangeInput/DatePicker/Combobox clear+create).
+   Only chevron-specific behavior: re-enable clicks in the trailing
+   container and rotate the icon on open. */
+.dndev-combobox-chevron {
+  pointer-events: auto;
+}
+
+.dndev-combobox-chevron svg {
+  transition: transform var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-combobox-open .dndev-combobox-chevron svg {
+  transform: rotate(180deg);
+}
+
+/* Spinner replaces chevron — match its footprint so there's no layout shift */
+.dndev-combobox-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────────
+   Chips-inside mode — wrapper becomes the visual input
+   ────────────────────────────────────────────────── */
+
+.dndev-combobox-wrapper--chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-tight, 4px);
+  border: var(--border-hairline) solid var(--line-2);
+  border-radius: var(--radius-interactive);
+  padding: var(--gap-tight, 4px);
+  padding-inline-end: var(--combobox-pad-end);
+  min-height: var(--touch-target);
+  cursor: text;
+  transition: all var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-combobox-wrapper--chips:hover {
+  border-color: var(--ring);
+}
+
+.dndev-combobox-open .dndev-combobox-wrapper--chips {
+  border-color: var(--ring);
+}
+
+/* Inside FloatingLabel fieldset: fieldset owns the border, suppress wrapper border */
+.dndev-floating-fieldset > .dndev-combobox-wrapper--chips {
+  border-color: transparent;
+}
+
+/* Input inside chips wrapper: grow to fill, no min height */
+.dndev-combobox-wrapper--chips .dndev-input {
+  flex: 1 1 80px;
+  min-width: 80px;
+  height: auto;
+  padding: var(--gap-tight, 4px) var(--gap-sm);
+}
+
+/* ──────────────────────────────────────────────────
+   Dropdown content
+   ────────────────────────────────────────────────── */
+
+.dndev-combobox-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.dndev-combobox-option {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-sm) var(--gap-md);
+  cursor: pointer;
+  border-radius: var(--radius-interactive);
+  transition: background-color var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-combobox-option:disabled {
+  opacity: var(--opacity-muted);
+  cursor: not-allowed;
+}
+
+.dndev-combobox-option-highlighted:not(:disabled) {
+  background-color: var(--accent);
+  opacity: var(--opacity-strong);
+}
+
+.dndev-combobox-option-selected {
+  font-weight: var(--font-weight-medium);
+  background-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.dndev-combobox-option-selected.dndev-combobox-option-highlighted {
+  background-color: var(--accent);
+}
+
+.dndev-combobox-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  flex: 1;
+}
+
+.dndev-combobox-option-label {
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+}
+
+.dndev-combobox-option-description {
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+.dndev-combobox-option-count {
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  margin-inline-start: var(--gap-tight);
+  flex-shrink: 0;
+}
+
+.dndev-combobox-option-check {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding-inline-start: var(--gap-sm);
+}
+
+.dndev-combobox-empty {
+  padding: var(--gap-lg) var(--gap-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+/* Creatable option styling */
+.dndev-combobox-option-create {
+  color: var(--primary);
+  font-style: italic;
+}
+
+.dndev-combobox-option-create-icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  margin-inline-end: var(--gap-sm);
+  flex-shrink: 0;
+}

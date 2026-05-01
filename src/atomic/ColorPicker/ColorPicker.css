@@ -1,0 +1,123 @@
+/* packages/components/src/atomic/ColorPicker/ColorPicker.css */
+
+.dndev-color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+/* Swatch grid */
+.dndev-color-swatches {
+  display: grid;
+  grid-template-columns: repeat(var(--color-picker-columns, 8), 1fr);
+  gap: var(--gap-sm);
+}
+
+/* Individual swatch */
+.dndev-color-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: var(--radius-interactive);
+  border: 2px solid transparent;
+  background-color: var(--swatch-color);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    border-color var(--dur-fast) var(--ease-in-out);
+  padding: 0;
+  position: relative;
+}
+
+.dndev-color-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: var(--shadow-md);
+  z-index: 1;
+}
+
+.dndev-color-swatch:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dndev-color-swatch:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Selected swatch — ring */
+.dndev-color-swatch[aria-checked='true'] {
+  border-color: var(--foreground);
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--foreground);
+}
+
+/* Checkmark on selected */
+.dndev-color-swatch[aria-checked='true']::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 40%;
+  height: 22%;
+  border-bottom: 2px solid;
+  border-inline-start: 2px solid;
+  transform: rotate(-45deg) translateY(-15%);
+}
+
+/* Contrast-aware checkmark color */
+.dndev-color-swatch[aria-checked='true'][data-light='true']::after {
+  color: #000000;
+}
+
+.dndev-color-swatch[aria-checked='true'][data-light='false']::after {
+  color: #ffffff;
+}
+
+/* Custom color section */
+.dndev-color-custom {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+.dndev-color-custom-label {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.dndev-color-custom input[type='color'] {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-interactive);
+  padding: 2px;
+  cursor: pointer;
+  background: none;
+}
+
+.dndev-color-custom input[type='color']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Hex display */
+.dndev-color-hex {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+/* Disabled */
+.dndev-color-picker[aria-disabled='true'] {
+  opacity: var(--opacity-muted);
+  pointer-events: none;
+}

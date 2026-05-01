@@ -1,0 +1,54 @@
+/* packages/components/src/atomic/Input/Input.css */
+
+/* Hide number input spinners - cleaner UI for price/range inputs */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Input with leading icon (search, etc.) */
+.dndev-input-with-leading-icon {
+  padding-inline-start: calc(var(--gap-md) + var(--icon-md) + var(--gap-sm));
+}
+
+/* Input with trailing icon */
+.dndev-input-with-trailing-icon {
+  padding-inline-end: calc(var(--gap-md) + var(--icon-md) + var(--gap-sm));
+}
+
+/* Icon container inside input */
+.dndev-input-icon {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+  color: var(--muted-foreground);
+}
+
+.dndev-input-icon-leading {
+  inset-inline-start: var(--gap-md);
+}
+
+.dndev-input-icon-trailing {
+  inset-inline-end: var(--gap-md);
+}
+
+/* Error / destructive state — red border for invalid fields */
+[data-variant='destructive'],
+[aria-invalid='true'] {
+  border-color: var(--destructive);
+}
+
+[data-variant='destructive']:focus,
+[aria-invalid='true']:focus {
+  border-color: var(--destructive);
+  outline-color: var(--destructive);
+}

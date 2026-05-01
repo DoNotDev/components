@@ -1,0 +1,156 @@
+/* packages/components/src/atomic/Blockquote/Blockquote.css */
+
+/*
+ * Blockquote Component - Industry-standard patterns
+ * Semantic figure + blockquote + figcaption structure
+ * Three variants optimized for different content types
+ */
+
+.dndev-blockquote {
+  position: relative;
+  margin-block: calc(var(--gap-lg) * 1.25); /* 2em vertical separation */
+  margin-inline: 0;
+  box-sizing: border-box;
+}
+
+.dndev-blockquote *,
+.dndev-blockquote *::before,
+.dndev-blockquote *::after {
+  box-sizing: border-box;
+}
+
+/* Blockquote content (inner <blockquote> element) */
+.dndev-blockquote blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+.dndev-blockquote-content {
+  font-size: var(--font-size-lg); /* 20px - emphasized text */
+  line-height: 1.7; /* Industry standard for readability */
+  font-weight: var(--font-weight-normal);
+  color: inherit;
+  margin: 0;
+}
+
+/* Attribution (figcaption) */
+.dndev-blockquote-caption {
+  display: block;
+  font-style: normal;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  margin-block-start: var(--gap-md); /* 16px gap from quote */
+}
+
+.dndev-blockquote-author {
+  font-weight: var(--font-weight-semibold);
+  font-style: normal;
+  color: inherit;
+}
+
+.dndev-blockquote-source {
+  font-weight: var(--font-weight-normal);
+}
+
+/*
+ * VARIANT: Default (Documentation/Technical)
+ * Optimized for technical documentation and tutorials
+ * Features: Left border, subtle background, no italic
+ */
+.dndev-blockquote[data-variant='default'] blockquote {
+  padding: var(--gap-md) calc(var(--gap-md) + 4px) var(--gap-md) var(--gap-lg);
+  background: var(--muted);
+  border-inline-start: 4px solid var(--primary);
+  border-inline-end: none;
+  border-block-start: none;
+  border-block-end: none;
+  border-radius: var(--radius-interactive) var(--radius-surface)
+    var(--radius-surface) var(--radius-interactive);
+  overflow: hidden;
+}
+
+.dndev-blockquote[data-variant='default'] .dndev-blockquote-content {
+  font-style: normal; /* No italic for technical content */
+}
+
+/*
+ * VARIANT: Editorial (Articles/Blogs)
+ * Optimized for long-form editorial content
+ * Features: Serif font, italic, minimal styling, left border
+ */
+.dndev-blockquote[data-variant='editorial'] blockquote {
+  padding-inline-start: var(--gap-lg);
+  border-inline-start: 3px solid var(--foreground);
+}
+
+.dndev-blockquote[data-variant='editorial'] .dndev-blockquote-content {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: var(--font-size-xl); /* 25px - larger for editorial impact */
+  color: inherit;
+  opacity: 0.95;
+}
+
+.dndev-blockquote[data-variant='editorial'] .dndev-blockquote-caption {
+  padding-inline-start: var(--gap-lg); /* Align with quote */
+}
+
+/*
+ * VARIANT: Testimonial (Marketing/Landing Pages)
+ * Optimized for marketing content and customer testimonials
+ * Features: Card with shadow, decorative quote mark
+ */
+.dndev-blockquote[data-variant='testimonial'] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-surface);
+  padding: calc(var(--gap-lg) + var(--gap-md)); /* 2.5rem */
+  box-shadow:
+    0 1px 3px 0 hsl(var(--foreground-hsl) / 0.1),
+    0 1px 2px -1px hsl(var(--foreground-hsl) / 0.1);
+}
+
+.dndev-blockquote[data-variant='testimonial'] blockquote {
+  position: relative;
+  padding-block-start: var(--gap-md); /* Space for quote mark */
+}
+
+/* Decorative opening quote mark */
+.dndev-blockquote[data-variant='testimonial'] blockquote::before {
+  content: '"';
+  position: absolute;
+  inset-block-start: -0.25em;
+  inset-inline-start: -0.125em;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--primary);
+  opacity: 0.15;
+  font-family: Georgia, serif;
+  font-weight: var(--font-weight-bold);
+  pointer-events: none;
+}
+
+.dndev-blockquote[data-variant='testimonial'] .dndev-blockquote-content {
+  font-style: normal;
+  position: relative;
+  z-index: 1; /* Above decorative quote */
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .dndev-blockquote {
+    margin-block: var(--gap-lg);
+  }
+
+  .dndev-blockquote-content {
+    font-size: var(--font-size-base); /* Slightly smaller on mobile */
+  }
+
+  .dndev-blockquote[data-variant='editorial'] .dndev-blockquote-content {
+    font-size: var(--font-size-lg);
+  }
+
+  .dndev-blockquote[data-variant='testimonial'] {
+    padding: var(--gap-lg);
+  }
+}

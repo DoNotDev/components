@@ -1,0 +1,1103 @@
+/* packages/components/src/styles/utilities.css */
+
+/**
+ * Development-only debug utilities
+ * THOSE ARE VERY IMPORTANT FOR OUR APPS!
+ */
+
+:root {
+  --debug-enabled: 0;
+}
+
+/* Used by DebugTools component - do not remove */
+.debug-layout {
+  outline: calc(var(--debug-enabled) * 2px) solid rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Used by DebugTools component via CSS variables - do not remove */
+.debug-flex {
+  outline: calc(var(--debug-enabled) * 2px) dashed rgba(255, 165, 0, 0.8) !important;
+}
+
+/* Used by DebugTools component via CSS variables - do not remove */
+.debug-component {
+  outline: calc(var(--debug-enabled) * 1px) dotted rgba(0, 255, 0, 0.6) !important;
+}
+
+/* Auto-apply debug borders when data-debug attribute is present */
+/* Layout elements - red borders */
+[data-debug='true'] {
+  .dndev-layout,
+  header[role='banner'],
+  main[role='main'],
+  aside[role='navigation'],
+  footer[role='contentinfo'] {
+    outline: 2px solid rgba(255, 0, 0, 0.5) !important;
+  }
+
+  /* Flex containers - orange dashed borders */
+  .flex,
+  .flex-col,
+  .flex-row,
+  .inline-flex {
+    outline: 2px dashed rgba(255, 165, 0, 0.8) !important;
+  }
+
+  /* Grid containers - orange dashed borders */
+  .grid,
+  [class*='grid'] {
+    outline: 2px dashed rgba(255, 165, 0, 0.8) !important;
+  }
+
+  /* Components - green dotted borders */
+  [class*='dndev-'],
+  [class*='card'],
+  button,
+  input,
+  select,
+  textarea {
+    outline: 1px dotted rgba(0, 255, 0, 0.6) !important;
+  }
+}
+
+/* ===========================
+   ACCESSIBILITY
+   =========================== */
+
+/* Screen reader only - hides element visually but keeps it accessible to screen readers */
+.dndev-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ===========================
+   DISPLAY
+   =========================== */
+.dndev-flex {
+  display: flex;
+}
+
+.dndev-flex-col {
+  flex-direction: column;
+}
+
+/* Used in feature packages (auth, oauth, crud) - do not remove */
+.dndev-flex-col-reverse {
+  flex-direction: column-reverse;
+}
+
+/* Used in feature packages (auth, oauth, crud) - do not remove */
+.dndev-flex-row {
+  flex-direction: row;
+}
+
+.dndev-flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* Used in feature packages (auth, oauth, crud) - do not remove */
+.dndev-flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.dndev-flex-1 {
+  flex: 1 1 0%;
+}
+
+.dndev-flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.dndev-inline-flex {
+  display: inline-flex;
+}
+
+.dndev-grid {
+  display: grid;
+}
+
+/* Used in feature packages (crud FormLayout) - do not remove */
+.dndev-grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.dndev-block {
+  display: block;
+}
+
+/* Used in feature packages (crud, ui) - do not remove */
+.dndev-inline {
+  display: inline;
+}
+
+.dndev-hidden {
+  display: none;
+}
+
+/* ===========================
+   FLEXBOX ALIGNMENT
+   =========================== */
+.dndev-items-start {
+  align-items: flex-start;
+}
+
+.dndev-items-center {
+  align-items: center;
+}
+
+/* Used in feature packages (auth, oauth) - do not remove */
+.dndev-items-end {
+  align-items: flex-end;
+}
+
+/* Used in feature packages (auth, oauth) - do not remove */
+.dndev-items-stretch {
+  align-items: stretch;
+}
+
+.dndev-justify-start {
+  justify-content: flex-start;
+}
+
+.dndev-justify-center {
+  justify-content: center;
+}
+
+.dndev-justify-end {
+  justify-content: flex-end;
+}
+
+.dndev-justify-between {
+  justify-content: space-between;
+}
+
+/* ===========================
+   GAP (4-tier system)
+   =========================== */
+.dndev-gap-none {
+  gap: var(--gap-none);
+}
+
+.dndev-gap-sm {
+  gap: var(--gap-sm);
+}
+
+.dndev-gap-md {
+  gap: var(--gap-md);
+}
+
+.dndev-gap-lg {
+  gap: var(--gap-lg);
+}
+
+/* ===========================
+   UNIVERSAL DATA ATTRIBUTES
+   Work with any element
+   =========================== */
+
+/* Gap system */
+[data-gap='none'] {
+  gap: var(--gap-none);
+}
+
+[data-gap='tight'] {
+  gap: var(--gap-sm);
+}
+
+[data-gap='medium'] {
+  gap: var(--gap-md);
+}
+
+[data-gap='large'] {
+  gap: var(--gap-lg);
+}
+
+/* Grid columns - gridCols is max columns, cards min 350px */
+[data-cols='1'] {
+  grid-template-columns: repeat(1, minmax(350px, 1fr));
+  align-items: stretch;
+}
+
+[data-cols='2'] {
+  grid-template-columns: repeat(2, minmax(350px, 1fr));
+  align-items: stretch;
+
+  @media (width <=699px) {
+    grid-template-columns: repeat(1, minmax(350px, 1fr));
+  }
+}
+
+[data-cols='3'] {
+  grid-template-columns: repeat(3, minmax(350px, 1fr));
+  align-items: stretch;
+
+  @media (width <=1049px) {
+    grid-template-columns: repeat(2, minmax(350px, 1fr));
+  }
+
+  @media (width <=699px) {
+    grid-template-columns: repeat(1, minmax(350px, 1fr));
+  }
+}
+
+[data-cols='4'] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+
+  /* Responsive: reduce columns when container is narrow */
+  @media (width <=1399px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (width <=1049px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (width <=699px) {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+/* Tone backgrounds - apply directly to section element (like CallToAction) */
+.dndev-section-full-width {
+  /* Ghost (default) - transparent, allows background images to show through */
+  &[data-tone='ghost'],
+  &:not([data-tone]) {
+    background: transparent;
+  }
+
+  &[data-tone='base'] {
+    background: var(--background);
+  }
+
+  &[data-tone='muted'] {
+    background: var(--muted);
+  }
+
+  &[data-tone='contrast'] {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  &[data-tone='accent'] {
+    background: color-mix(in oklab, var(--accent) 5%, transparent);
+  }
+}
+
+/* HeroSection tone backgrounds - same system as Section/CallToAction */
+.dndev-hero-section {
+  /* Ghost (default) - transparent, allows background images to show through */
+  &[data-tone='ghost'],
+  &:not([data-tone]) {
+    background: transparent;
+  }
+
+  &[data-tone='base'] {
+    background: var(--background);
+  }
+
+  &[data-tone='muted'] {
+    background: var(--muted);
+  }
+
+  &[data-tone='contrast'] {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  &[data-tone='accent'] {
+    background: color-mix(in oklab, var(--accent) 5%, transparent);
+  }
+}
+
+/* Fallback for other elements using data-tone (not sections) */
+[data-tone='base'] {
+  &:not(.dndev-section-full-width) {
+    background: var(--background);
+  }
+}
+
+[data-tone='muted'] {
+  &:not(.dndev-section-full-width) {
+    background: var(--muted);
+  }
+}
+
+[data-tone='elevated'] {
+  &:not(.dndev-section-full-width) {
+    background: var(--background);
+  }
+}
+
+[data-tone='contrast'] {
+  &:not(.dndev-section-full-width) {
+    background: var(--background);
+    color: var(--foreground);
+  }
+}
+
+[data-tone='accent'] {
+  &:not(.dndev-section-full-width) {
+    background: color-mix(in oklab, var(--accent) 5%, transparent);
+  }
+}
+
+/* ===========================
+   UNIVERSAL COLOR VARIANTS
+   REMOVED: Variants are now scoped per CSS family
+   - .dndev-surface variants in patterns.css (sets --card / --card-foreground)
+   - .dndev-floating variants in patterns.css (sets --popover / --popover-foreground)
+   - .dndev-interactive variants in patterns.css (direct colors for buttons)
+   - .dndev-notification variants in patterns.css (inverted floating colors)
+   - .dndev-text-base variants in Text.css (color only)
+   =========================== */
+
+/* Code element - semantic HTML (monospace font only, inherits size/weight) */
+code {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  /* Inherit parent size */
+  font-weight: inherit;
+  /* Inherit parent weight */
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  /* No background by default */
+}
+
+/* Code variant - visual styling (background, padding, can apply to any element) */
+[data-variant='code'] {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  /* Default small size */
+  background: var(--muted);
+  color: var(--muted-foreground);
+  padding: var(--gap-sm) var(--gap-md);
+  display: inline-block;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border-radius: var(--radius-interactive);
+}
+
+/* Code element + variant = semantic + visual (monospace + background) */
+code[data-variant='code'] {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  padding: var(--gap-sm) var(--gap-md);
+  display: inline-block;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border-radius: var(--radius-interactive);
+}
+
+/* Heading + code variant = heading size/weight + code background */
+h1[data-variant='code'],
+h2[data-variant='code'],
+h3[data-variant='code'],
+h4[data-variant='code'] {
+  font-family: var(--font-mono);
+  /* Size and weight inherited from heading styles */
+  background: var(--muted);
+  color: var(--muted-foreground);
+  padding: var(--gap-sm) var(--gap-md);
+  display: inline-block;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border-radius: var(--radius-interactive);
+}
+
+/* ===========================
+   SIZING (ONLY 2 UTILITIES)
+   =========================== */
+.dndev-size-md {
+  width: var(--icon-md);
+  /* 20px */
+  height: var(--icon-md);
+}
+
+.dndev-size-touch {
+  width: var(--touch-target);
+  /* 48px */
+  height: var(--touch-target);
+}
+
+/* ===========================
+   LAYOUT HELPERS
+   =========================== */
+.dndev-w-full {
+  width: 100%;
+}
+
+.dndev-h-full {
+  height: 100%;
+}
+
+.dndev-min-w-0 {
+  min-width: 0;
+}
+
+.dndev-max-w-none {
+  max-width: none;
+}
+
+.dndev-mx-auto {
+  margin-inline-start: auto;
+  margin-inline-end: auto;
+}
+
+.dndev-ml-auto {
+  margin-inline-start: auto;
+}
+
+.dndev-mt-0 {
+  margin-top: 0;
+}
+
+.dndev-relative {
+  position: relative;
+  min-width: 0;
+  /* Allow flex items to shrink below content size */
+}
+
+.dndev-absolute {
+  position: absolute;
+}
+
+.dndev-fixed {
+  position: fixed;
+}
+
+.dndev-abs-centered {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dndev-overflow-hidden {
+  overflow: hidden;
+}
+
+.dndev-overflow-y-auto {
+  overflow-y: auto;
+}
+
+.dndev-overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+/* ===========================
+   TEXT ALIGNMENT (RTL-aware)
+   =========================== */
+.dndev-text-center {
+  text-align: center;
+}
+
+.dndev-text-start {
+  text-align: start;
+}
+
+.dndev-text-end {
+  text-align: end;
+}
+
+/* Universal data attribute for text alignment (works with any element) */
+[data-text-align='start'] {
+  text-align: start;
+}
+
+[data-text-align='center'] {
+  text-align: center;
+}
+
+[data-text-align='end'] {
+  text-align: end;
+}
+
+.dndev-inset-0 {
+  inset: 0;
+}
+
+.dndev-inset-y-0 {
+  top: 0;
+  bottom: 0;
+}
+
+.dndev-inset-inline-start-0 {
+  inset-inline-start: 0;
+}
+
+.dndev-min-h-0 {
+  min-height: 0;
+}
+
+.dndev-ms-auto {
+  margin-inline-start: auto;
+}
+
+.dndev-pointer-events-none {
+  pointer-events: none;
+}
+
+.dndev-pointer-events-auto {
+  pointer-events: auto;
+}
+
+.dndev-cursor-pointer {
+  cursor: pointer;
+}
+
+.dndev-aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.dndev-object-contain {
+  object-fit: contain;
+}
+
+/* ===========================
+   RESPONSIVE DISPLAY
+   =========================== */
+@media (width >=768px) {
+  .dndev-md\:block {
+    display: block;
+  }
+
+  .dndev-md\:hidden {
+    display: none;
+  }
+
+  .dndev-md\:flex {
+    display: flex;
+  }
+
+  .dndev-md\:grid {
+    display: grid;
+  }
+
+  .dndev-md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dndev-md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (width >=1024px) {
+  .dndev-lg\:block {
+    display: block;
+  }
+
+  .dndev-lg\:hidden {
+    display: none;
+  }
+}
+
+/* ===========================
+   ANIMATIONS
+   =========================== */
+
+.dndev-animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.dndev-animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.dndev-animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.dndev-animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.dndev-animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.dndev-animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* ===========================
+   ACCESSIBILITY
+   =========================== */
+
+.dndev-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===========================
+   PROSE - SEMANTIC TYPOGRAPHY FOR CONTENT PAGES
+   Wrap docs/markdown/article content in .prose for semantic margins
+   Components are unaffected - they own their own spacing
+   =========================== */
+
+.prose {
+  color: var(--color-fg);
+  text-align: start;
+  line-height: 1.75;
+
+  /* ── Headings (typography standards) ──
+     Global heading sizes are for page-level use; .prose scales them down for article context. */
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.111;
+    margin-block-start: 0;
+    margin-block-end: 0.889rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.333;
+    margin-block-start: 2rem;
+    margin-block-end: 1rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-block-start: 1.6rem;
+    margin-block-end: 0.6rem;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-block-start: 1.5rem;
+    margin-block-end: 0.5rem;
+  }
+
+  /* ── Block elements ── */
+
+  p {
+    margin-block: 1.25rem;
+  }
+
+  blockquote {
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-fg-muted, var(--color-fg));
+    border-inline-start: 0.25rem solid var(--color-border);
+    padding-inline-start: 1rem;
+    margin-block: 1.6rem;
+    margin-inline: 0;
+  }
+
+  blockquote p:first-of-type::before {
+    content: open-quote;
+  }
+
+  blockquote p:last-of-type::after {
+    content: close-quote;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin-block: 3rem;
+  }
+
+  /* ── Lists ── */
+
+  ul,
+  ol {
+    padding-inline-start: 1.625rem;
+    margin-block: 1.25rem;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  li {
+    margin-block: 0.5rem;
+    padding-inline-start: 0.375rem;
+  }
+
+  /* Nested lists: tighter spacing */
+  li > ul,
+  li > ol {
+    margin-block: 0.5rem;
+  }
+
+  /* ── Links ── */
+
+  a {
+    color: var(--color-accent, var(--color-fg));
+    text-decoration: underline;
+    font-weight: 500;
+    text-underline-offset: 2px;
+  }
+
+  /* ── Inline elements ── */
+
+  strong {
+    font-weight: 600;
+  }
+
+  /* Inline code (not inside pre) */
+  :not(pre) > code {
+    font-size: 0.875em;
+    font-weight: 600;
+    background: var(
+      --color-surface-raised,
+      var(--color-bg-muted, rgba(0, 0, 0, 0.05))
+    );
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+  }
+
+  /* Code blocks */
+  pre {
+    overflow-x: auto;
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.714;
+    margin-block: 1.714rem;
+    border-radius: var(--radius-md, 0.375rem);
+  }
+
+  pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-weight: inherit;
+    font-size: inherit;
+  }
+
+  /* ── Tables (typography standards) ── */
+
+  table {
+    width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.714;
+    margin-block: 2rem;
+    text-indent: 0;
+    border-collapse: collapse;
+  }
+
+  thead {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  thead th {
+    color: var(--color-fg);
+    font-weight: 600;
+    vertical-align: bottom;
+    text-align: start;
+    padding: 0 0.571rem 0.571rem;
+  }
+
+  thead th:first-child {
+    padding-inline-start: 0;
+  }
+
+  thead th:last-child {
+    padding-inline-end: 0;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--color-border-muted, var(--color-border));
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody td {
+    vertical-align: baseline;
+    text-align: start;
+    padding: 0.571rem;
+  }
+
+  tbody td:first-child {
+    padding-inline-start: 0;
+  }
+
+  tbody td:last-child {
+    padding-inline-end: 0;
+  }
+
+  /* ── Media ── */
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+    margin-block: 2rem;
+  }
+
+  figure {
+    margin-block: 2rem;
+    margin-inline: 0;
+  }
+
+  figure > img,
+  figure > video {
+    margin-block: 0;
+  }
+
+  figcaption {
+    color: var(--color-fg-muted, var(--color-fg));
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-block-start: 0.857rem;
+  }
+
+  /* ── Keyboard ── */
+
+  kbd {
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 0.875em;
+    color: var(--color-fg);
+    background: var(
+      --color-surface-raised,
+      var(--color-bg-muted, rgba(0, 0, 0, 0.05))
+    );
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    box-shadow:
+      0 0 0 1px var(--color-border),
+      0 2px 0 var(--color-border);
+  }
+
+  /* ── Definition lists ── */
+
+  dl {
+    margin-block: 1.25rem;
+  }
+
+  dt {
+    font-weight: 600;
+    margin-block-start: 1.25rem;
+  }
+
+  dd {
+    margin-inline-start: 1.625rem;
+    margin-block-start: 0.5rem;
+  }
+
+  /* ── Edge cleanup ── */
+
+  > :first-child {
+    margin-block-start: 0;
+  }
+
+  > :last-child {
+    margin-block-end: 0;
+  }
+}
+
+/* ===========================
+   SHADOW CONTROL (Universal)
+   Works with any element
+   =========================== */
+[data-shadow='none'] {
+  box-shadow: none;
+}
+
+[data-shadow='md'] {
+  box-shadow: var(--shadow-md);
+
+  &:dir(rtl) {
+    box-shadow: var(--shadow-md-rtl);
+  }
+}
+
+[data-shadow='xl'] {
+  box-shadow: var(--shadow-xl);
+
+  &:dir(rtl) {
+    box-shadow: var(--shadow-xl-rtl);
+  }
+}
+
+/* ===========================
+   RADIUS CONTROL (Universal)
+   Works with any element
+   =========================== */
+[data-radius='none'] {
+  border-radius: var(--radius-none);
+}
+
+[data-radius='md'] {
+  border-radius: var(--radius-md);
+}
+
+[data-radius='full'] {
+  border-radius: var(--radius-full);
+}
+
+/* ===========================
+   GRADIENT TEXT (Universal)
+   Data attribute-based gradient text utilities
+   Top 3 industry hero variants: primary, subtle, accent
+   =========================== */
+[data-gradient-text='primary'] {
+  background: linear-gradient(
+    to right,
+    var(--foreground),
+    var(--primary),
+    var(--foreground)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-gradient-text='accent'] {
+  background: linear-gradient(
+    to right,
+    var(--foreground),
+    var(--accent),
+    var(--foreground)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===========================
+   Z-INDEX UTILITIES
+   =========================== */
+
+.dndev-z-header {
+  z-index: var(--z-header);
+}
+
+.dndev-z-sidebar {
+  z-index: var(--z-sidebar);
+}
+
+.dndev-z-footer {
+  z-index: var(--z-footer);
+}
+
+.dndev-z-overlay {
+  z-index: var(--z-overlay);
+}
+
+.dndev-z-breadcrumbs {
+  z-index: var(--z-breadcrumbs);
+}
+
+.dndev-z-dropdown {
+  z-index: var(--z-dropdown);
+}
+
+.dndev-z-modal {
+  z-index: var(--z-modal);
+}
+
+.dndev-z-tooltip {
+  z-index: var(--z-tooltip);
+}
+
+.dndev-z-toast {
+  z-index: var(--z-toast);
+}
+
+/* ===========================
+   HEIGHT UTILITIES - DYNAMIC VIEWPORT
+   Standard dvh values for layout (mobile-friendly)
+   =========================== */
+
+/* Full height */
+.dndev-h-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.dndev-min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.dndev-max-h-screen {
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+
+/* 90dvh - Large modals/dialogs */
+.dndev-h-90 {
+  height: 90vh;
+  height: 90dvh;
+}
+
+.dndev-min-h-90 {
+  min-height: 90vh;
+  min-height: 90dvh;
+}
+
+.dndev-max-h-90 {
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+
+/* 80dvh - Standard modals/dialogs */
+.dndev-h-80 {
+  height: 80vh;
+  height: 80dvh;
+}
+
+.dndev-min-h-80 {
+  min-height: 80vh;
+  min-height: 80dvh;
+}
+
+.dndev-max-h-80 {
+  max-height: 80vh;
+  max-height: 80dvh;
+}
+
+/* 60dvh - Compact sections */
+.dndev-h-60 {
+  height: 60vh;
+  height: 60dvh;
+}
+
+.dndev-min-h-60 {
+  min-height: 60vh;
+  min-height: 60dvh;
+}
+
+.dndev-max-h-60 {
+  max-height: 60vh;
+  max-height: 60dvh;
+}

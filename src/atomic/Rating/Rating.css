@@ -1,0 +1,146 @@
+/* packages/components/src/atomic/Rating/Rating.css */
+
+/**
+ * Rating Component Styles
+ * Star-based rating with filled, half, and empty states
+ */
+
+.dndev-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  user-select: none;
+}
+
+.dndev-rating[data-disabled] {
+  opacity: var(--opacity-muted);
+  pointer-events: none;
+}
+
+.dndev-rating:not([data-readonly]):not([data-disabled]) {
+  cursor: pointer;
+}
+
+.dndev-rating:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Stars container */
+.dndev-rating-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+/* Individual star button */
+.dndev-rating-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: inherit;
+  color: var(--muted-foreground);
+  transition:
+    color var(--dur-fast) var(--ease-in-out),
+    transform var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-rating-star:disabled {
+  cursor: default;
+}
+
+.dndev-rating-star svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  stroke-width: 1.5;
+}
+
+/* Star states */
+.dndev-rating-star[data-state='empty'] {
+  color: var(--muted-foreground);
+}
+
+.dndev-rating-star[data-state='filled'] {
+  color: var(--warning);
+}
+
+.dndev-rating-star[data-state='filled'] svg {
+  fill: currentColor;
+}
+
+/* Half-star rendering */
+.dndev-rating-star-half {
+  position: relative;
+  display: inline-flex;
+}
+
+.dndev-rating-star-back {
+  color: var(--muted-foreground);
+}
+
+.dndev-rating-star-front {
+  position: absolute;
+  inset: 0;
+  color: var(--warning);
+  fill: currentColor;
+  clip-path: inset(0 50% 0 0);
+}
+
+/* RTL support */
+:dir(rtl) .dndev-rating-star-front {
+  clip-path: inset(0 0 0 50%);
+}
+
+/* Interactive hover effects */
+.dndev-rating:not([data-readonly]):not([data-disabled])
+  .dndev-rating-star:hover {
+  transform: scale(1.15);
+}
+
+/* Variant colors - override warning default */
+.dndev-rating[data-variant='primary'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='primary'] .dndev-rating-star-front {
+  color: var(--primary);
+}
+
+.dndev-rating[data-variant='secondary'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='secondary'] .dndev-rating-star-front {
+  color: var(--secondary);
+}
+
+.dndev-rating[data-variant='accent'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='accent'] .dndev-rating-star-front {
+  color: var(--accent);
+}
+
+.dndev-rating[data-variant='success'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='success'] .dndev-rating-star-front {
+  color: var(--success);
+}
+
+.dndev-rating[data-variant='warning'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='warning'] .dndev-rating-star-front {
+  color: var(--warning);
+}
+
+.dndev-rating[data-variant='destructive']
+  .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='destructive'] .dndev-rating-star-front {
+  color: var(--destructive);
+}
+
+.dndev-rating[data-variant='muted'] .dndev-rating-star[data-state='filled'],
+.dndev-rating[data-variant='muted'] .dndev-rating-star-front {
+  color: var(--muted-foreground);
+}
+
+/* Numeric value display */
+.dndev-rating-value {
+  font-size: var(--font-size-input);
+  font-weight: var(--font-weight-medium);
+  color: var(--muted-foreground);
+  min-width: 2ch;
+}

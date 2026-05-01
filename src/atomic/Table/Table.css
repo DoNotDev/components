@@ -1,0 +1,244 @@
+/* packages/components/src/atomic/Table/Table.css */
+
+.dndev-table-wrapper {
+  position: relative;
+  width: 100%;
+  overflow-y: auto;
+  border-radius: 0;
+  border: 1px solid var(--border);
+}
+
+.dndev-table {
+  width: 100%;
+  caption-side: bottom;
+  font-size: var(--font-size-sm);
+  border-collapse: collapse;
+}
+
+.dndev-table-header {
+  background-color: var(--accent);
+}
+
+/* Filter row above header */
+.dndev-table-filter-row {
+  border: 1px solid var(--border);
+  border-bottom: none;
+}
+
+.dndev-table-filter-row .dndev-table-head {
+  background-color: var(--muted);
+  padding: var(--gap-xs);
+  height: auto;
+  min-height: auto;
+}
+
+.dndev-table-body {
+  /* Base body styles */
+}
+
+/* Table row styles */
+.dndev-table-row {
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--dur-fast) ease-out;
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--accent) 15%, transparent);
+  }
+}
+
+/* Cursor pointer for clickable rows */
+.dndev-table-row.dndev-cursor-pointer {
+  cursor: pointer;
+}
+
+/* Zebra striping for data tables */
+.dndev-table-body .dndev-table-row:nth-child(even) {
+  background-color: var(--muted);
+
+  &:hover {
+    background-color: color-mix(
+      in oklab,
+      var(--muted) 80%,
+      var(--foreground) 20%
+    );
+  }
+}
+
+.dndev-table-body tr:last-child {
+  border-bottom: 0;
+}
+
+/* Table footer styles */
+.dndev-table-footer {
+  border-top: 1px solid var(--border);
+  background-color: color-mix(in srgb, var(--muted) 50%, transparent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Table head (th) styles */
+.dndev-table-head {
+  text-align: start;
+  vertical-align: middle;
+  font-weight: var(--font-weight-medium);
+  color: var(--muted-foreground);
+  height: var(--touch-target);
+  padding-inline: var(--gap-md);
+  padding-block: var(--gap-sm);
+}
+
+/* Header cells use accent foreground for contrast */
+.dndev-table-header .dndev-table-head {
+  color: var(--accent-foreground);
+
+  &[data-sortable='true'] {
+    cursor: pointer;
+  }
+
+  &[data-align='center'] {
+    text-align: center;
+  }
+
+  &[data-align='end'] {
+    text-align: end;
+  }
+
+  &[data-align='start'] {
+    text-align: start;
+  }
+}
+
+/* Active filter indicator */
+.dndev-table-filter-active {
+  color: var(--primary);
+}
+
+/* Table cell (td) styles */
+.dndev-table-cell {
+  vertical-align: middle;
+  padding-inline: var(--gap-md);
+  padding-block: var(--gap-sm);
+  min-height: var(--touch-target);
+  line-height: 1.5; /* Ensure consistent line height for empty cells */
+
+  &[data-align='center'] {
+    text-align: center;
+  }
+
+  &[data-align='end'] {
+    text-align: end;
+  }
+
+  &[data-align='start'] {
+    text-align: start;
+  }
+}
+
+/* Excel-like grid lines variant */
+.dndev-table-grid .dndev-table-head,
+.dndev-table-grid .dndev-table-cell {
+  border: 1px solid var(--border);
+  padding: 0;
+}
+
+.dndev-table-grid .dndev-table-row {
+  border-bottom: 1px solid var(--border);
+}
+
+.dndev-table-grid .dndev-table-row:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Input components inside grid cells should be borderless and fit snugly */
+.dndev-table-grid .dndev-table-cell .dndev-input,
+.dndev-table-grid .dndev-table-cell input[type='text'],
+.dndev-table-grid .dndev-table-cell input[type='number'] {
+  border: none;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+}
+
+.dndev-table-grid .dndev-table-cell .dndev-input:focus,
+.dndev-table-grid .dndev-table-cell input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* Table caption styles */
+.dndev-table-caption {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  padding: var(--gap-md);
+}
+
+/* DataTable search container */
+.dndev-table-search-container {
+  max-width: var(--content-narrow);
+}
+
+.dndev-table-search-icon {
+  position: absolute;
+  inset-inline-start: var(--gap-md);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dndev-table-search-input {
+  padding-inline-start: calc(var(--gap-md) + var(--icon-md) + var(--gap-sm));
+}
+
+/* Skeleton rows - apply standard skeleton pulse animation to entire rows */
+/* Keep existing background colors (zebra striping) - just add opacity pulse */
+.dndev-table-body .dndev-table-row.dndev-skeleton-row {
+  animation: dndev-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+
+  /* Keep hover state but disabled (pointer-events: none prevents hover) */
+  &:hover {
+    /* Inherit from parent .dndev-table-row hover styles */
+  }
+}
+
+/* Even rows keep their var(--muted) background, just pulse */
+.dndev-table-body .dndev-table-row.dndev-skeleton-row:nth-child(even) {
+  animation: dndev-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  &:hover {
+    /* Inherit from parent .dndev-table-row:nth-child(even) hover styles */
+  }
+}
+
+/* Skeleton bars inside cells - adapt to row background for visibility */
+/* Odd rows (transparent background): use default var(--muted) skeleton */
+/* Even rows (var(--muted) background): use lighter skeleton for contrast */
+.dndev-table-body .dndev-table-row.dndev-skeleton-row .dndev-skeleton {
+  background-color: var(--muted);
+}
+
+.dndev-table-body
+  .dndev-table-row.dndev-skeleton-row:nth-child(even)
+  .dndev-skeleton {
+  /* Even rows have var(--muted) background, so skeleton should be lighter for contrast */
+  background-color: color-mix(
+    in oklab,
+    var(--muted) 60%,
+    var(--foreground) 40%
+  );
+}
+
+/* Use the same pulse animation as standard skeleton (from Skeleton.css) */
+@keyframes dndev-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--opacity-muted);
+  }
+}

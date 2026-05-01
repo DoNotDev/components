@@ -1,0 +1,103 @@
+/* packages/components/src/atomic/Stepper/Stepper.css */
+
+.dndev-stepper-container {
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.dndev-stepper-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+}
+
+.dndev-stepper-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+.dndev-interactive[data-role='stepper-button'],
+.dndev-interactive[data-role='stepper-button']:focus,
+.dndev-interactive[data-role='stepper-button']:focus-visible {
+  outline: none;
+}
+
+.dndev-interactive[data-role='stepper-button'] {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  border-width: 2px;
+  border-style: solid;
+
+  &[data-state='active'] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+    transform: scale(1.1);
+  }
+
+  &[data-state='completed'] {
+    background-color: rgb(from var(--primary) r g b / 0.2);
+    color: var(--primary);
+    border-color: rgb(from var(--primary) r g b / 0.5);
+
+    &:hover {
+      background-color: rgb(from var(--primary) r g b / 0.3);
+    }
+  }
+
+  &[data-state='pending'] {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    border-color: var(--border);
+
+    &:hover {
+      background-color: rgb(from var(--muted) r g b / 0.8);
+    }
+  }
+}
+
+.dndev-stepper-connector {
+  width: 2rem;
+  height: 1px;
+  transition-property: background-color;
+  transition-timing-function: var(--ease-in-out);
+  transition-duration: var(--dur-fast);
+
+  &[data-completed='true'] {
+    background-color: var(--primary);
+  }
+
+  &[data-completed='false'] {
+    background-color: var(--border);
+  }
+}
+
+.dndev-stepper-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  margin-top: var(--gap-md);
+}
+
+.dndev-stepper-info {
+  font-size: var(--font-size-sm);
+  color: inherit;
+}
+
+.dndev-stepper-card-content {
+  border-width: 2px;
+}
+
+.dndev-stepper-button-min-width {
+  min-width: var(--touch-target);
+}

@@ -1,0 +1,21 @@
+/* packages/components/src/atomic/RangeInput/RangeInput.css */
+
+.dndev-range-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0;
+  padding-inline-start: var(--gap-sm);
+  width: 100%;
+}
+
+.dndev-range-input > .dndev-input,
+.dndev-range-input > .dndev-relative {
+  min-width: 0;
+  padding-inline: var(--gap-sm);
+}
+
+.dndev-range-input-separator {
+  padding-inline: var(--gap-tight);
+}
+

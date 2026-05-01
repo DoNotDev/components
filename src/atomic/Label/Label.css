@@ -1,0 +1,121 @@
+/* packages/components/src/atomic/Label/Label.css */
+
+.dndev-label-base {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: var(--ease-in-out);
+  transition-duration: var(--dur-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+
+  &:has(+ *:disabled) {
+    cursor: not-allowed;
+    opacity: var(--opacity-muted);
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  &:focus {
+    color: var(--primary);
+  }
+
+  &[data-plain='true'] {
+    cursor: default;
+
+    &:hover {
+      color: inherit;
+    }
+
+    &:focus {
+      color: inherit;
+    }
+  }
+}
+
+.dndev-label-icon {
+  width: var(--icon-md);
+  height: var(--icon-md);
+
+  &[data-position='leading'] {
+    margin-inline-end: var(--gap-sm);
+  }
+
+  &[data-position='trailing'] {
+    margin-inline-start: var(--gap-sm);
+  }
+}
+
+/* Floating Fieldset - native border-cutting via legend */
+.dndev-floating-fieldset {
+  position: relative;
+  border: var(--border-hairline) solid var(--line-2);
+  border-radius: var(--radius-interactive);
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  transition: all var(--dur-normal) var(--ease-in-out);
+  text-align: start;
+  /* Flex-aware: allow fieldset to shrink in flex containers */
+  min-width: 0;
+  width: 100%;
+}
+
+.dndev-floating-fieldset:hover {
+  border-color: var(--ring);
+}
+
+.dndev-floating-fieldset:focus-within {
+  border-color: var(--ring);
+}
+
+.dndev-floating-fieldset[data-disabled='true'] {
+  opacity: var(--opacity-muted);
+  cursor: not-allowed;
+}
+
+/* Legend sits on border - browser natively cuts border */
+.dndev-floating-legend {
+  margin-inline-start: var(--gap-sm);
+  padding: 0 var(--gap-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: var(--foreground);
+  /* Ellipsis by default */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dndev-floating-legend label {
+  cursor: default;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-tight);
+}
+
+.dndev-floating-fieldset[data-disabled='true'] .dndev-floating-legend {
+  color: var(--muted-foreground);
+}
+
+/* Disable truncation when explicitly set to false */
+.dndev-floating-legend[data-truncate='false'] {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+/* Input inside fieldset uses bare mode via data-bare attribute (set by Input component) */
+/* This rule is kept for non-Input children that might need border removal */
+.dndev-floating-fieldset > .dndev-input:not([data-bare]) {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}

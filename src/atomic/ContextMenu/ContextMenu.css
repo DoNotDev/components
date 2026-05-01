@@ -1,0 +1,11 @@
+/* packages/components/src/atomic/ContextMenu/ContextMenu.css */
+
+.dndev-context-menu-sub-content {
+  min-width: 15ch; /* Character-based: scales with font size */
+  padding: var(--gap-sm);
+}
+
+.dndev-context-menu-radio-indicator {
+  width: var(--gap-sm);
+  height: var(--gap-sm);
+}

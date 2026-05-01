@@ -1,0 +1,148 @@
+/* packages/components/src/atomic/Slider/Slider.css */
+
+.dndev-slider {
+  position: relative;
+  display: flex;
+  width: 100%;
+  touch-action: none;
+  user-select: none;
+  align-items: center;
+  /* Ensure stops/marks are positioned relative to root */
+  isolation: isolate;
+}
+
+.dndev-slider-track {
+  position: relative;
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background-color: var(--muted);
+  height: 0.375rem;
+}
+
+.dndev-slider-range {
+  position: absolute;
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: all var(--dur-normal) var(--ease-in-out);
+  background-color: var(--primary);
+}
+
+.dndev-slider[data-variant='default'] .dndev-slider-range {
+  background-color: var(--primary);
+}
+
+.dndev-slider[data-variant='primary'] .dndev-slider-range {
+  background-color: var(--primary);
+}
+
+.dndev-slider[data-variant='secondary'] .dndev-slider-range {
+  background-color: var(--secondary);
+}
+
+.dndev-slider[data-variant='muted'] .dndev-slider-range {
+  background-color: var(--muted-foreground);
+}
+
+.dndev-slider[data-variant='accent'] .dndev-slider-range {
+  background-color: var(--accent);
+}
+
+.dndev-slider[data-variant='success'] .dndev-slider-range {
+  background-color: var(--success);
+}
+
+.dndev-slider[data-variant='warning'] .dndev-slider-range {
+  background-color: var(--warning);
+}
+
+.dndev-slider[data-variant='destructive'] .dndev-slider-range {
+  background-color: var(--destructive);
+}
+
+.dndev-slider-thumb {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  min-height: 1.25rem;
+  border-radius: var(--radius-full);
+  /* --card not --background: surface must be opaque (--background can be transparent in some themes) */
+  background-color: var(--card);
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-md);
+  transition: all var(--dur-fast) var(--ease-in-out);
+  cursor: grab;
+  touch-action: none;
+}
+
+.dndev-slider-thumb:hover {
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.1);
+}
+
+.dndev-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+.dndev-slider[data-variant='default'] .dndev-slider-thumb,
+.dndev-slider[data-variant='primary'] .dndev-slider-thumb {
+  border-color: var(--primary);
+}
+
+.dndev-slider[data-variant='secondary'] .dndev-slider-thumb {
+  border-color: var(--secondary);
+}
+
+.dndev-slider[data-variant='muted'] .dndev-slider-thumb {
+  border-color: var(--muted-foreground);
+}
+
+.dndev-slider[data-variant='accent'] .dndev-slider-thumb {
+  border-color: var(--accent);
+}
+
+.dndev-slider[data-variant='success'] .dndev-slider-thumb {
+  border-color: var(--success);
+}
+
+.dndev-slider[data-variant='warning'] .dndev-slider-thumb {
+  border-color: var(--warning);
+}
+
+.dndev-slider[data-variant='destructive'] .dndev-slider-thumb {
+  border-color: var(--destructive);
+}
+
+.dndev-slider-thumb:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--ring),
+    0 0 0 4px rgb(from var(--ring) r g b / 0.2),
+    var(--shadow-md);
+}
+
+/* Container for slider + value */
+.dndev-slider-container {
+  width: 100%;
+}
+
+/* Value display inside thumb */
+.dndev-slider-value {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+  /* --card not --background: surface must be opaque */
+  background-color: var(--card);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-interactive);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  pointer-events: none;
+}

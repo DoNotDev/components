@@ -1,0 +1,76 @@
+/* packages/components/src/atomic/Collapsible/Collapsible.css */
+
+.dndev-collapsible {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dndev-collapsible-content {
+  overflow: hidden;
+  width: 100%;
+}
+
+.dndev-collapsible-content[data-state='open'] {
+  animation: slideDown var(--dur-normal) var(--ease-in-out);
+  overflow: visible; /* Allow dropdowns/overlays to escape when open */
+}
+
+.dndev-collapsible-content[data-state='closed'] {
+  animation: slideUp var(--dur-normal) var(--ease-in-out);
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.dndev-collapsible-trigger {
+  width: 100%;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-collapsible-trigger:hover {
+  opacity: var(--opacity-strong);
+}
+
+.dndev-collapsible-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-interactive);
+}
+
+.dndev-collapsible-icon {
+  width: var(--size-md);
+  height: var(--size-md);
+  flex-shrink: 0;
+  color: var(--accent);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-collapsible-chevron {
+  transform: rotate(0deg);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-collapsible[data-state='open'] .dndev-collapsible-chevron {
+  transform: rotate(180deg);
+}

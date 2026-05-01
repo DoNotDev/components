@@ -1,0 +1,38 @@
+/* packages/components/src/atomic/Badge/Badge.css */
+
+.dndev-badge-base {
+  /* Badge-specific overrides: pill shape and sizing */
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  border-radius: var(--radius-full); /* Pill shape, not surface rounded */
+  padding-inline-start: var(--gap-sm);
+  padding-inline-end: var(--gap-sm);
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: none; /* Badges don't need shadows */
+
+  &:focus {
+    outline: none;
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+      var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+      calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow:
+      var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+      var(--tw-shadow, 0 0 #0000);
+    --tw-ring-color: var(--ring);
+    --tw-ring-offset-width: 2px;
+  }
+
+  /* Variants handled by .dndev-surface variants in patterns.css via CSS variables */
+  /* Exception: outline variant is Badge-specific (transparent bg, primary border/text) */
+  &[data-variant='outline'] {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+}

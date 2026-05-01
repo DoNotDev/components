@@ -1,0 +1,39 @@
+/* packages/components/src/atomic/Progress/Progress.css */
+
+.dndev-progress {
+  position: relative;
+  height: var(--gap-md);
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background-color: var(--secondary);
+}
+
+.dndev-progress [data-radix-progress-indicator] {
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  background-color: var(--primary);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+
+  /* Variant colors */
+  &[data-variant='default'] {
+    background-color: var(--primary);
+  }
+
+  &[data-variant='accent'] {
+    background-color: var(--accent);
+  }
+
+  &[data-variant='success'] {
+    background-color: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    background-color: var(--warning);
+  }
+
+  &[data-variant='destructive'] {
+    background-color: var(--destructive);
+  }
+}

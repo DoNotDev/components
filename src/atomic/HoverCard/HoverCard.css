@@ -1,0 +1,7 @@
+/* packages/components/src/atomic/HoverCard/HoverCard.css */
+
+.dndev-hovercard-content {
+  width: max-content;
+  max-width: min(90vw, 24rem); /* 90% viewport or 384px, whichever is smaller */
+  outline: none;
+}

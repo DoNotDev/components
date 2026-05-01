@@ -1,0 +1,71 @@
+/* packages/components/src/atomic/Pagination/Pagination.css */
+
+.dndev-pagination {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  width: 100%;
+}
+
+.dndev-pagination-info {
+  display: none;
+}
+
+.dndev-pagination-size {
+  display: flex;
+  align-items: center;
+}
+
+.dndev-pagination-size-label {
+  display: none;
+}
+
+.dndev-pagination-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  width: 100%;
+}
+
+.dndev-pagination-list {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dndev-pagination-button {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Desktop: Show all elements in one row */
+@media (min-width: 768px) {
+  .dndev-pagination-info,
+  .dndev-pagination-size {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .dndev-pagination-size-label {
+    margin-inline-end: var(--gap-sm);
+  }
+
+  .dndev-pagination-nav {
+    justify-content: flex-end;
+    width: auto;
+    margin-inline-start: auto;
+    /* Push to end */
+  }
+}

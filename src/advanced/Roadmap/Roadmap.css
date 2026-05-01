@@ -1,0 +1,249 @@
+/* packages/components/src/advanced/Roadmap/Roadmap.css */
+
+.dndev-roadmap {
+  width: 100%;
+  position: relative;
+}
+
+/* =========================
+   DESKTOP LAYOUT
+   ========================= */
+
+.dndev-roadmap-desktop {
+  position: relative;
+}
+
+/* Progress line container - from center of first icon to center of last icon */
+.dndev-roadmap-timeline {
+  position: absolute;
+  top: calc(var(--touch-target) / 2); /* Center of node */
+  inset-inline-start: calc(
+    100% / var(--step-count) / 2
+  ); /* Center of first grid cell */
+  inset-inline-end: calc(
+    100% / var(--step-count) / 2
+  ); /* Center of last grid cell */
+  height: 4px;
+  z-index: 0;
+}
+
+.dndev-roadmap-timeline-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--muted);
+  border-radius: var(--radius-full);
+}
+
+.dndev-roadmap-timeline-progress {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--primary),
+    var(--accent),
+    var(--primary)
+  );
+  border-radius: var(--radius-full);
+  transition: width var(--dur-slow) var(--ease-in-out);
+}
+
+/* Grid for steps */
+.dndev-roadmap-grid {
+  display: grid;
+  gap: var(--gap-lg);
+  position: relative;
+  z-index: 1;
+}
+
+/* Individual step container */
+.dndev-roadmap-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Timeline node (icon circle) */
+.dndev-roadmap-node {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border-radius: var(--radius-full);
+  border: var(--border-huge) solid var(--muted);
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dur-normal) var(--ease-in-out);
+  margin-bottom: var(--gap-lg);
+  flex-shrink: 0;
+}
+
+.dndev-roadmap-node[data-active='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px color-mix(in oklab, var(--accent) 40%, transparent);
+  transform: scale(1.1);
+}
+
+.dndev-roadmap-node svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--muted-foreground);
+  transition: color var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-roadmap-node[data-active='true'] svg {
+  color: var(--accent);
+}
+
+/* Card styling - extra top padding for badge overlap, push footer to bottom */
+.dndev-roadmap-card {
+  position: relative;
+  height: 100%;
+  padding-top: calc(var(--gap-lg) + var(--gap-sm)) !important;
+  align-content: space-between;
+}
+
+.dndev-roadmap-step:hover .dndev-roadmap-card,
+.dndev-roadmap-card[data-active='true'] {
+  border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+  transform: translateY(calc(-1 * var(--gap-sm)));
+  box-shadow: var(--shadow-xl);
+}
+
+/* Phase badge - used inside Card overlay container */
+.dndev-roadmap-phase {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px var(--gap-sm); /* Tight vertical padding for badge */
+  border-radius: var(--radius-interactive);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Description - sm, foreground, start */
+.dndev-roadmap-description {
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+  line-height: var(--line-height);
+  margin: 0;
+  margin-bottom: var(--gap-md);
+  text-align: start;
+}
+
+/* =========================
+   MOBILE LAYOUT
+   ========================= */
+
+.dndev-roadmap-mobile {
+  position: relative;
+  padding-inline-start: 0;
+  padding-bottom: var(--gap-lg);
+}
+
+/* Vertical timeline line - centered, with animated progress */
+.dndev-roadmap-timeline-vertical {
+  position: absolute;
+  inset-inline-start: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--muted);
+  transform: translateX(-50%);
+  z-index: 0;
+  border-radius: var(--radius-full);
+}
+
+.dndev-roadmap-timeline-vertical-progress {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  background: linear-gradient(
+    to bottom,
+    var(--primary),
+    var(--accent),
+    var(--primary)
+  );
+  border-radius: var(--radius-full);
+  transition: height var(--dur-slow) var(--ease-in-out);
+}
+
+/* Step container - flex column to stack Node -> Card */
+.dndev-roadmap-step-mobile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.dndev-roadmap-step-mobile:last-child {
+  margin-bottom: 0;
+}
+
+/* Mobile node - relative positioning, centered, with top margin from previous card */
+.dndev-roadmap-node-mobile {
+  position: relative;
+  inset-inline-start: auto;
+  top: auto;
+  margin-top: var(--gap-md); /* Space from previous card's bottom */
+  margin-bottom: var(--gap-md); /* Space before current card */
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border-radius: var(--radius-full);
+  border: var(--border-huge) solid var(--muted);
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--dur-normal) var(--ease-in-out);
+  z-index: 1;
+}
+
+/* First step's icon has no top margin */
+.dndev-roadmap-step-mobile:first-child .dndev-roadmap-node-mobile {
+  margin-top: 0;
+}
+
+.dndev-roadmap-node-mobile[data-active='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+.dndev-roadmap-node-mobile svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--muted-foreground);
+}
+
+.dndev-roadmap-node-mobile[data-active='true'] svg {
+  color: var(--accent);
+}
+
+/* Mobile card - full width, with active state */
+.dndev-roadmap-card-mobile {
+  position: relative;
+  width: 100%;
+  padding-top: calc(var(--gap-lg) + var(--gap-sm)) !important;
+  align-content: space-between;
+  background: var(--card);
+  z-index: 1;
+  transition: all var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-roadmap-card-mobile[data-active='true'] {
+  border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+  box-shadow: var(--shadow-lg);
+}
+
+/* Only apply hover on devices that support it */
+@media (hover: hover) {
+  .dndev-roadmap-card-mobile:hover {
+    border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
+  }
+}

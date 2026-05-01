@@ -1,0 +1,131 @@
+/* packages/components/src/atomic/Switch/Switch.css */
+
+.dndev-switch {
+  all: unset;
+  width: 2.75rem;
+  height: 1.5rem;
+  background-color: var(--control-bg);
+  border: 2px solid var(--control-border);
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  transition: all var(--dur-normal) var(--ease-in-out);
+
+  &[data-state='checked'] {
+    background-color: var(--control-border);
+  }
+
+  /* Variants - use .dndev-control system */
+  &[data-variant='primary'] {
+    --control-border: var(--primary);
+  }
+
+  &[data-variant='secondary'] {
+    --control-border: var(--secondary);
+  }
+
+  &[data-variant='muted'] {
+    --control-border: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'] {
+    --control-border: var(--accent);
+  }
+
+  &[data-variant='success'] {
+    --control-border: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    --control-border: var(--warning);
+  }
+
+  &[data-variant='destructive'] {
+    --control-border: var(--destructive);
+  }
+
+  &[data-variant='default'] {
+    --control-border: color-mix(
+      in oklab,
+      var(--foreground) 70%,
+      var(--background)
+    );
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: var(--opacity-muted);
+  }
+}
+
+.dndev-switch-thumb {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: var(--foreground);
+  border-radius: 9999px;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+  transform: translateX(0.125rem);
+  will-change: transform;
+}
+
+.dndev-switch[data-state='checked'] .dndev-switch-thumb {
+  transform: translateX(calc(2.75rem - 1.25rem - 0.125rem));
+}
+
+/* Switch with labels container */
+.dndev-switch-with-labels {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+}
+
+/* Labels - keep switch and its labels on one line when possible */
+.dndev-switch-with-labels > .dndev-switch {
+  flex-shrink: 0;
+}
+
+.dndev-switch-label {
+  font-size: var(--font-size-input);
+  transition:
+    color var(--dur-normal) var(--ease-in-out),
+    font-weight var(--dur-normal) var(--ease-in-out);
+  white-space: nowrap;
+}
+
+/* Unchecked label - active when switch is unchecked */
+.dndev-switch-with-labels:not(:has(.dndev-switch[data-state='checked']))
+  .dndev-switch-label-unchecked,
+.dndev-switch-with-labels[data-checked='false'] .dndev-switch-label-unchecked {
+  color: var(--foreground);
+  font-weight: var(--font-weight-medium);
+}
+
+.dndev-switch-with-labels:has(.dndev-switch[data-state='checked'])
+  .dndev-switch-label-unchecked,
+.dndev-switch-with-labels[data-checked='true'] .dndev-switch-label-unchecked {
+  color: var(--muted-foreground);
+  font-weight: var(--font-weight-normal);
+}
+
+/* Checked label - active when switch is checked */
+.dndev-switch-with-labels:has(.dndev-switch[data-state='checked'])
+  .dndev-switch-label-checked,
+.dndev-switch-with-labels[data-checked='true'] .dndev-switch-label-checked {
+  color: var(--foreground);
+  font-weight: var(--font-weight-medium);
+}
+
+.dndev-switch-with-labels:not(:has(.dndev-switch[data-state='checked']))
+  .dndev-switch-label-checked,
+.dndev-switch-with-labels[data-checked='false'] .dndev-switch-label-checked {
+  color: var(--muted-foreground);
+  font-weight: var(--font-weight-normal);
+}

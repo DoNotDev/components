@@ -1,0 +1,14 @@
+/* packages/components/src/atomic/Tooltip/Tooltip.css */
+
+.dndev-tooltip {
+  z-index: var(--z-tooltip);
+  /* Inverted colors for high contrast - industry standard (Vercel, GitHub, Stripe) */
+  background: var(--foreground);
+  /* --card not --background: inverted text must be opaque (--background can be transparent in some themes) */
+  color: var(--card);
+  box-shadow: var(--shadow-lg); /* Stronger shadow for visibility */
+  padding: 0.375rem 0.5rem; /* 6px 8px - industry standard */
+  font-size: var(--font-size-xs); /* 12px */
+  border-radius: var(--radius-floating);
+  max-width: 12.5rem; /* 200px */
+}

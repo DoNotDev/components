@@ -1,0 +1,93 @@
+/* packages/components/src/atomic/ToggleGroup/ToggleGroup.css */
+
+.dndev-toggle-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: 0.125rem;
+  border-radius: var(--radius-interactive);
+  background-color: var(--muted);
+  border: var(--border-width) solid var(--border);
+
+  .dndev-interactive {
+    border: none;
+    border-radius: var(--radius-interactive);
+    background-color: transparent !important;
+    min-height: auto;
+    padding: var(--gap-sm) var(--gap-md);
+    font-size: var(--font-size-sm);
+
+    &[data-state='off'] {
+      background: transparent !important;
+      color: var(--muted-foreground) !important;
+    }
+
+    &:hover:not(:disabled)[data-state='off'] {
+      background-color: color-mix(
+        in oklab,
+        var(--muted) 80%,
+        black 20%
+      ) !important;
+    }
+
+    &[data-state='on'] {
+      background-color: var(--primary) !important;
+      color: var(--primary-foreground) !important;
+      box-shadow: var(--shadow-md);
+    }
+
+    &[data-variant='primary'][data-state='on'] {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    &[data-variant='secondary'][data-state='on'] {
+      background-color: var(--secondary);
+      color: var(--secondary-foreground);
+    }
+
+    &[data-variant='accent'][data-state='on'] {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+
+    &[data-variant='success'][data-state='on'] {
+      background-color: var(--success);
+      color: var(--success-foreground);
+    }
+
+    &[data-variant='warning'][data-state='on'] {
+      background-color: var(--warning);
+      color: var(--warning-foreground);
+    }
+
+    &[data-variant='destructive'][data-state='on'] {
+      background-color: var(--destructive);
+      color: var(--destructive-foreground);
+    }
+  }
+
+  &[data-variant='outline'] {
+    background-color: transparent;
+    border-color: var(--border);
+
+    .dndev-interactive {
+      &[data-state='off'] {
+        background: transparent;
+        color: var(--foreground);
+      }
+
+      &:hover:not(:disabled)[data-state='off'] {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+      }
+
+      &[data-state='on'] {
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+        border: 1px solid var(--primary);
+      }
+    }
+  }
+}

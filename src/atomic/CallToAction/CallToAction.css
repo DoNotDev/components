@@ -1,0 +1,199 @@
+/* packages/components/src/atomic/CallToAction/CallToAction.css */
+
+.dndev-cta {
+  color: var(--foreground);
+  /* Padding for background - vertical only, horizontal handled by content */
+  padding-block: var(--gap-lg);
+}
+
+/* Tone variants - leverage existing data-tone system */
+/* Ghost (default) - no background */
+.dndev-cta[data-tone='ghost'],
+.dndev-cta:not([data-tone]) {
+  background: transparent;
+}
+
+.dndev-cta[data-tone='base'] {
+  background: var(--background);
+}
+
+.dndev-cta[data-tone='muted'] {
+  background: var(--muted);
+}
+
+.dndev-cta[data-tone='contrast'] {
+  background: var(--foreground);
+  /* --card not --background: inverted text must be opaque (--background can be transparent in some themes) */
+  color: var(--card);
+}
+
+.dndev-cta[data-tone='primary'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dndev-cta[data-tone='accent'] {
+  background: color-mix(in oklab, var(--accent) 5%, transparent);
+}
+
+/* Bleed: full viewport width */
+.dndev-cta--bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Background image with overlay for text readability */
+.dndev-cta--bg-image {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.dndev-cta--bg-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.6)
+  );
+  z-index: 0;
+}
+
+.dndev-cta--bg-image > * {
+  position: relative;
+  z-index: 1;
+}
+
+.dndev-cta--bg-image,
+.dndev-cta--bg-image .dndev-cta-content {
+  color: white;
+}
+
+.dndev-cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  align-items: center;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  /* Padding to match PageContainer behavior */
+  padding-inline: var(--gap-md);
+
+  @media (width >= 1024px) {
+    padding-inline: var(--gap-lg);
+  }
+}
+
+/* Text alignment */
+.dndev-cta-content[data-text-align='start'] {
+  text-align: start;
+}
+.dndev-cta-content[data-text-align='center'] {
+  text-align: center;
+}
+.dndev-cta-content[data-text-align='end'] {
+  text-align: end;
+}
+
+/* Item alignment (align-items) */
+.dndev-cta-content[data-align='start'] {
+  align-items: flex-start;
+}
+.dndev-cta-content[data-align='center'] {
+  align-items: center;
+}
+.dndev-cta-content[data-align='end'] {
+  align-items: flex-end;
+}
+.dndev-cta-content[data-align='stretch'] {
+  align-items: stretch;
+}
+
+/* Content justification (justify-content) */
+.dndev-cta-content[data-justify='start'] {
+  justify-content: flex-start;
+}
+.dndev-cta-content[data-justify='center'] {
+  justify-content: center;
+}
+.dndev-cta-content[data-justify='end'] {
+  justify-content: flex-end;
+}
+.dndev-cta-content[data-justify='between'] {
+  justify-content: space-between;
+}
+.dndev-cta-content[data-justify='around'] {
+  justify-content: space-around;
+}
+.dndev-cta-content[data-justify='evenly'] {
+  justify-content: space-evenly;
+}
+
+.dndev-cta-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--gap-md);
+  justify-content: center;
+
+  .dndev-interactive {
+    min-width: 150px;
+  }
+}
+
+/* Button overrides scoped to primary tone */
+.dndev-cta[data-tone='primary'] .dndev-cta-actions {
+  .dndev-interactive[data-variant='primary'] {
+    background: var(--primary-foreground);
+    color: var(--primary);
+    border-color: var(--primary-foreground);
+
+    &:hover {
+      background: var(--accent);
+      color: var(--accent-foreground);
+      border-color: var(--accent);
+    }
+  }
+
+  .dndev-interactive[data-variant='outline'] {
+    background: transparent;
+    color: var(--primary-foreground);
+    border-color: var(--primary-foreground);
+
+    &:hover {
+      background: var(--primary-foreground);
+      color: var(--primary);
+      border-color: var(--primary-foreground);
+    }
+  }
+}
+
+/* Button overrides scoped to contrast tone */
+.dndev-cta[data-tone='contrast'] .dndev-cta-actions {
+  .dndev-interactive[data-variant='primary'] {
+    background: var(--card);
+    color: var(--foreground);
+    border-color: var(--card);
+
+    &:hover {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+  }
+
+  .dndev-interactive[data-variant='outline'] {
+    background: transparent;
+    color: var(--card);
+    border-color: var(--card);
+
+    &:hover {
+      background: var(--card);
+      color: var(--foreground);
+      border-color: var(--card);
+    }
+  }
+}

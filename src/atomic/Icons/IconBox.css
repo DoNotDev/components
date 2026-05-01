@@ -1,0 +1,14 @@
+/* packages/components/src/atomic/Icons/IconBox.css */
+
+.dndev-icon-box {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  border: 1px solid var(--card-foreground);
+  border-radius: var(--radius-surface);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

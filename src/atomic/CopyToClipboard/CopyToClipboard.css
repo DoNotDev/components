@@ -1,0 +1,9 @@
+/* packages/components/src/atomic/CopyToClipboard/CopyToClipboard.css */
+
+.dndev-copy-button-transition {
+  transition: transform var(--dur-fast) ease-out;
+}
+
+.dndev-copy-button-scaled {
+  transform: scale(0.95);
+}

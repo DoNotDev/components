@@ -1,0 +1,120 @@
+/* packages/components/src/atomic/Toaster/Toaster.css */
+
+.dndev-toast-viewport {
+  position: fixed;
+  top: var(--gap-md);
+  z-index: 100;
+  display: flex;
+  flex-direction: column-reverse;
+  max-height: 100dvh;
+  width: 100%;
+  padding: var(--gap-md);
+
+  /* Hide when no toasts */
+  &:not(:has(*)) {
+    display: none;
+  }
+
+  @media (width >= 640px) {
+    bottom: var(--gap-md);
+    inset-inline-end: var(--gap-md);
+    top: auto;
+    flex-direction: column;
+    max-width: 420px;
+  }
+}
+
+.dndev-toast-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dndev-toast-description {
+  font-size: var(--font-size-sm);
+  opacity: var(--opacity-strong);
+}
+
+.dndev-interactive[data-role='toast-action'] {
+  height: 2rem;
+  flex-shrink: 0;
+  padding-inline-start: var(--gap-md);
+  padding-inline-end: var(--gap-md);
+  border-radius: var(--radius-interactive);
+  border: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+
+  &:hover {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+}
+
+.dndev-toast-close {
+  position: absolute;
+  inset-inline-end: var(--gap-sm);
+  top: var(--gap-sm);
+  padding: 0;
+  color: var(--muted-foreground);
+  transition: color var(--dur-fast) var(--ease-in-out);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--popover);
+  }
+}
+
+/* Toast animations - entry/exit using Radix data-state */
+.dndev-notification[data-state='open'] {
+  animation: toast-slide-in-mobile var(--dur-normal) var(--ease-heavy);
+}
+
+@media (width >= 640px) {
+  .dndev-notification[data-state='open'] {
+    animation: toast-slide-in-desktop var(--dur-normal) var(--ease-heavy);
+  }
+}
+
+.dndev-notification[data-state='closed'] {
+  animation: toast-fade-out var(--dur-normal) var(--ease-in-out);
+}
+
+@keyframes toast-slide-in-mobile {
+  from {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-slide-in-desktop {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + var(--gap-md))) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* Notification variants are defined in patterns.css (shared by tooltips and toasts) */

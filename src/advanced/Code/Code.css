@@ -1,0 +1,143 @@
+/* packages/components/src/advanced/Code/Code.css */
+
+.dndev-code {
+  /* Code-specific overrides: background color, text color, and layout */
+  display: flex;
+  flex-direction: column;
+  background: var(--muted);
+  /* Override surface gradient with code-specific dark background */
+  color: var(--muted-foreground);
+  /* Override surface text color for dark background */
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  min-height: 0;
+  /* Inherit from dndev-surface: padding, border, border-radius, box-shadow */
+}
+
+.dndev-code[data-compact='true'] {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.dndev-code[data-glow='blank']::before {
+  display: none;
+}
+
+.dndev-code-header {
+  display: flex;
+  align-items: center;
+  padding: var(--gap-sm);
+  border-bottom: var(--border-hairline) solid var(--line-2);
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+.dndev-code-traffic-lights {
+  display: flex;
+  gap: var(--gap-sm);
+}
+
+.dndev-code-traffic-light {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.dndev-code-traffic-light[data-color='red'] {
+  background-color: #ef4444;
+}
+
+.dndev-code-traffic-light[data-color='yellow'] {
+  background-color: #eab308;
+}
+
+.dndev-code-traffic-light[data-color='green'] {
+  background-color: #22c55e;
+}
+
+.dndev-code-language {
+  text-transform: uppercase;
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+}
+
+.dndev-code-line-count {
+  opacity: var(--opacity-muted);
+}
+
+.dndev-code-content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.dndev-code-pre {
+  margin: 0;
+  padding: var(--gap-md);
+  text-align: start;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.dndev-code-pre[data-compact='true'] {
+  padding: var(--gap-sm);
+}
+
+.dndev-code-pre[data-wrap='true'] {
+  white-space: pre-wrap;
+}
+
+.dndev-code-line-numbers {
+  user-select: none;
+  padding-inline-end: var(--gap-md);
+  text-align: end;
+  font-size: inherit;
+  /* Match parent code font-size */
+  opacity: var(--opacity-muted);
+  width: 3rem;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  /* Consistent line height */
+}
+
+.dndev-code-line-number {
+  line-height: 1.5;
+  min-height: 1.5em;
+  font-size: inherit;
+}
+
+.dndev-code-code {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+  display: block;
+  line-height: 1.5;
+  /* Match line numbers */
+  font-size: var(--font-size-sm);
+  /* Explicit match with line numbers */
+}
+
+/* Ensure shiki-generated code respects line-height AND font-size */
+.dndev-code-code pre,
+.dndev-code-code code {
+  line-height: inherit;
+  font-size: inherit;
+}
+
+/* Shiki wraps each line in <span class="line"> — force consistent sizing */
+.dndev-code-code .line {
+  display: block;
+  line-height: 1.5;
+  font-size: inherit;
+  min-height: 1.5em;
+}
+
+/* Empty Shiki lines still need height to stay in sync with line numbers */
+.dndev-code-code .line:empty::after {
+  content: '\00a0';
+}

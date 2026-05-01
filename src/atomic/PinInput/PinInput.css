@@ -1,0 +1,94 @@
+/* packages/components/src/atomic/PinInput/PinInput.css */
+
+.dndev-pin-input {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+  justify-content: center;
+  direction: ltr; /* digits are always LTR even in RTL locales */
+}
+
+.dndev-pin-input__box {
+  inline-size: var(--input-height, 2.75rem) !important;
+  block-size: var(--input-height, 2.75rem) !important;
+  padding: 0 !important;
+  text-align: center !important;
+  font-size: var(--font-xl, 1.25rem) !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  caret-color: var(--primary);
+}
+
+/* Mask the typed digit via CSS, not by overwriting React's controlled value.
+   Rewriting value={raw} → value='•' on every keystroke forces React to
+   overwrite the native input value after the browser has already painted
+   the user's keystroke, which is the classic "lags like shit" PinInput bug
+   on mobile Chrome/Safari. `-webkit-text-security: disc` renders a bullet
+   purely in the layout layer while the input's real value stays the digit,
+   so React never has to race the browser's paint pipeline.
+   Firefox does not support -webkit-text-security and will render the digit
+   unmasked; the eye-toggle still works for revealing on WebKit/Blink. */
+.dndev-pin-input__box--masked {
+  -webkit-text-security: disc;
+}
+
+.dndev-pin-input__reveal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--gap-tight, 0.25rem);
+  margin-inline-start: var(--gap-sm, 0.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground, currentColor);
+  opacity: var(--opacity-muted, 0.65);
+  transition: opacity var(--dur-fast, 150ms) var(--ease-in-out, ease-in-out);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dndev-pin-input__reveal:hover,
+.dndev-pin-input__reveal:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.dndev-pin-input__reveal:focus-visible {
+  outline: 2px solid var(--primary, currentColor);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Shake animation hook — the container flips data-shake='true' on error
+   and the animation plays once via this keyframe. Consumers can override
+   via `.dndev-pin-input[data-shake='true'] { animation: ... }`. */
+@keyframes dndev-pin-input-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-0.35rem);
+  }
+  40% {
+    transform: translateX(0.35rem);
+  }
+  60% {
+    transform: translateX(-0.25rem);
+  }
+  80% {
+    transform: translateX(0.15rem);
+  }
+}
+
+.dndev-pin-input[data-shake='true'] {
+  animation: dndev-pin-input-shake var(--dur-normal, 320ms)
+    var(--ease-in-out, ease-in-out) 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dndev-pin-input[data-shake='true'] {
+    animation: none;
+  }
+}

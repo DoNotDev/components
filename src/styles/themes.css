@@ -1,0 +1,42 @@
+/* packages/components/src/styles/themes.css */
+
+/* ===========================
+   CORE THEMES (FRAMEWORK DEFAULTS)
+   Aligned with Demo App High Contrast Themes
+   =========================== */
+
+/* Light Theme (Default/High Contrast Light) */
+/* Framework provides ONLY light theme as minimal default */
+/* Users define their own themes (including dark) in their themes.css */
+/* Note: :root defaults in variables.css should match this */
+:root {
+  --theme-icon: 'Sun';
+  --theme-label: 'Light';
+  --theme-is-dark: 0;
+
+  /* Colors */
+  --foreground: #000000;
+  --background: #ffffff;
+  --primary: #00bcd4; /* Cyan */
+  --secondary: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
+  --accent: #ff9800; /* Orange */
+
+  /* Semantic */
+  --success: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
+  --warning: #f59e0b;
+  --destructive: #dc2626;
+
+  /* Surfaces (Glow provides shading) */
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  /* Text Variants */
+  --primary-foreground: var(--foreground);
+  --secondary-foreground: var(--background);
+  --accent-foreground: var(--foreground);
+  --success-foreground: var(--background);
+  --warning-foreground: var(--foreground);
+  --destructive-foreground: var(--background);
+}

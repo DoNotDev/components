@@ -1,0 +1,207 @@
+/* packages/components/src/atomic/NavigationMenu/NavigationMenu.css */
+
+.dndev-nav-menu-base {
+  position: relative;
+  z-index: var(--z-header);
+  display: flex;
+  flex: 1 1 0%;
+
+  &[data-vertical='true'] {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+
+    .dndev-interactive[data-role='nav-trigger'] {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .dndev-interactive[data-role='menu-item'] {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+
+  &[data-vertical='false'] {
+    max-width: max-content;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .dndev-interactive[data-role='nav-trigger'] {
+      width: max-content;
+      justify-content: center;
+    }
+
+    .dndev-interactive[data-role='menu-item'] {
+      width: max-content;
+      justify-content: center;
+    }
+  }
+}
+
+.dndev-nav-menu-list {
+  display: flex;
+  flex: 1 1 0%;
+  list-style: none;
+
+  &[data-vertical='true'] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--gap-none);
+  }
+
+  &[data-vertical='false'] {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-none);
+  }
+}
+
+/* Navigation trigger - NavigationMenu-specific styles only */
+.dndev-interactive[data-role='nav-trigger'] {
+  height: var(--touch-target);
+
+  &:focus {
+    outline: none;
+  }
+
+  &[data-active='true'],
+  &[data-state='open'] {
+    background-color: rgb(from var(--accent) r g b / 0.5);
+  }
+}
+
+.dndev-nav-menu-trigger-icon {
+  position: relative;
+  top: 1px;
+  margin-inline-start: var(--gap-sm);
+  height: var(--icon-md);
+  width: var(--icon-md);
+  transition-property: transform;
+  transition-timing-function: var(--ease-in-out);
+  transition-duration: var(--dur-normal);
+
+  &[data-state='open'] {
+    transform: rotate(180deg);
+  }
+}
+
+.dndev-nav-menu-content {
+  inset-inline-start: 0;
+  top: 0;
+  width: 100%;
+
+  @media (width >= 768px) {
+    position: absolute;
+    width: auto;
+  }
+}
+
+.dndev-nav-menu-viewport-wrapper {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.dndev-nav-menu-viewport {
+  position: relative;
+  margin-top: var(--gap-sm);
+  height: var(--radix-navigation-menu-viewport-height);
+  width: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+
+  @media (width >= 768px) {
+    width: var(--radix-navigation-menu-viewport-width);
+  }
+}
+
+.dndev-nav-menu-indicator {
+  top: 100%;
+  z-index: 1;
+  display: flex;
+  height: var(--gap-sm);
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dndev-nav-menu-indicator-inner {
+  position: relative;
+  top: 60%;
+  height: var(--gap-sm);
+  width: var(--gap-sm);
+  transform: rotate(45deg);
+  border-start-start-radius: 2px;
+  background-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+/* Navigation Menu Content Grid */
+.dndev-nav-menu-grid-container {
+  padding: var(--gap-md);
+}
+
+.dndev-nav-menu-grid-featured {
+  grid-template-columns: 0.75fr 1fr;
+}
+
+.dndev-nav-menu-grid-standard {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.dndev-nav-menu-featured-item {
+  grid-row: span 3;
+  height: 100%;
+  padding: var(--gap-md);
+  border-radius: var(--radius-floating);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--muted) 50%, transparent),
+    var(--muted)
+  );
+  text-decoration: none;
+  outline: none;
+}
+
+.dndev-nav-menu-featured-title {
+  margin-bottom: var(--gap-sm);
+  margin-top: var(--gap-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.dndev-nav-menu-featured-description {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+.dndev-nav-menu-item-container {
+  padding: var(--gap-md);
+  border-radius: var(--radius-floating);
+  text-decoration: none;
+  outline: none;
+}
+
+.dndev-nav-menu-item-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.dndev-nav-menu-item-description {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* No overrides - all styling handled by patterns.css base rules */

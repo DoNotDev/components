@@ -1,0 +1,281 @@
+/* packages/components/src/atomic/Calendar/Calendar.css */
+
+/**
+ * Calendar Component Styles
+ * All sizes use --touch-target with border INSIDE (box-sizing: border-box)
+ */
+
+/* ===========================
+   CONTAINER
+   =========================== */
+.dndev-calendar {
+  position: relative;
+  width: fit-content;
+  color: var(--popover-foreground);
+  background: var(--popover);
+  border: var(--border-hairline) solid var(--border);
+  border-radius: var(--radius-floating);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===========================
+   MONTH VIEW (header + days grid)
+   =========================== */
+.dndev-calendar-months {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dndev-calendar-month {
+  position: relative;
+}
+
+/* ===========================
+   HEADER: NAV BUTTONS (prev/next)
+   =========================== */
+.dndev-calendar-nav {
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: var(--touch-target);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Merged Borders Pattern: Container owns outer, children own separators */
+.dndev-calendar-nav-button {
+  position: absolute;
+  top: 0;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  border-radius: 0;
+  border: none;
+  border-bottom: var(--border-hairline) solid var(--border);
+  background: transparent;
+  color: var(--foreground);
+}
+
+.dndev-calendar-nav-button:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dndev-calendar-nav-previous {
+  inset-inline-start: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.dndev-calendar-nav-next {
+  inset-inline-end: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* ===========================
+   HEADER: CAPTION (month/year dropdowns)
+   =========================== */
+.dndev-calendar-caption {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: var(--touch-target);
+  width: 100%;
+  padding-inline: var(--touch-target);
+  padding-block: 0;
+  gap: 0;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: var(--border-hairline) solid var(--border);
+}
+
+.dndev-calendar-caption-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===========================
+   MONTH/YEAR DROPDOWN BUTTONS (opens 12 months / years grid)
+   =========================== */
+.dndev-calendar-dropdowns {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - calc(var(--touch-target) * 2));
+  height: 100%;
+  gap: 0;
+  margin-inline: var(--touch-target);
+}
+
+.dndev-calendar-dropdown-month {
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dndev-calendar-dropdown-year {
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dndev-calendar-dropdown-trigger {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border-top: none !important;
+}
+
+.dndev-calendar-dropdown-selected,
+.dndev-calendar-dropdown-grid [data-selected='true'] {
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+  background-color: transparent;
+}
+
+/* ===========================
+   DAYS GRID
+   =========================== */
+.dndev-calendar-table {
+  width: auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.dndev-calendar-weekday {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  text-align: center;
+  border: none;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+/* ===========================
+   DAY BUTTON STATES
+   =========================== */
+.dndev-calendar-day-button {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--popover-foreground);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-interactive);
+  border: var(--border-width) solid transparent;
+  box-sizing: border-box;
+}
+
+/* Hover (regular day) - accent bg, full 48px, no border */
+.dndev-calendar-day-button:hover:not([disabled]) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border: var(--border-width) solid transparent;
+}
+
+/* Selected - primary bg + fg, full 48px, no border */
+.dndev-calendar-day-selected .dndev-calendar-day-button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: var(--border-width) solid transparent;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Today - just secondary border */
+.dndev-calendar-day-today .dndev-calendar-day-button {
+  border-color: var(--secondary);
+}
+
+/* Hover + Selected - accent bg (hover) + primary border (selected) */
+.dndev-calendar-day-selected .dndev-calendar-day-button:hover:not([disabled]) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--primary);
+}
+
+/* Hover + Today - accent bg (hover) + secondary border (today) */
+.dndev-calendar-day-today .dndev-calendar-day-button:hover:not([disabled]) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--secondary);
+}
+
+/* Selected + Today - primary bg + fg (selected) + secondary border (today) */
+.dndev-calendar-day-today.dndev-calendar-day-selected
+  .dndev-calendar-day-button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--secondary);
+}
+
+/* Hover + Selected + Today - accent bg (hover) + secondary border (today) */
+.dndev-calendar-day-today.dndev-calendar-day-selected
+  .dndev-calendar-day-button:hover:not([disabled]) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--secondary);
+}
+
+/* Outside Days - interactive but always muted to show they're from different month */
+.dndev-calendar-day-outside .dndev-calendar-day-button {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.dndev-calendar-day-outside .dndev-calendar-day-button:hover:not([disabled]) {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-selected
+  .dndev-calendar-day-button {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-selected
+  .dndev-calendar-day-button:hover:not([disabled]) {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-today
+  .dndev-calendar-day-button {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-today
+  .dndev-calendar-day-button:hover:not([disabled]) {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-today.dndev-calendar-day-selected
+  .dndev-calendar-day-button {
+  color: var(--muted-foreground);
+}
+
+.dndev-calendar-day-outside.dndev-calendar-day-today.dndev-calendar-day-selected
+  .dndev-calendar-day-button:hover:not([disabled]) {
+  color: var(--muted-foreground);
+}
+
+/* Hidden Days */
+.dndev-calendar-day-hidden {
+  visibility: hidden;
+}

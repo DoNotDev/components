@@ -1,0 +1,40 @@
+/* packages/components/src/advanced/Carousel/Carousel.css */
+
+/* Responsive slide width via CSS custom properties — same pattern as Grid */
+.dndev-carousel-slide {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: calc(100% / var(--carousel-slides-mobile, 1));
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  .dndev-carousel-slide {
+    width: calc(100% / var(--carousel-slides-tablet, 1));
+  }
+}
+
+/* Laptop: 1024px+ */
+@media (min-width: 1024px) {
+  .dndev-carousel-slide {
+    width: calc(100% / var(--carousel-slides-laptop, 1));
+  }
+}
+
+/* Desktop: 1440px+ */
+@media (min-width: 1440px) {
+  .dndev-carousel-slide {
+    width: calc(100% / var(--carousel-slides-desktop, 1));
+  }
+}
+
+/* Gap between slides — padding inside the slide box, translateX math untouched */
+.dndev-carousel-slide[data-gap='tight'] {
+  padding-inline-end: var(--gap-sm);
+}
+.dndev-carousel-slide[data-gap='medium'] {
+  padding-inline-end: var(--gap-md);
+}
+.dndev-carousel-slide[data-gap='large'] {
+  padding-inline-end: var(--gap-lg);
+}

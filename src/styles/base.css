@@ -1,0 +1,264 @@
+/* packages/components/src/styles/base.css */
+
+/* ===========================
+    DOCUMENT STRUCTURE
+    =========================== */
+
+html {
+  touch-action: manipulation;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+
+  @supports (overscroll-behavior: none) {
+    overscroll-behavior: none;
+  }
+
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===========================
+    SCROLLBAR STYLING
+    Theme-aware, square edges (interactive element)
+    =========================== */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) var(--muted);
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  background-color: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: var(--radius-interactive);
+
+  &:hover {
+    background-color: var(--accent);
+  }
+}
+
+/* ===========================
+    GLOBAL TRANSITIONS
+    =========================== */
+
+/* Removed global * transitions to prevent jank and hover delays */
+/* Component-specific transitions are handled individually for better performance */
+
+/* Reset and base styles */
+:root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Remove default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Set core body defaults — font-family here so theme tokens on :root cascade cleanly */
+body {
+  font-family: var(--font-family, var(--font-sans));
+  min-height: 100vh;
+  min-height: 100dvh;
+  line-height: var(--line-height);
+  text-rendering: optimizeSpeed;
+  font-size: var(--font-size-base);
+}
+
+/* Make images easier to work with */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* ===========================
+   BASE LINK STYLING
+   Remove browser defaults, provide framework defaults
+   =========================== */
+
+a {
+  &:not(.dndev-interactive) {
+    &,
+    &:link,
+    &:visited {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color var(--dur-fast) var(--ease-in-out);
+    }
+
+    &:hover {
+      color: var(--primary);
+    }
+
+    &:active {
+      color: var(--primary);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-interactive);
+  }
+}
+
+/* Main element - no focus outline (programmatic focus for keyboard nav) */
+main:focus-visible {
+  outline: none;
+}
+
+/* ===========================
+   BASE TYPOGRAPHY - RESET ONLY
+   Zero margins, components own their spacing
+   Use .prose wrapper for content pages (docs, markdown)
+   =========================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background: transparent;
+  text-wrap: balance; /* Equalize line lengths, prevent orphans */
+  text-transform: var(--text-transform-heading, none);
+  letter-spacing: var(--letter-spacing-heading, normal);
+}
+
+:is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-headline);
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+h5,
+h6 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+p {
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background: transparent;
+  text-wrap: pretty; /* Optimize last line, avoid orphans */
+}
+
+ul,
+ol {
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background: transparent;
+  list-style-position: outside;
+  text-wrap: pretty;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+li {
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+  color: var(--foreground);
+  background: transparent;
+}
+
+/* Semantic HTML - strong and em */
+strong {
+  font-weight: var(--font-weight-semibold);
+  font-size: inherit; /* Inherit parent font size (body text) */
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+em {
+  font-style: italic;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+/* Remove all animations and transitions for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

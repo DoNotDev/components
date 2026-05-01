@@ -1,0 +1,338 @@
+/* packages/components/src/advanced/Crawl/Crawl.css */
+
+/* ===========================
+   1. CSS VARIABLES (Fluid - Expressive Density)
+   =========================== */
+
+:root {
+  /* Animation & 3D Settings */
+  --crawl-perspective: 600px;
+  --crawl-tilt: 40deg;
+
+  /* Typography - FLUID (No Breakpoints) */
+  /* Formula: clamp(min, rem + vw, max) for zoom support */
+  --crawl-body-size: clamp(1.6rem, 1rem + 2.5vw, 3rem);
+  --crawl-title-size: clamp(3rem, 1.5rem + 6vw, 8rem);
+  --crawl-intro-font-size: clamp(2rem, 1rem + 3vw, 4rem);
+
+  /* Spacing */
+  --crawl-content-line: 1.2;
+  --crawl-body-margin: 0.9em;
+  --crawl-title-margin: 3em;
+
+  /* Colors - Hardcoded SW Yellow (not theme colors) */
+  --crawl-text-color: #ffc909;
+  --crawl-intro-color: #4a9eff;
+
+  /* Effects */
+  /* --crawl-text-shadow: 0 0 8px rgba(255, 201, 9, 1), 0 0 16px rgba(255, 201, 9, 0.8); */
+  --crawl-text-shadow: 0 0 12px rgba(255, 201, 9, 1);
+  --crawl-intro-shadow:
+    0 0 30px rgba(74, 158, 255, 0.9), 0 0 60px rgba(74, 158, 255, 0.6),
+    0 0 90px rgba(74, 158, 255, 0.4), 0 0 120px rgba(74, 158, 255, 0.2);
+
+  /* Intro Overlay */
+  --crawl-intro-duration: 2000ms;
+}
+
+/* ===========================
+   2. CONTAINER & LAYOUT (Cinematic Breakout)
+   =========================== */
+
+.dndev-crawl-container {
+  /* 1. Context */
+  position: relative;
+  background: #000;
+  contain: layout style paint;
+  perspective: var(--crawl-perspective);
+  backface-visibility: hidden;
+
+  /* 2. THE CINEMATIC BREAKOUT (150vw) */
+  /* This forces the element to be 1.5x wider than the screen */
+  width: 150vw;
+
+  /* 3. The "Dead Center" Lock */
+  /* Move start edge to the exact center of parent... */
+  inset-inline-start: 50%;
+  /* ...then pull back by exactly half of OWN width (75vw) */
+  transform: translate3d(-50%, 0, 0);
+
+  /* 4. Reset Constraints */
+  margin: 0;
+  margin-top: 0 !important; /* Override PageContainer gap - always sit flush with header */
+  padding: 0;
+  max-width: none; /* Critical: Ignore parent max-width constraints */
+
+  /* 5. Sizing & Safety */
+  min-height: calc(100dvh - var(--header-height));
+  overflow: hidden; /* Critical: Hides the text as it flies "past" the camera */
+}
+
+/* Override PageContainer gap and margin-top for Crawl - always first child */
+/* Remove top gap only, keep bottom gap normal */
+.dndev-container > .dndev-crawl-container:first-child {
+  margin-top: 0 !important;
+}
+
+/* Override PageContainer's margin-top when Crawl is first child */
+.dndev-container:has(> .dndev-crawl-container:first-child) {
+  margin-top: 0 !important;
+}
+
+/* ===========================
+   3. STAR FIELD BACKGROUND (Canvas)
+   =========================== */
+
+.dndev-crawl-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  contain: layout style paint;
+  pointer-events: none;
+}
+
+/* Starfield layers using SVG pattern (no canvas, no resize issues) */
+.dndev-crawl-stars-layer-1,
+.dndev-crawl-stars-layer-2,
+.dndev-crawl-stars-layer-3 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='500' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='23' cy='17' r='1' fill='white' opacity='1'/%3E%3Ccircle cx='47' cy='89' r='1' fill='white' opacity='0.8'/%3E%3Ccircle cx='91' cy='43' r='0.5' fill='white' opacity='1'/%3E%3Ccircle cx='131' cy='67' r='1' fill='white' opacity='0.6'/%3E%3Ccircle cx='163' cy='19' r='0.5' fill='%23ddd' opacity='0.8'/%3E%3Ccircle cx='197' cy='73' r='1' fill='white' opacity='1'/%3E%3Ccircle cx='211' cy='41' r='0.5' fill='white' opacity='0.7'/%3E%3Ccircle cx='233' cy='97' r='1' fill='%23eee' opacity='0.9'/%3E%3Ccircle cx='251' cy='13' r='0.5' fill='white' opacity='1'/%3E%3Ccircle cx='277' cy='59' r='1' fill='white' opacity='0.5'/%3E%3Ccircle cx='293' cy='83' r='0.5' fill='%23ddd' opacity='0.8'/%3E%3Ccircle cx='317' cy='31' r='1' fill='white' opacity='1'/%3E%3Ccircle cx='337' cy='71' r='0.5' fill='white' opacity='0.8'/%3E%3Ccircle cx='359' cy='7' r='1' fill='%23eee' opacity='0.9'/%3E%3Ccircle cx='373' cy='53' r='0.5' fill='white' opacity='1'/%3E%3Ccircle cx='389' cy='79' r='1' fill='white' opacity='0.6'/%3E%3Ccircle cx='401' cy='23' r='0.5' fill='%23ddd' opacity='0.8'/%3E%3Ccircle cx='419' cy='61' r='1' fill='white' opacity='1'/%3E%3Ccircle cx='433' cy='37' r='0.5' fill='white' opacity='0.7'/%3E%3Ccircle cx='449' cy='87' r='1' fill='%23eee' opacity='0.9'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+.dndev-crawl-stars-layer-1 {
+  --layer-base-opacity: 1;
+  opacity: 1;
+  background-size: 400px 250px;
+  animation: dndev-stars-twinkle 4s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.dndev-crawl-stars-layer-2 {
+  --layer-base-opacity: 0.7;
+  opacity: 0.7;
+  background-size: 300px 200px;
+  animation: dndev-stars-twinkle 2.5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.dndev-crawl-stars-layer-3 {
+  --layer-base-opacity: 0.5;
+  opacity: 0.5;
+  background-size: 200px 150px;
+  animation: dndev-stars-twinkle 1.8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes dndev-stars-twinkle {
+  0%,
+  100% {
+    opacity: var(--layer-base-opacity);
+  }
+  50% {
+    opacity: calc(var(--layer-base-opacity) * 1.43);
+  }
+}
+
+/* ===========================
+   4. 3D CONTAINER & TEXT ANIMATION
+   =========================== */
+
+.dndev-crawl-3d-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  perspective: var(--crawl-perspective);
+  transform-style: preserve-3d;
+  contain: layout style;
+  backface-visibility: hidden;
+  will-change: auto;
+}
+
+.dndev-crawl-text {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform: rotateX(var(--crawl-tilt)) translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  contain: layout style;
+}
+
+/* ===========================
+   5. TEXT CONTENT STYLES
+   Simple: yellow text, big shadows, centered
+   =========================== */
+
+.dndev-crawl-content {
+  color: var(--crawl-text-color);
+  font-size: var(--crawl-body-size);
+  line-height: var(--crawl-content-line);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-shadow: var(--crawl-text-shadow);
+  position: relative;
+  z-index: 2;
+  width: 60%;
+  max-width: 60%;
+  margin-inline: auto;
+  padding: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Title - bigger, same styling */
+.dndev-crawl-title,
+.dndev-crawl-content h1,
+.dndev-crawl-content h2,
+.dndev-crawl-content p {
+  color: var(--crawl-text-color);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-shadow: var(--crawl-text-shadow);
+
+  /* Responsive - remove shadows on mobile/tablet for performance */
+  @media (width <= 1023px) {
+    text-shadow: none;
+  }
+}
+
+.dndev-crawl-title,
+.dndev-crawl-content h1,
+.dndev-crawl-content h2 {
+  font-size: var(--crawl-title-size);
+  margin-bottom: var(--crawl-title-margin);
+  padding: 0;
+  margin-inline: 0;
+}
+
+.dndev-crawl-content p {
+  font-size: var(--crawl-body-size);
+  margin-bottom: var(--crawl-body-margin);
+}
+
+/* Responsive - allow wrapping on mobile */
+@media (width >= 1024px) {
+  .dndev-crawl-title {
+    white-space: nowrap;
+  }
+}
+
+/* ===========================
+   6. INTRO OVERLAY STYLES
+   =========================== */
+
+.dndev-crawl-intro {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+.dndev-crawl-intro-content {
+  color: var(--crawl-intro-color);
+  font-size: var(--crawl-intro-font-size);
+  font-weight: 900;
+  text-align: center;
+  text-shadow: var(--crawl-intro-shadow);
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 60%;
+  max-width: 60%;
+  margin-inline: auto;
+  margin-block: 0;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  white-space: normal;
+}
+
+.dndev-crawl-intro-mobile {
+  animation: dndev-intro-fade-mobile var(--crawl-intro-duration) ease-in-out
+    forwards;
+}
+
+.dndev-crawl-intro-desktop {
+  animation: dndev-intro-fade-desktop calc(var(--crawl-intro-duration) * 2)
+    ease-in-out forwards;
+}
+
+/* ===========================
+   7. ANIMATIONS & KEYFRAMES
+   =========================== */
+
+@keyframes dndev-crawl-animation {
+  from {
+    transform: rotateX(var(--crawl-tilt)) translate3d(0, 100dvh, 0);
+  }
+  to {
+    transform: rotateX(var(--crawl-tilt))
+      translate3d(0, calc(-1 * var(--crawl-content-height)), 0);
+  }
+}
+
+/* ===========================
+   8. ACCESSIBILITY & PERFORMANCE
+   =========================== */
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  .dndev-crawl-text {
+    animation: none !important;
+  }
+
+  .dndev-crawl-3d-container {
+    transform: rotateX(0deg) translate3d(0, 0, 0) !important;
+  }
+
+  .dndev-crawl-content {
+    position: static !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .dndev-crawl-intro-mobile,
+  .dndev-crawl-intro-desktop {
+    animation: none !important;
+  }
+}
+
+/* High Contrast Preference */
+@media (prefers-contrast: high) {
+  .dndev-crawl-stars {
+    filter: contrast(1.5) brightness(1.2);
+  }
+}
+
+/* Reduced Motion Class (applied programmatically) */
+.dndev-crawl-reduced-motion {
+  animation: none !important;
+  transform: none !important;
+
+  .dndev-crawl-content {
+    position: static !important;
+    transform: none !important;
+  }
+
+  .dndev-crawl-stars-layer-1,
+  .dndev-crawl-stars-layer-2,
+  .dndev-crawl-stars-layer-3 {
+    animation: none !important;
+  }
+}

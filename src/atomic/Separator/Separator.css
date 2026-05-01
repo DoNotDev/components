@@ -1,0 +1,116 @@
+/* packages/components/src/atomic/Separator/Separator.css */
+
+.dndev-separator {
+  flex-shrink: 0;
+  background-color: var(--line-2);
+  margin-inline: auto;
+
+  &[data-orientation='horizontal'] {
+    height: 2px;
+    width: 80%;
+
+    /* Inside Section: cap to content width */
+    .dndev-section & {
+      max-width: calc(var(--content-width) * 0.8);
+    }
+  }
+
+  &[data-orientation='vertical'] {
+    width: 1px;
+    height: 100%;
+  }
+
+  /* Default variant - uses line color */
+  &[data-variant='default'] {
+    background-color: var(--line-2);
+  }
+
+  /* Muted variant */
+  &[data-variant='muted'] {
+    background-color: var(--line-1);
+    opacity: var(--opacity-muted);
+
+    /* Context-aware: inside muted surface, use accent (contrasting) */
+    .dndev-surface[data-variant='muted'] & {
+      background-color: var(--accent);
+      opacity: var(--opacity-strong);
+    }
+  }
+
+  /* Primary variant */
+  &[data-variant='primary'] {
+    background-color: var(--primary);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside primary surface, use primary-foreground (contrasting) */
+    .dndev-surface[data-variant='primary'] & {
+      background-color: var(--primary-foreground);
+      opacity: 1;
+    }
+
+    /* Context-aware: inside default surface, use accent (contrasting) */
+    .dndev-surface:not([data-variant]) & {
+      background-color: var(--accent);
+    }
+  }
+
+  /* Secondary variant */
+  &[data-variant='secondary'] {
+    background-color: var(--secondary);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside secondary surface, use secondary-foreground (contrasting) */
+    .dndev-surface[data-variant='secondary'] & {
+      background-color: var(--secondary-foreground);
+      opacity: 1;
+    }
+  }
+
+  /* Accent variant */
+  &[data-variant='accent'] {
+    background-color: var(--accent);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside accent surface, use accent-foreground (contrasting) */
+    .dndev-surface[data-variant='accent'] & {
+      background-color: var(--accent-foreground);
+      opacity: 1;
+    }
+  }
+
+  /* Success variant */
+  &[data-variant='success'] {
+    background-color: var(--success);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside success surface, use success-foreground (contrasting) */
+    .dndev-surface[data-variant='success'] & {
+      background-color: var(--success-foreground);
+      opacity: 1;
+    }
+  }
+
+  /* Warning variant */
+  &[data-variant='warning'] {
+    background-color: var(--warning);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside warning surface, use warning-foreground (contrasting) */
+    .dndev-surface[data-variant='warning'] & {
+      background-color: var(--warning-foreground);
+      opacity: 1;
+    }
+  }
+
+  /* Destructive variant */
+  &[data-variant='destructive'] {
+    background-color: var(--destructive);
+    opacity: var(--opacity-strong);
+
+    /* Context-aware: inside destructive surface, use destructive-foreground (contrasting) */
+    .dndev-surface[data-variant='destructive'] & {
+      background-color: var(--destructive-foreground);
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,155 @@
+/* packages/components/src/atomic/Section/Section.css */
+
+/* Full-width section wrapper for tone backgrounds */
+.dndev-section-full-width {
+  width: 100%;
+}
+
+/* Bleed: background spans full viewport width, content stays padded */
+.dndev-section-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+.dndev-section-bleed > .dndev-section-content {
+  max-width: none;
+}
+
+/* Content wrapper: constrained + centered + padded */
+.dndev-section-content {
+  /* Respects PageContainer's --content-width (passed through breakthrough root) */
+  max-width: var(--content-width);
+  margin-inline: auto;
+  min-width: 0; /* Allow shrinking so max-width wins when content would force wider */
+  /* Padding with section background - responsive to match PageContainer */
+  padding-inline: var(--gap-md);
+  padding-top: var(--gap-lg);
+  padding-bottom: var(--gap-lg);
+
+  @media (width >= 1024px) {
+    padding-inline: var(--gap-lg);
+  }
+}
+
+/* Content width constraints — background stays full, only inner content narrows */
+.dndev-section-content[data-content-width='standard'] {
+  max-width: var(--content-width-standard);
+}
+.dndev-section-content[data-content-width='docs'] {
+  max-width: var(--content-width-docs);
+}
+.dndev-section-content[data-content-width='narrow'] {
+  max-width: var(--content-width-narrow);
+}
+
+/* Propagate text-align to all section content via CSS inheritance */
+.dndev-section-full-width[data-text-align='start'] > .dndev-section-content {
+  text-align: start;
+}
+
+.dndev-section-full-width[data-text-align='center'] > .dndev-section-content {
+  text-align: center;
+}
+
+.dndev-section-full-width[data-text-align='end'] > .dndev-section-content {
+  text-align: end;
+}
+
+/* Item alignment (align-items) on content container */
+.dndev-section-content[data-align='start'] {
+  align-items: flex-start;
+}
+.dndev-section-content[data-align='center'] {
+  align-items: center;
+}
+.dndev-section-content[data-align='end'] {
+  align-items: flex-end;
+}
+.dndev-section-content[data-align='stretch'] {
+  align-items: stretch;
+}
+
+/* Content justification (justify-content) on content container */
+.dndev-section-content[data-justify='start'] {
+  justify-content: flex-start;
+}
+.dndev-section-content[data-justify='center'] {
+  justify-content: center;
+}
+.dndev-section-content[data-justify='end'] {
+  justify-content: flex-end;
+}
+.dndev-section-content[data-justify='between'] {
+  justify-content: space-between;
+}
+.dndev-section-content[data-justify='around'] {
+  justify-content: space-around;
+}
+.dndev-section-content[data-justify='evenly'] {
+  justify-content: space-evenly;
+}
+
+/* Section title: uppercase, accent color, letter spacing */
+.dndev-section-title {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent) !important;
+  margin-block-end: var(--gap-md);
+  text-align: center; /* DEFAULT - works without attribute selector */
+}
+
+.dndev-section-full-width[data-text-align='start'] .dndev-section-title {
+  text-align: start;
+}
+
+.dndev-section-full-width[data-text-align='center'] .dndev-section-title {
+  text-align: center;
+}
+
+.dndev-section-full-width[data-text-align='end'] .dndev-section-title {
+  text-align: end;
+}
+
+/* Collapsible title trigger */
+.dndev-section-title-trigger {
+  width: 100%;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-in-out);
+  margin-block-end: var(--gap-md);
+}
+
+.dndev-section-title-trigger .dndev-section-title {
+  margin-block-end: 0;
+}
+
+.dndev-section-title-trigger:hover {
+  opacity: var(--opacity-strong);
+}
+
+.dndev-section-title-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-interactive);
+}
+
+.dndev-section-icon {
+  width: var(--size-md);
+  height: var(--size-md);
+  flex-shrink: 0;
+  color: var(--accent);
+  transition: transform var(--dur-normal) var(--ease-in-out);
+}
+
+.dndev-section-full-width[data-text-align='start']
+  .dndev-section-title-trigger {
+  justify-content: flex-start;
+}
+
+.dndev-section-full-width[data-text-align='center']
+  .dndev-section-title-trigger {
+  justify-content: center;
+}
+
+.dndev-section-full-width[data-text-align='end'] .dndev-section-title-trigger {
+  justify-content: flex-end;
+}

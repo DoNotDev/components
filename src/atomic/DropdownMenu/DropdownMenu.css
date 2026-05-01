@@ -1,0 +1,34 @@
+/* packages/components/src/atomic/DropdownMenu/DropdownMenu.css */
+
+/* Force labels visible in dropdown menus (overrides COMPACT/AUTO) */
+.dndev-menu-content .dndev-interactive-label {
+  display: inline-flex !important;
+}
+
+/* Auto margin for trailing icons/indicators */
+.dndev-dropdown-menu-trailing {
+  margin-inline-start: auto;
+}
+
+/* Checkmark icon for checked items */
+.dndev-dropdown-menu-checkmark {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dndev-dropdown-sub-content-custom {
+  padding: var(--gap-sm);
+}
+
+/* Checked state styling */
+.dndev-interactive[data-role='menu-item'][data-state='checked'] {
+  color: var(--secondary-foreground);
+}
+
+/* Checked + hover state */
+.dndev-interactive[data-role='menu-item'][data-state='checked']:hover,
+.dndev-interactive[data-role='menu-item'][data-state='checked']:focus-visible,
+.dndev-interactive[data-role='menu-item'][data-state='checked'][data-highlighted] {
+  background-color: var(--accent);
+  color: var(--secondary-foreground);
+}

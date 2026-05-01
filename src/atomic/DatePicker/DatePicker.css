@@ -1,0 +1,219 @@
+/* packages/components/src/atomic/DatePicker/DatePicker.css */
+
+/**
+ * DatePicker Component Styles
+ * Segmented date input with calendar popover.
+ * Mobile: falls back to native <input type="date"> via @media (pointer: coarse).
+ */
+
+/* ===========================
+   ROOT CONTAINER
+   =========================== */
+
+.dndev-datepicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* ===========================
+   DESKTOP: SEGMENTED INPUT
+   =========================== */
+
+.dndev-datepicker-custom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Input-like container (mirrors .dndev-input from patterns.css) */
+.dndev-datepicker-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--touch-target);
+  border-radius: var(--radius-interactive);
+  border: var(--border-hairline) solid var(--line-2);
+  background-color: transparent;
+  color: var(--foreground);
+  padding-inline-start: var(--gap-md);
+  padding-inline-end: 0;
+  font-size: var(--font-size-input);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--dur-normal) var(--ease-in-out);
+  touch-action: manipulation;
+  cursor: text;
+}
+
+/* Bare mode inside FloatingLabel (fieldset provides border) */
+.dndev-datepicker-field[data-bare] {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Hover */
+.dndev-datepicker-field:hover {
+  border-color: var(--ring);
+}
+
+/* Focus-within */
+.dndev-datepicker-field:focus-within {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Focus-within bare (FloatingLabel handles outer border) */
+.dndev-datepicker-field[data-bare]:focus-within {
+  box-shadow: none;
+}
+
+/* Error state */
+.dndev-datepicker-field[aria-invalid='true'],
+.dndev-datepicker-field[data-variant='destructive'] {
+  border-color: var(--destructive);
+}
+
+/* Disabled */
+.dndev-datepicker-field[data-disabled] {
+  cursor: not-allowed;
+  opacity: var(--opacity-muted);
+}
+
+/* ===========================
+   SEGMENTS AREA
+   =========================== */
+
+.dndev-datepicker-segments {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===========================
+   SEGMENTS
+   =========================== */
+
+.dndev-datepicker-segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap-tight) 1px;
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+  caret-color: transparent;
+  outline: none;
+  min-width: 2ch;
+  text-align: center;
+  user-select: none;
+}
+
+/* Year segment needs more room */
+.dndev-datepicker-segment[data-type='year'] {
+  min-width: 4ch;
+}
+
+/* Placeholder text */
+.dndev-datepicker-segment[data-placeholder] {
+  color: var(--placeholder);
+}
+
+/* Focused segment highlight */
+.dndev-datepicker-segment:focus {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  outline: none;
+}
+
+/* Separator between segments */
+.dndev-datepicker-separator {
+  color: var(--muted-foreground);
+  padding: 0 1px;
+  user-select: none;
+}
+
+/* ===========================
+   CALENDAR TRIGGER BUTTON (inside field)
+   =========================== */
+
+/* Extends .dndev-inline-action-btn from patterns.css */
+.dndev-datepicker-calendar-btn {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+/* ===========================
+   POPOVER
+   =========================== */
+
+.dndev-datepicker-popover {
+  padding: 0;
+}
+
+/* Fix: .dndev-floating .dndev-interactive overrides width/justify on ALL
+   interactive children. Calendar needs its own sizing - undo the override. */
+.dndev-datepicker-popover .dndev-interactive {
+  width: auto;
+  justify-content: center;
+}
+
+/* Calendar nav buttons: restore absolute-positioned fixed size */
+.dndev-datepicker-popover .dndev-calendar-nav-button {
+  width: var(--touch-target);
+}
+
+/* Calendar day buttons: restore fixed cell size */
+.dndev-datepicker-popover .dndev-calendar-day-button {
+  width: var(--touch-target);
+}
+
+/* Calendar dropdown triggers: restore full-width inside their cell */
+.dndev-datepicker-popover .dndev-calendar-dropdown-trigger {
+  width: 100%;
+}
+
+/* ===========================
+   MOBILE: NATIVE INPUT FALLBACK
+   =========================== */
+
+.dndev-datepicker-native {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .dndev-datepicker-custom {
+    display: none;
+  }
+
+  .dndev-datepicker-native {
+    display: flex;
+    width: 100%;
+  }
+}
+
+/* ===========================
+   SCREEN READER LIVE REGION
+   =========================== */
+
+.dndev-datepicker-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===========================
+   DISABLED STATE (root)
+   =========================== */
+
+.dndev-datepicker[data-disabled] {
+  pointer-events: none;
+}

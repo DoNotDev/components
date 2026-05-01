@@ -1,0 +1,14 @@
+/* packages/components/src/atomic/FeatureFallback/FeatureFallback.css */
+
+.dndev-feature-fallback-card {
+  max-width: var(--content-text);
+  border: none;
+}
+
+.dndev-feature-fallback-title {
+  color: var(--muted-foreground);
+}
+
+.dndev-feature-fallback-text {
+  color: var(--muted-foreground);
+}

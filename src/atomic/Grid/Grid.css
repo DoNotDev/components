@@ -1,0 +1,152 @@
+/* packages/components/src/atomic/Grid/Grid.css */
+
+.dndev-grid-component {
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  /* Default: use mobile columns */
+  grid-template-columns: repeat(var(--grid-cols-mobile, 1), 1fr);
+}
+
+/* Responsive columns via media queries */
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  .dndev-grid-component {
+    grid-template-columns: repeat(var(--grid-cols-tablet, 1), 1fr);
+  }
+}
+
+/* Laptop: 1024px+ (key layout split) */
+@media (min-width: 1024px) {
+  .dndev-grid-component {
+    grid-template-columns: repeat(var(--grid-cols-laptop, 1), 1fr);
+  }
+}
+
+/* Desktop: 1440px+ */
+@media (min-width: 1440px) {
+  .dndev-grid-component {
+    grid-template-columns: repeat(var(--grid-cols-desktop, 1), 1fr);
+  }
+}
+
+/* Responsive templateColumns via custom properties */
+.dndev-grid-component[data-responsive-tpl='true'] {
+  grid-template-columns: var(--grid-tpl-mobile);
+}
+@media (min-width: 768px) {
+  .dndev-grid-component[data-responsive-tpl='true'] {
+    grid-template-columns: var(--grid-tpl-tablet);
+  }
+}
+@media (min-width: 1024px) {
+  .dndev-grid-component[data-responsive-tpl='true'] {
+    grid-template-columns: var(--grid-tpl-laptop);
+  }
+}
+@media (min-width: 1440px) {
+  .dndev-grid-component[data-responsive-tpl='true'] {
+    grid-template-columns: var(--grid-tpl-desktop);
+  }
+}
+
+/* Responsive grid areas via custom properties */
+.dndev-grid-component[data-responsive-areas='true'] {
+  grid-template-areas: var(--grid-areas-mobile);
+}
+@media (min-width: 768px) {
+  .dndev-grid-component[data-responsive-areas='true'] {
+    grid-template-areas: var(--grid-areas-tablet);
+  }
+}
+@media (min-width: 1024px) {
+  .dndev-grid-component[data-responsive-areas='true'] {
+    grid-template-areas: var(--grid-areas-laptop);
+  }
+}
+@media (min-width: 1440px) {
+  .dndev-grid-component[data-responsive-areas='true'] {
+    grid-template-areas: var(--grid-areas-desktop);
+  }
+}
+
+/* Spacing from CSS variables */
+.dndev-grid-component[data-gap='none'] {
+  gap: var(--gap-none);
+}
+.dndev-grid-component[data-gap='tight'] {
+  gap: var(--gap-sm);
+}
+.dndev-grid-component[data-gap='medium'] {
+  gap: var(--gap-md);
+}
+.dndev-grid-component[data-gap='large'] {
+  gap: var(--gap-lg);
+}
+
+/* Alignment */
+.dndev-grid-component[data-align='start'] {
+  align-items: start;
+}
+.dndev-grid-component[data-align='center'] {
+  align-items: center;
+}
+.dndev-grid-component[data-align='end'] {
+  align-items: end;
+}
+.dndev-grid-component[data-align='stretch'] {
+  align-items: stretch;
+}
+
+/* Text alignment */
+.dndev-grid-component[data-text-align='start'] {
+  text-align: start;
+}
+.dndev-grid-component[data-text-align='center'] {
+  text-align: center;
+}
+.dndev-grid-component[data-text-align='end'] {
+  text-align: end;
+}
+
+/* Justify items (horizontal alignment) */
+.dndev-grid-component[data-justify='start'] {
+  justify-items: start;
+}
+.dndev-grid-component[data-justify='center'] {
+  justify-items: center;
+}
+.dndev-grid-component[data-justify='end'] {
+  justify-items: end;
+}
+.dndev-grid-component[data-justify='stretch'] {
+  justify-items: stretch;
+}
+
+/*
+ * GRID AREA COMPONENT
+ * Named grid areas for semantic grid layouts
+ * Note: grid-area is set via inline style (layout prop, not styling prop)
+ */
+
+.dndev-grid-area {
+  /* Grid area assignment handled via inline style */
+  min-width: 0; /* Allow grid areas to shrink below content size (required for grid to work properly) */
+  overflow: hidden; /* Hide overflow by default (prevents wrapping) */
+}
+
+/* Override overflow when explicitly set via prop */
+.dndev-grid-area[data-overflow='visible'] {
+  overflow: visible;
+}
+.dndev-grid-area[data-overflow='auto'] {
+  overflow: auto;
+}
+.dndev-grid-area[data-overflow='scroll'] {
+  overflow: scroll;
+}
+
+/* Rigid: prevent GridArea from shrinking */
+.dndev-grid-area[data-rigid='true'] {
+  flex-shrink: 0;
+}

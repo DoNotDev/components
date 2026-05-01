@@ -1,0 +1,142 @@
+/* packages/components/src/atomic/Card/Card.css */
+
+/* Card root — when a cover is present, move padding off the root so the cover
+   sits flush to the rounded corners. Padding is re-applied inside the body
+   slot (which is the only thing that needs it). Non-cover cards keep the
+   legacy layout so existing consumers render identically. */
+.dndev-card {
+  display: grid;
+  gap: var(--gap-md);
+  text-align: start;
+  align-content: start;
+  position: relative;
+}
+
+.dndev-surface.dndev-card[data-has-cover='true'] {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  /* Remove the grid gap — cover and body are stacked vertically via flow and
+     must sit flush (cover edges meet body edge with no gutter). */
+  gap: 0;
+}
+
+/* Body slot — the padded region that holds header/content/footer.
+   Only rendered when at least one body field is set (see renderCard logic). */
+.dndev-card-body {
+  display: grid;
+  gap: var(--gap-md);
+  position: relative;
+  z-index: 1;
+}
+
+.dndev-card[data-has-cover='true'] > .dndev-card-body {
+  padding: var(--gap-md);
+}
+
+.dndev-card-body[data-body-background='solid'] {
+  background: var(--card);
+}
+
+/* Card body children spacing */
+.dndev-card-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.dndev-card-header > .dndev-stack {
+  min-width: 0;
+}
+
+.dndev-card-header > .dndev-stack > .dndev-card-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.dndev-card-title {
+  margin: 0;
+  min-width: 0;
+  word-wrap: break-word;
+}
+
+.dndev-surface .dndev-card-subtitle {
+  margin-top: 0;
+  margin-bottom: 0;
+  min-width: 0;
+  word-wrap: break-word;
+  color: color-mix(in oklab, var(--card-foreground) 70%, transparent);
+}
+
+/* Cover region — sits flush to the card's rounded corners.
+   - When body is present (data-has-body='true'): cover is a sized header
+     region in flow. Height comes from its own aspect-ratio (inline style).
+   - When cover-only (no body): cover fills the card (inset:0 absolute) while
+     the card itself sets the aspect-ratio on its root. */
+.dndev-card-cover {
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+  width: 100%;
+  background: var(--muted);
+}
+
+/* Cover-only: fill the card completely. Card root owns the aspect-ratio. */
+.dndev-card-cover:not([data-has-body='true']) {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+/* Direct media (string cover → <img>, or ReactNode passthrough) fills. */
+.dndev-card-cover > img,
+.dndev-card-cover > video,
+.dndev-card-cover > picture,
+.dndev-card-cover > picture > img,
+.dndev-card-cover > .dndev-card-cover-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Consumer-supplied ReactNode: wrapper fills, inner media fills. */
+.dndev-card-cover-media {
+  position: relative;
+}
+
+.dndev-card-cover-media > img,
+.dndev-card-cover-media > video,
+.dndev-card-cover-media > picture,
+.dndev-card-cover-media > picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overlay — sits above both cover and body slot. */
+.dndev-card-overlay {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.dndev-card[data-overlay-position='top-left'] > .dndev-card-overlay {
+  top: var(--gap-md);
+  inset-inline-start: var(--gap-md);
+}
+
+.dndev-card[data-overlay-position='top-right'] > .dndev-card-overlay {
+  top: var(--gap-md);
+  inset-inline-end: var(--gap-md);
+}
+
+.dndev-card[data-overlay-position='bottom-left'] > .dndev-card-overlay {
+  bottom: var(--gap-md);
+  inset-inline-start: var(--gap-md);
+}
+
+.dndev-card[data-overlay-position='bottom-right'] > .dndev-card-overlay {
+  bottom: var(--gap-md);
+  inset-inline-end: var(--gap-md);
+}

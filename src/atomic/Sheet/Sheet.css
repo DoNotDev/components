@@ -1,0 +1,266 @@
+/* packages/components/src/atomic/Sheet/Sheet.css */
+
+.dndev-sheet-content {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-modal);
+  background: var(--card);
+  /* Ensure background is opaque */
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-xl);
+  /* Focus Tunnel: Deep elevation */
+  overflow: hidden;
+  /* Scroll Trap: Container clips overflow */
+
+  /* Motion Physics: Base state */
+  will-change: transform, opacity;
+
+  /* Open state animation - "Heavy" ease for premium feel */
+  &[data-state='open'] {
+    animation: sheet-slide-in var(--dur-heavy) var(--ease-heavy);
+  }
+
+  /* Closed state animation */
+  &[data-state='closed'] {
+    animation: sheet-slide-out var(--dur-normal) var(--ease-in-out);
+  }
+
+  /* Sheet positioning by side - SPATIAL METAPHOR */
+
+  /* Physical properties intentional: Sheet anchors to viewport edges regardless of text direction.
+     Logical inset-inline would incorrectly swap sides in RTL for left/right sheet variants. */
+
+  /* RIGHT / LEFT (Desktop Panels) */
+  &[data-side='right'],
+  &[data-side='left'] {
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 56rem;
+    /* Standard panel width */
+    height: 100%;
+    /* Full height */
+    border-radius: 0;
+    /* Square edges for panel metaphor */
+  }
+
+  &[data-side='right'] {
+    /* Physical positioning: right edge */
+    right: 0;
+    left: auto;
+    /* Border on logical start (left in LTR, right in RTL) */
+    border-inline-start: var(--border-hairline) solid var(--line-1);
+  }
+
+  &[data-side='left'] {
+    /* Physical positioning: left edge */
+    left: 0;
+    right: auto;
+    /* Border on logical end (right in LTR, left in RTL) */
+    border-inline-end: var(--border-hairline) solid var(--line-1);
+  }
+
+  /* TOP / BOTTOM (Mobile Cards) */
+  &[data-side='top'],
+  &[data-side='bottom'] {
+    left: 0;
+    right: 0;
+    /* Card metaphor: Detached from opposite edge */
+    height: auto;
+    max-height: 92dvh;
+    /* Never touch top edge */
+    width: 100%;
+    margin-inline: auto;
+
+    /* On larger screens, constrain width */
+    @media (width >=768px) {
+      max-width: 56rem;
+      width: 90%;
+      border-radius: var(--radius-lg);
+      /* Fully rounded card on desktop */
+    }
+  }
+
+  &[data-side='top'] {
+    top: 0;
+    border-bottom: var(--border-hairline) solid var(--line-1);
+    /* Rounded bottom corners only */
+    border-end-start-radius: var(--radius-lg);
+    border-end-end-radius: var(--radius-lg);
+  }
+
+  &[data-side='bottom'] {
+    bottom: 0;
+    border-top: var(--border-hairline) solid var(--line-1);
+    /* Rounded top corners only */
+    border-start-start-radius: var(--radius-lg);
+    border-start-end-radius: var(--radius-lg);
+  }
+}
+
+/* DRAG HANDLE PILL - Visual affordance for draggable sheets */
+.dndev-sheet-drag-handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  background: var(--line-2);
+  border-radius: var(--radius-full);
+  margin: var(--gap-sm) auto 0;
+  flex-shrink: 0;
+  cursor: grab;
+  transition: background-color var(--dur-fast) var(--ease-in-out);
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* Positioning for bottom sheets */
+.dndev-sheet-content[data-side='bottom'] > .dndev-sheet-drag-handle {
+  margin-top: var(--gap-sm);
+  margin-bottom: 0;
+}
+
+/* Positioning for top sheets */
+.dndev-sheet-content[data-side='top'] > .dndev-sheet-drag-handle {
+  margin-top: max(var(--gap-sm), env(safe-area-inset-top));
+  margin-bottom: 0;
+}
+
+/* HEADER - Pinned, No Padding (Tight Layout) */
+/* Industry standard: Title always on start, X always on end (consistent across all sides) */
+.dndev-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  flex-shrink: 0;
+  /* Never shrink */
+  min-height: var(--touch-target);
+  /* No padding - tight layout: [ Title               X ] */
+  padding-block: 0;
+  /* RTL-aware: padding on logical start only */
+  padding-inline-start: var(--gap-md);
+  padding-inline-end: 0; /* X button has its own spacing */
+  border-bottom: var(--border-hairline) solid var(--line-1);
+  /* Separator */
+
+  /* Thumb Ergonomics: Top Safe Area (only for top sheets) */
+  .dndev-sheet-content[data-side='top'] & {
+    padding-top: max(0, env(safe-area-inset-top));
+  }
+}
+
+/* Adjust header padding when drag handle is present (sibling selector) */
+.dndev-sheet-content[data-side='bottom']
+  .dndev-sheet-drag-handle
+  ~ .dndev-sheet-header,
+.dndev-sheet-content[data-side='top']
+  .dndev-sheet-drag-handle
+  ~ .dndev-sheet-header {
+  padding-top: 0;
+}
+
+/* BODY - Scrollable */
+.dndev-sheet-body {
+  flex: 1;
+  /* Consumes available space */
+  overflow-y: auto;
+  /* Independent scroll */
+  overflow-x: hidden;
+  padding: var(--gap-md);
+  overscroll-behavior: contain;
+  /* Prevent body scroll chaining */
+}
+
+/* FOOTER - Pinned */
+.dndev-sheet-footer {
+  flex-shrink: 0;
+  /* Never shrink */
+  padding: var(--gap-md);
+  border-top: var(--border-hairline) solid var(--line-1);
+  /* Separator */
+  display: flex;
+  flex-direction: column-reverse;
+  /* Mobile-first stacking */
+  gap: var(--gap-sm);
+
+  /* Desktop: Row layout */
+  @media (width >=640px) {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  /* Thumb Ergonomics: Bottom Safe Area (Home Indicator) */
+  padding-bottom: max(var(--gap-md), env(safe-area-inset-bottom));
+}
+
+.dndev-sheet-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+}
+
+.dndev-sheet-close {
+  /* Position relative - flex handles alignment */
+  position: relative;
+  margin-inline-start: auto;
+  /* Push to end (RTL-aware: end = right in LTR, left in RTL) */
+  margin-inline-end: var(--gap-sm);
+  /* Spacing from edge - use margin not padding to keep icon centered */
+  opacity: var(--opacity-muted);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/* ===========================
+   ANIMATIONS (Motion Physics)
+   =========================== */
+
+/* Slide In/Out Keyframes - Context Aware */
+@keyframes sheet-slide-in {
+  from {
+    opacity: 0;
+    transform: var(--slide-enter-transform);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes sheet-slide-out {
+  from {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: var(--slide-exit-transform);
+  }
+}
+
+/* Define Transforms based on Side */
+.dndev-sheet-content[data-side='right'] {
+  --slide-enter-transform: translateX(100%);
+  --slide-exit-transform: translateX(100%);
+}
+
+.dndev-sheet-content[data-side='left'] {
+  --slide-enter-transform: translateX(-100%);
+  --slide-exit-transform: translateX(-100%);
+}
+
+.dndev-sheet-content[data-side='bottom'] {
+  --slide-enter-transform: translateY(100%);
+  --slide-exit-transform: translateY(100%);
+}
+
+.dndev-sheet-content[data-side='top'] {
+  --slide-enter-transform: translateY(-100%);
+  --slide-exit-transform: translateY(-100%);
+}

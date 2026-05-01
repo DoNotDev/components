@@ -1,0 +1,86 @@
+/* packages/components/src/atomic/Checkbox/Checkbox.css */
+
+.dndev-control[data-type='checkbox'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--font-size-input);
+  height: var(--font-size-input);
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background-color: transparent;
+
+  &[data-state='checked'] {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &[data-variant='primary'][data-state='checked'] {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &[data-variant='secondary'][data-state='checked'] {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
+  &[data-variant='muted'][data-state='checked'] {
+    background-color: var(--muted);
+    border-color: var(--border);
+    color: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'][data-state='checked'] {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  &[data-variant='success'][data-state='checked'] {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: var(--success-foreground);
+  }
+
+  &[data-variant='warning'][data-state='checked'] {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    color: var(--warning-foreground);
+  }
+
+  &[data-variant='destructive'][data-state='checked'] {
+    background-color: var(--destructive);
+    border-color: var(--destructive);
+    color: var(--destructive-foreground);
+  }
+}
+
+/* Checkbox indicator (check mark) */
+.dndev-control[data-type='checkbox'] [data-radix-checkbox-indicator] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.dndev-control[data-type='checkbox'] [data-radix-checkbox-indicator] svg {
+  width: var(--font-size-input);
+  height: var(--font-size-input);
+  animation: checkbox-check-in var(--dur-fast) var(--ease-in-out);
+}
+
+/* Smooth check mark animation */
+@keyframes checkbox-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

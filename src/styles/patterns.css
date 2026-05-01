@@ -1,0 +1,1630 @@
+/* packages/components/src/styles/patterns.css */
+
+/* Menu scroll area pattern - shared by DropdownMenu, Select, Combobox */
+.dndev-menu-scroll-area {
+  max-height: 50dvh;
+}
+
+.dndev-menu-scroll-area .dndev-scroll-area-viewport {
+  max-height: 50dvh;
+}
+
+/* ===========================
+         FORM COMPONENTS (BASE)
+         =========================== */
+
+/* Input base class - text inputs, textarea, select */
+.dndev-input {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius-interactive);
+  border: var(--border-hairline) solid var(--line-2);
+  background-color: var(--interactive, transparent);
+  color: var(--foreground);
+  padding-inline-start: var(--gap-md);
+  padding-inline-end: var(--gap-md);
+  padding-top: var(--gap-sm);
+  padding-bottom: var(--gap-sm);
+  font-size: var(--font-size-input);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--dur-normal) var(--ease-in-out);
+  /* Touch target for mobile */
+  height: var(--touch-target);
+  touch-action: manipulation;
+
+  /* Textarea specific - resize from bottom-right only */
+  &:is(textarea) {
+    resize: vertical;
+    min-height: var(--touch-target);
+    max-height: 50dvh;
+    overflow-y: auto;
+    height: auto;
+  }
+
+  &::placeholder {
+    color: var(--placeholder);
+    font-size: var(--font-size-input);
+  }
+
+  &:hover {
+    border-color: var(--ring);
+  }
+
+  &:focus {
+    border-color: var(--ring);
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus), var(--shadow-interactive);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: var(--opacity-muted);
+  }
+
+  /* Error state - destructive variant */
+  &[data-variant='destructive'] {
+    border-color: var(--destructive);
+
+    &:focus {
+      border-color: var(--destructive);
+      box-shadow: 0 0 0 3px
+        color-mix(in oklab, var(--destructive) 50%, transparent);
+    }
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 3px color-mix(in oklab, var(--destructive) 50%, transparent),
+        0 0 0 3px color-mix(in oklab, var(--destructive) 20%, transparent);
+    }
+  }
+
+  /* File input specific styles */
+  &[type='file']::file-selector-button {
+    border: 0;
+    background-color: transparent;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+/* Radix UI and other non-native placeholders (e.g. Select, DatePicker triggers) */
+[data-placeholder] {
+  color: var(--placeholder);
+}
+
+/* ===========================
+         INLINE ACTION BUTTONS
+   =========================== */
+
+/** Shared pattern for inline clear/action buttons inside input-like components.
+ *  Used by: Combobox trailing buttons, RangeInput clear, DateFilter clear. */
+.dndev-inline-action-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: 100%;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  opacity: var(--opacity-muted, 0.5);
+  transition:
+    color var(--dur-fast) var(--ease-in-out),
+    opacity var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-inline-action-btn:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--foreground);
+}
+
+.dndev-inline-action-btn:focus-visible {
+  opacity: 1;
+  color: var(--foreground);
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--ring),
+    0 0 0 4px rgb(from var(--ring) r g b / 0.2);
+}
+
+.dndev-inline-action-btn:active:not(:disabled) {
+  opacity: 0.8;
+}
+
+.dndev-inline-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: calc(var(--opacity-muted, 0.5) * 0.5);
+}
+
+.dndev-inline-action-btn svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+/* Control base class - checkbox, radio, switch, slider */
+.dndev-control {
+  flex-shrink: 0;
+  border: var(--border-width) solid
+    color-mix(in oklab, var(--foreground) 25%, var(--background));
+  background-color: transparent;
+  transition: all var(--dur-fast) var(--ease-in-out);
+  color: var(--primary);
+  cursor: pointer;
+  outline: none;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus), var(--shadow-interactive);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: var(--opacity-muted);
+    pointer-events: none;
+  }
+
+  /* Variants - set colors and border-color using framework variables */
+  &[data-variant='primary'] {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  &[data-variant='secondary'] {
+    color: var(--secondary);
+    border-color: var(--secondary);
+  }
+
+  &[data-variant='muted'] {
+    color: var(--muted-foreground);
+    border-color: var(--border);
+  }
+
+  &[data-variant='accent'] {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  &[data-variant='success'] {
+    color: var(--success);
+    border-color: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    color: var(--warning);
+    border-color: var(--warning);
+  }
+
+  &[data-variant='destructive'] {
+    color: var(--destructive);
+    border-color: var(--destructive);
+  }
+}
+
+/* ===========================
+         BASE CLASSES - SURFACE & INTERACTIVE
+         =========================== */
+
+/* SURFACE - Static elevated containers (cards, dialogs, sheets) */
+.dndev-surface {
+  /* Glow formulas - defined here so they recompute when variants change --card */
+  /* Creates gradual shades: base card color tinted with foreground color */
+  /* Light mode (0): 10% / 5% / 0% - subtle shading */
+  /* Dark mode (1): 25% / 15% / 7% - more visible contrast */
+  --surface-glow-start: color-mix(
+    in oklab,
+    var(--card) calc(90% - 15% * var(--theme-is-dark)),
+    var(--card-foreground) calc(10% + 15% * var(--theme-is-dark))
+  );
+  --surface-glow-mid: color-mix(
+    in oklab,
+    var(--card) calc(95% - 10% * var(--theme-is-dark)),
+    var(--card-foreground) calc(5% + 10% * var(--theme-is-dark))
+  );
+  --surface-glow-end: var(--card);
+  --surface-ring: color-mix(
+    in oklab,
+    var(--card) calc(92% - 12% * var(--theme-is-dark)),
+    var(--card-foreground) calc(8% + 12% * var(--theme-is-dark))
+  );
+  --surface-glow-gradient: linear-gradient(
+    135deg,
+    var(--surface-glow-end) 0%,
+    var(--surface-glow-mid) 50%,
+    var(--surface-glow-start) 100%
+  );
+
+  background: var(--surface-glow-gradient);
+  color: var(--card-foreground);
+  border: var(--border-hairline) solid var(--line-2);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-md);
+  padding: var(--gap-md); /* 1rem / 16px default */
+  padding-block-start: calc(
+    var(--gap-md) + var(--gap-sm)
+  ); /* Extra top padding for FloatingLabels */
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    transform var(--dur-normal) var(--ease-in-out),
+    box-shadow var(--dur-normal) var(--ease-in-out);
+
+  /* Override end for dark mode (color-mix with 0% doesn't work) */
+  .dark & {
+    --surface-glow-end: color-mix(
+      in oklab,
+      var(--card) 93%,
+      var(--card-foreground) 7%
+    );
+  }
+
+  /* Disable glow with data-glow='blank' */
+  &[data-glow='blank'] {
+    background: var(--card);
+  }
+
+  &:dir(rtl) {
+    background: linear-gradient(
+      135deg,
+      var(--surface-glow-start) 0%,
+      var(--surface-glow-mid) 50%,
+      var(--surface-glow-end) 100%
+    );
+  }
+
+  /* Size variants - ONLY 3 sizes */
+  &[data-size='sm'] {
+    padding: var(--gap-sm);
+  } /* 8px */
+  &[data-size='md'] {
+    padding: var(--gap-md);
+  } /* 16px - default */
+  &[data-size='lg'] {
+    padding: var(--gap-lg);
+  } /* 32px */
+
+  /* Hover behaviors */
+  &[data-hover='lift']:hover {
+    transform: scale(1.02);
+  }
+  &[data-hover='glow'] {
+    &:hover {
+      box-shadow:
+        var(--shadow-xl),
+        0 0 40px color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+
+    &:dir(rtl):hover {
+      box-shadow:
+        var(--shadow-xl-rtl),
+        0 0 40px color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+  }
+
+  /* Role-specific defaults */
+  &[data-role='card'] {
+    padding: var(--gap-md);
+    border-radius: var(--radius-surface);
+  }
+
+  /* Elevated cards - stronger shadow */
+  /* Apply if elevated=true OR (clickable=true AND elevated!=false) */
+  &[data-elevated='true'],
+  &[data-clickable='true']:not([data-elevated='false']) {
+    box-shadow: var(--shadow-xl);
+
+    &:dir(rtl) {
+      box-shadow: var(--shadow-xl-rtl);
+    }
+  }
+
+  /* Clickable cards - hover effects */
+  &[data-clickable='true'] {
+    cursor: pointer;
+    transition:
+      transform var(--dur-normal) var(--ease-in-out),
+      box-shadow var(--dur-normal) var(--ease-in-out),
+      border-color var(--dur-normal) var(--ease-in-out);
+
+    &:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow:
+        var(--shadow-xl),
+        0 0 0 1px var(--accent);
+    }
+
+    &:dir(rtl):hover {
+      box-shadow:
+        var(--shadow-xl-rtl),
+        0 0 0 1px var(--accent);
+    }
+  }
+
+  &[data-role='floating'] {
+    box-shadow: none;
+    will-change: var(--will-change-none);
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  /**
+   * Variant system - 6 surface variants
+   * - default: Standard card/surface (--card colors)
+   * - muted: Subtle background (--muted colors)
+   * - primary: Primary brand color (--primary colors)
+   * - secondary: Secondary brand color (--secondary colors)
+   * - accent: Highlighted/active state (--accent colors, sets context for children)
+   * - destructive: Error/danger state (--destructive colors)
+   * 
+   * Variants override --card and --card-foreground.
+   * Primary/secondary also override --shadow-md/--shadow-xl for per-variant shadows.
+   * Default resets --card from --card-base (root snapshot) so nested default cards
+   * inside other variants get the root card color, not the parent's.
+   * Surface glow gradient is computed from --theme-is-dark flag and not affected by variants.
+   */
+
+  &[data-variant='default'] {
+    --card: var(--card-base);
+    --card-foreground: var(--card-foreground-base);
+    --shadow-md: var(--shadow-md-base);
+    --shadow-xl: var(--shadow-xl-base);
+  }
+
+  &[data-variant='muted'] {
+    --card: var(--muted);
+    --card-foreground: var(--muted-foreground);
+    border-color: var(--border);
+  }
+
+  &[data-variant='primary'] {
+    --card: var(--primary);
+    --card-foreground: var(--primary-foreground);
+    --shadow-md: var(--shadow-primary);
+    --shadow-xl: var(--shadow-primary-xl);
+    border-color: var(--primary);
+  }
+
+  &[data-variant='secondary'] {
+    --card: var(--secondary);
+    --card-foreground: var(--secondary-foreground);
+    --shadow-md: var(--shadow-secondary);
+    --shadow-xl: var(--shadow-secondary-xl);
+    border-color: var(--secondary);
+  }
+
+  &[data-variant='accent'] {
+    --card: var(--accent);
+    --card-foreground: var(--accent-foreground);
+    border-color: var(--accent);
+
+    /* Context variables - children read these for adaptation */
+    --surface-text: var(--accent-foreground);
+    --surface-bg: var(--accent);
+  }
+
+  &[data-variant='destructive'] {
+    --card: var(--destructive);
+    --card-foreground: var(--destructive-foreground);
+    border-color: var(--destructive);
+  }
+
+  &[data-variant='success'] {
+    --card: var(--success);
+    --card-foreground: var(--success-foreground);
+    border-color: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    --card: var(--warning);
+    --card-foreground: var(--warning-foreground);
+    border-color: var(--warning);
+  }
+
+  &[data-variant='outline'] {
+    background: transparent;
+    color: var(--foreground);
+    border: var(--border-hairline) solid var(--border);
+    box-shadow: none;
+  }
+
+  &[data-variant='glass'] {
+    background: color-mix(in oklab, var(--card) 55%, transparent);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: var(--border-hairline) solid
+      color-mix(in oklab, var(--card-foreground) 25%, transparent);
+    box-shadow:
+      var(--shadow-lg),
+      inset 0 1px 0 0
+        color-mix(in oklab, var(--card-foreground) 10%, transparent);
+  }
+
+  /* Separator style */
+  & [data-orientation='horizontal'][role='separator'] {
+    height: 1px;
+    background-color: var(--border);
+    margin-block-start: var(--gap-sm);
+    margin-block-end: var(--gap-sm);
+    margin-inline-start: calc(-1 * var(--gap-sm)); /* Extend to edges */
+    margin-inline-end: calc(-1 * var(--gap-sm));
+  }
+}
+
+/* FLOATING - Floating containers (popovers, dropdowns, menus, tooltips, navigation) */
+.dndev-floating {
+  /* Glow formulas - defined here so they recompute when variants change --popover */
+  /* Creates gradual shades: base popover color tinted with foreground color */
+  /* Light mode (0): 10% / 5% / 0% - subtle shading */
+  /* Dark mode (1): 25% / 15% / 7% - more visible contrast */
+  --floating-glow-start: color-mix(
+    in oklab,
+    var(--popover) calc(90% - 15% * var(--theme-is-dark)),
+    var(--popover-foreground) calc(10% + 15% * var(--theme-is-dark))
+  );
+  --floating-glow-mid: color-mix(
+    in oklab,
+    var(--popover) calc(95% - 10% * var(--theme-is-dark)),
+    var(--popover-foreground) calc(5% + 10% * var(--theme-is-dark))
+  );
+  --floating-glow-end: var(--popover);
+  --floating-ring: color-mix(
+    in oklab,
+    var(--popover) calc(92% - 12% * var(--theme-is-dark)),
+    var(--popover-foreground) calc(8% + 12% * var(--theme-is-dark))
+  );
+  --floating-glow-gradient: linear-gradient(
+    135deg,
+    var(--floating-glow-end) 0%,
+    var(--floating-glow-mid) 50%,
+    var(--floating-glow-start) 100%
+  );
+
+  background: var(--floating-glow-gradient);
+  color: var(--popover-foreground);
+  border: var(--border-hairline) solid var(--line-2);
+  border-radius: var(--radius-floating);
+  box-shadow: var(--shadow-md);
+  padding: var(--gap-md); /* 1rem / 16px default */
+  padding-block-start: calc(
+    var(--gap-md) + var(--gap-sm)
+  ); /* Extra top padding for FloatingLabels */
+  position: relative;
+  overflow: hidden;
+  contain: layout style;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    transform var(--dur-normal) var(--ease-in-out),
+    box-shadow var(--dur-normal) var(--ease-in-out);
+
+  /* Override end for dark mode (color-mix with 0% doesn't work) */
+  .dark & {
+    --floating-glow-end: color-mix(
+      in oklab,
+      var(--popover) 93%,
+      var(--popover-foreground) 7%
+    );
+  }
+
+  /* Disable glow with data-glow='blank' */
+  &[data-glow='blank'] {
+    background: var(--popover);
+  }
+
+  &:dir(rtl) {
+    background: linear-gradient(
+      135deg,
+      var(--floating-glow-start) 0%,
+      var(--floating-glow-mid) 50%,
+      var(--floating-glow-end) 100%
+    );
+  }
+
+  /* Size variants - ONLY 3 sizes */
+  &[data-size='sm'] {
+    padding: var(--gap-sm);
+  } /* 8px */
+  &[data-size='md'] {
+    padding: var(--gap-md);
+  } /* 16px - default */
+  &[data-size='lg'] {
+    padding: var(--gap-lg);
+  } /* 32px */
+
+  /* Hover behaviors */
+  &[data-hover='lift']:hover {
+    transform: scale(1.02);
+  }
+  &[data-hover='glow'] {
+    &:hover {
+      box-shadow:
+        var(--shadow-xl),
+        0 0 40px color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+
+    &:dir(rtl):hover {
+      box-shadow:
+        var(--shadow-xl-rtl),
+        0 0 40px color-mix(in oklab, var(--foreground) 30%, transparent);
+    }
+  }
+
+  /* Role-specific defaults */
+  &[data-role='card'] {
+    padding: var(--gap-md);
+    border-radius: var(--radius-surface);
+  }
+
+  &[data-role='floating'] {
+    box-shadow: none;
+    will-change: var(--will-change-none);
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  /**
+   * Variant system - 6 floating variants
+   * - default: Standard floating panel (--popover colors)
+   * - muted: Subtle background (--muted colors)
+   * - primary: Primary brand color (--primary colors)
+   * - secondary: Secondary brand color (--secondary colors)
+   * - accent: Highlighted/active state (--accent colors, sets context for children)
+   * - destructive: Error/danger state (--destructive colors)
+   * 
+   * Variants only override --popover and --popover-foreground.
+   * Floating glow gradient is computed from --theme-is-dark flag and not affected by variants.
+   */
+
+  &[data-variant='muted'] {
+    --popover: var(--muted);
+    --popover-foreground: var(--muted-foreground);
+    border-color: var(--border);
+  }
+
+  &[data-variant='primary'] {
+    --popover: var(--primary);
+    --popover-foreground: var(--primary-foreground);
+    border-color: var(--primary);
+  }
+
+  &[data-variant='secondary'] {
+    --popover: var(--secondary);
+    --popover-foreground: var(--secondary-foreground);
+    border-color: var(--secondary);
+  }
+
+  &[data-variant='accent'] {
+    --popover: var(--accent);
+    --popover-foreground: var(--accent-foreground);
+    border-color: var(--accent);
+
+    /* Context variables - children read these for adaptation */
+    --surface-text: var(--accent-foreground);
+    --surface-bg: var(--accent);
+  }
+
+  &[data-variant='destructive'] {
+    --popover: var(--destructive);
+    --popover-foreground: var(--destructive-foreground);
+    border-color: var(--destructive);
+  }
+
+  &[data-variant='success'] {
+    --popover: var(--success);
+    --popover-foreground: var(--success-foreground);
+    border-color: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    --popover: var(--warning);
+    --popover-foreground: var(--warning-foreground);
+    border-color: var(--warning);
+  }
+
+  /* Separator style */
+  & [data-orientation='horizontal'][role='separator'] {
+    height: 1px;
+    background-color: var(--border);
+    margin-block-start: var(--gap-sm);
+    margin-block-end: var(--gap-sm);
+    margin-inline-start: calc(-1 * var(--gap-sm)); /* Extend to edges */
+    margin-inline-end: calc(-1 * var(--gap-sm));
+  }
+}
+
+/**
+ * INTERACTIVE - All clickable elements (buttons, nav items, menu items, tabs)
+ *
+ * 4 button variants:
+ * - default/primary: Filled primary (primary action) - aliases
+ * - outline: Outlined (secondary action)
+ * - ghost: Minimal (tertiary action)
+ * - destructive: Danger action
+ *
+ * Context-aware: Buttons automatically adapt to parent surface variant
+ */
+.dndev-interactive {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  min-height: var(--touch-target);
+  padding: var(--gap-sm);
+  border-radius: var(--radius-interactive);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  text-transform: var(--text-transform-button, none);
+  transition:
+    background var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out),
+    box-shadow var(--dur-fast) var(--ease-in-out),
+    border-color var(--dur-fast) var(--ease-in-out);
+  cursor: pointer;
+  border: var(--border-hairline) solid transparent;
+  /* Base - filled primary (industry standard) */
+  background: var(--primary);
+  color: var(--primary-foreground);
+
+  /* ── Shared states ── */
+  &:hover {
+    background: color-mix(in oklab, var(--primary) 85%, var(--foreground));
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(var(--click-scale));
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus), var(--shadow-interactive);
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: var(--opacity-muted);
+  }
+
+  /* Ripple effect element (injected by JS) */
+  & .dndev-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    pointer-events: none;
+    animation: dndev-ripple var(--dur-slow) var(--ease-in-out) forwards;
+  }
+
+  &[data-display='compact'] {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════
+     FILLED VARIANTS — hover = darken/lighten the bg color
+     ═══════════════════════════ */
+  &[data-variant='primary'] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &[data-variant='accent'] {
+    background: var(--accent);
+    color: var(--accent-foreground);
+
+    &:hover {
+      background: color-mix(in oklab, var(--accent) 85%, var(--foreground));
+    }
+  }
+
+  &[data-variant='secondary'] {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+
+    &:hover {
+      background: color-mix(in oklab, var(--secondary) 85%, var(--foreground));
+    }
+  }
+
+  &[data-variant='success'] {
+    background: var(--success);
+    color: var(--success-foreground);
+
+    &:hover {
+      background: color-mix(in oklab, var(--success) 85%, var(--foreground));
+    }
+  }
+
+  &[data-variant='warning'] {
+    background: var(--warning);
+    color: var(--warning-foreground);
+
+    &:hover {
+      background: color-mix(in oklab, var(--warning) 85%, var(--foreground));
+    }
+  }
+
+  &[data-variant='muted'] {
+    background: var(--muted);
+    color: var(--muted-foreground);
+
+    &:hover {
+      background: color-mix(in oklab, var(--muted) 80%, var(--foreground) 20%);
+    }
+  }
+
+  /* ═══════════════════════════
+     TRANSPARENT VARIANTS
+     ═══════════════════════════ */
+
+  /* Outline — themeable interactive surface (parallel to --card) */
+  &[data-variant='outline'] {
+    background: var(--interactive, transparent);
+    color: var(--foreground);
+  }
+
+  /* Ghost / nav / menu / command — transparent by design */
+  &[data-variant='ghost'],
+  &[data-role='nav-trigger'],
+  &[data-role='menu-item'],
+  &[data-role='command-item'] {
+    background: transparent;
+    color: var(--foreground);
+  }
+
+  /* Ghost — hover = font color only, no bg, no lift */
+  &[data-variant='ghost'] {
+    &:hover {
+      background: transparent;
+      color: var(--primary);
+      transform: none;
+    }
+  }
+
+  /* Outline / menu / nav — hover = subtle tint + text color shift */
+  &[data-variant='outline'],
+  &[data-role='nav-trigger'],
+  &[data-role='menu-item'],
+  &[data-role='command-item'] {
+    &:hover {
+      background: rgb(from var(--primary) r g b / 0.1);
+      color: var(--primary);
+    }
+  }
+
+  /* Outline adds border on top of ghost base */
+  &[data-variant='outline'] {
+    border: var(--border-hairline) solid var(--border);
+  }
+
+  /* Destructive ghost — same paradigm, different color */
+  &[data-variant='destructive'] {
+    background: transparent;
+    color: var(--destructive);
+    border: var(--border-hairline) solid var(--destructive);
+
+    &:hover {
+      background: rgb(from var(--destructive) r g b / 0.1);
+      color: var(--destructive);
+    }
+  }
+
+  /* Link variant — text-only, no background shift */
+  &[data-variant='link'] {
+    background: transparent;
+    color: var(--muted-foreground);
+    padding: 0;
+    min-height: auto;
+    font-size: var(--font-size-base);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--dur-fast) ease-out;
+
+    &:hover {
+      background: transparent;
+      color: var(--primary);
+      transform: none;
+    }
+  }
+
+  /* Context-aware: ONLY inside accent surfaces */
+  .dndev-surface[data-variant='accent'] &,
+  .dndev-floating[data-variant='accent'] & {
+    /* Default buttons flip colors */
+    &:not([data-variant]) {
+      background: var(--surface-text);
+      color: var(--surface-bg);
+    }
+
+    /* Outline adapts with tint */
+    &[data-variant='outline'] {
+      color: var(--surface-text);
+      &:hover {
+        background: rgb(from var(--surface-text) r g b / 0.1);
+        color: var(--surface-text);
+      }
+    }
+
+    /* Ghost adapts — font color only */
+    &[data-variant='ghost'] {
+      color: var(--surface-text);
+      &:hover {
+        color: var(--surface-text);
+      }
+    }
+  }
+
+  /* Unified menu/command/nav item base */
+  &[data-role='menu-item'],
+  &[data-role='command-item'],
+  &[data-role='nav-trigger'] {
+    min-height: auto;
+    padding-block: var(--gap-sm);
+    padding-inline: 0;
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-interactive);
+    user-select: none;
+    position: relative;
+    text-decoration: none;
+
+    /* Remove gap when compact (no label to space from) */
+    &[data-display='compact'] {
+      gap: 0 !important;
+    }
+  }
+
+  &[data-role='menu-item'] {
+    &:focus-visible,
+    &[data-highlighted] {
+      background: rgb(from var(--primary) r g b / 0.1);
+      color: var(--primary);
+      outline: 2px solid var(--ring);
+      outline-offset: 0;
+    }
+
+    &[data-disabled] {
+      pointer-events: none;
+      opacity: var(--opacity-muted);
+    }
+
+    &[data-inset='true'] {
+      padding-inline-start: var(--gap-lg);
+
+      .dndev-menu-indicator {
+        position: absolute;
+        inset-inline-start: var(--gap-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  &[data-role='command-item'] {
+    width: 100%;
+
+    &[data-selected='true'] {
+      background: rgb(from var(--primary) r g b / 0.1);
+      color: var(--primary);
+    }
+
+    &[data-disabled='true'] {
+      pointer-events: none;
+      opacity: var(--opacity-muted);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus), var(--shadow-interactive);
+    }
+  }
+}
+
+/* Specific containers that need start-align (not general stacks/grids) */
+.dndev-nav-menu-list[data-vertical='true'] .dndev-interactive,
+.dndev-floating .dndev-interactive,
+.dndev-command-group .dndev-interactive,
+.sidebar-top .dndev-interactive,
+.sidebar-content .dndev-interactive,
+.sidebar-bottom .dndev-interactive {
+  justify-content: flex-start;
+  width: 100%; /* Stretch to fill container */
+}
+
+/* Remove right border from outline buttons in sidebar - resize handle provides separator */
+.sidebar-content .dndev-interactive[data-variant='outline'],
+.sidebar-bottom .dndev-interactive[data-variant='outline'] {
+  border-inline-end: none;
+}
+
+/* Sidebar tooltip positioning - right in LTR, left in RTL */
+.sidebar-top,
+.sidebar-content,
+.sidebar-bottom {
+  --tooltip-side: right;
+}
+
+[dir='rtl'] .sidebar-top,
+[dir='rtl'] .sidebar-content,
+[dir='rtl'] .sidebar-bottom {
+  --tooltip-side: left;
+}
+
+/* INTERACTIVE LABEL - Unified label class for all interactive elements */
+.dndev-interactive-label {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: var(--text-transform-label, none);
+}
+
+/* Compact mode - always hide label */
+.dndev-interactive-label[data-display='compact'] {
+  display: none;
+}
+
+/* Full mode - always show label */
+.dndev-interactive-label[data-display='full'] {
+  display: inline-flex;
+}
+
+/* Auto mode - container-responsive, hidden in narrow containers */
+.dndev-interactive-label[data-display='auto'] {
+  display: inline-flex;
+}
+
+/* CONTROL - Form controls (switch, toggle, checkbox, radio, slider) */
+.dndev-control {
+  /* Control color variables - computed for light/dark mode */
+  --control-bg: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --control-border: color-mix(
+    in oklab,
+    var(--foreground) 70%,
+    var(--background)
+  );
+
+  background-color: var(--control-bg);
+  border: var(--border-width) solid var(--control-border);
+  transition: all var(--dur-fast) var(--ease-in-out);
+  cursor: pointer;
+
+  /* Hover state */
+  &:hover:not(:disabled) {
+    background-color: color-mix(
+      in oklab,
+      var(--control-bg) 80%,
+      var(--control-border) 20%
+    );
+  }
+
+  /* Focus state */
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus), var(--shadow-interactive);
+  }
+
+  /* Disabled state */
+  &:disabled {
+    cursor: not-allowed;
+    opacity: var(--opacity-muted);
+  }
+
+  /* Checked/On/Pressed states - fill with border color */
+  &[data-state='checked'],
+  &[data-state='on'],
+  &[data-pressed='true'] {
+    background-color: var(--control-border);
+    /* --card-base: root snapshot, not overridden by variant blocks (safe inside any surface) */
+    color: var(--card-base);
+  }
+}
+
+/* CONTROL GROUP - Shared pattern for grouped controls (RadioGroup, Checkbox groups) */
+.dndev-control-group {
+  display: grid;
+  gap: var(--gap-sm); /* 8px - tighter spacing for control groups */
+
+  /* Control + label pattern - used by RadioGroup, CheckboxFieldComponent, etc. */
+  label {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm); /* 8px - spacing between control and label */
+    font-size: var(--font-size-input);
+    color: var(--foreground);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+
+    /* Subtle hover on label text */
+    &:hover {
+      color: var(--primary);
+    }
+
+    /* Selected state - label color changes */
+    &:has([data-state='checked']),
+    &:has([data-state='on']) {
+      color: var(--primary);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  /**
+   * Variant system - 8 control variants
+   * Variants override --control-border to use semantic colors
+   * Off state: shows variant color in border
+   * On state: fills with variant color
+   */
+
+  &[data-variant='primary'] {
+    --control-border: var(--primary);
+  }
+
+  &[data-variant='secondary'] {
+    --control-border: var(--secondary);
+  }
+
+  &[data-variant='muted'] {
+    --control-border: var(--muted-foreground);
+  }
+
+  &[data-variant='accent'] {
+    --control-border: var(--accent);
+  }
+
+  &[data-variant='success'] {
+    --control-border: var(--success);
+  }
+
+  &[data-variant='warning'] {
+    --control-border: var(--warning);
+  }
+
+  &[data-variant='destructive'] {
+    --control-border: var(--destructive);
+  }
+
+  /* Default variant explicitly (same as base) */
+  &[data-variant='default'] {
+    --control-border: color-mix(
+      in oklab,
+      var(--foreground) 70%,
+      var(--background)
+    );
+  }
+}
+
+/* Unified container pattern: DropdownMenu, NavigationMenu (sidebar), Command palette */
+/* Completes global rule: adds padding-inside behavior */
+.dndev-floating,
+.dndev-command-group,
+.dndev-nav-menu-list[data-vertical='true'] {
+  /* Zero gap between items - they touch vertically */
+  gap: var(--gap-none);
+
+  /* Add horizontal padding to container (not children) */
+  .dndev-interactive[data-role='menu-item'],
+  .dndev-interactive[data-role='command-item'],
+  .dndev-interactive[data-role='nav-trigger'] {
+    padding-inline-start: var(--gap-sm);
+    padding-inline-end: var(--gap-sm);
+    color: var(--popover-foreground);
+
+    /* Remove padding if compact (icon alone) */
+    &[data-display='compact'] {
+      padding-inline-start: 0 !important;
+      padding-inline-end: 0 !important;
+    }
+  }
+}
+
+/* Navigation menu (vertical): Always 48px buttons, consistent padding-block */
+.dndev-nav-menu-list[data-vertical='true'] {
+  .dndev-interactive[data-role='menu-item'],
+  .dndev-interactive[data-role='nav-trigger'] {
+    /* Ensure 48px height always - override padding-block to maintain exact height */
+    height: var(--touch-target);
+    min-height: var(--touch-target);
+    padding-block: 0; /* No vertical padding - buttons fill exact 48px */
+  }
+}
+
+/* Remove padding from dropdown menu content (buttons touch edges) */
+.dndev-menu-content {
+  padding: 0;
+}
+
+/* Menu label */
+.dndev-menu-label {
+  padding: var(--gap-sm) var(--gap-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+
+  &[data-inset='true'] {
+    padding-inline-start: var(--gap-lg);
+  }
+}
+
+/* Menu separator */
+.dndev-menu-separator {
+  margin-inline-start: calc(-1 * var(--gap-md));
+  margin-inline-end: calc(-1 * var(--gap-md));
+  margin-top: var(--gap-sm);
+  margin-bottom: var(--gap-sm);
+  height: 1px;
+  background-color: var(--border);
+}
+
+/* Menu shortcut */
+.dndev-menu-shortcut {
+  margin-inline-start: auto;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.1em;
+  opacity: var(--opacity-muted);
+}
+
+/* NOTIFICATION - Overlay elements (toasts, tooltips) - inverted floating colors for high contrast */
+.dndev-notification {
+  display: grid;
+  gap: var(--gap-sm);
+  padding: var(--gap-md);
+  border-radius: var(--radius-floating);
+  border: var(--border-hairline) solid var(--border);
+  /* Inverted floating colors: popover-foreground as background, popover as foreground */
+  background: color-mix(in oklab, var(--popover-foreground) 95%, transparent);
+  color: var(--popover);
+  position: relative;
+  /* Glassmorphism effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* RTL-aware shadows - base shadow set here, variants add glows */
+  --notification-shadow-base: var(--shadow-xl);
+  box-shadow: var(--notification-shadow-base);
+
+  &:dir(rtl) {
+    --notification-shadow-base: var(--shadow-xl-rtl);
+  }
+
+  /* Notification variants - only override border + glow, bg/color inherited from base */
+  &[data-variant='default'] {
+    border: var(--border-hairline) solid var(--border);
+  }
+
+  &[data-variant='info'] {
+    border: var(--border-width) solid var(--accent);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent);
+  }
+
+  &[data-variant='success'] {
+    border: var(--border-width) solid var(--success);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--success) 20%, transparent);
+  }
+
+  &[data-variant='warning'] {
+    border: var(--border-width) solid var(--warning);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--warning) 20%, transparent);
+  }
+
+  &[data-variant='error'],
+  &[data-variant='destructive'] {
+    border: var(--border-width) solid var(--destructive);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--destructive) 20%, transparent);
+  }
+
+  &[data-variant='primary'] {
+    border: var(--border-width) solid var(--primary);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+
+  &[data-variant='secondary'] {
+    border: var(--border-width) solid var(--secondary);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--secondary) 20%, transparent);
+  }
+
+  &[data-variant='accent'] {
+    border: var(--border-width) solid var(--accent);
+    box-shadow:
+      var(--notification-shadow-base),
+      0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent);
+  }
+}
+
+/* ===========================
+         OVERLAY
+         =========================== */
+
+.dndev-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklab, var(--foreground) 40%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  will-change: opacity;
+  z-index: var(--z-overlay);
+  animation: overlay-in var(--dur-normal) var(--ease-in-out);
+
+  &[data-state='closed'] {
+    animation: overlay-out var(--dur-normal) var(--ease-in-out);
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ===========================
+         UTILITY COMPONENTS
+         =========================== */
+
+.dndev-spinner {
+  display: inline-block;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  border: 2px solid currentColor;
+  border-radius: var(--radius-full);
+  border-inline-end-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+/* ===========================
+         MODAL/DIALOG/SHEET SHARED RULES
+         =========================== */
+
+.dndev-modal-content {
+  position: fixed;
+  inset-inline-start: 50%;
+  top: 50%;
+  z-index: calc(var(--z-modal) + 1);
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  gap: var(--gap-sm);
+  padding-block: var(--gap-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  animation: dialog-in var(--dur-normal) var(--ease-in-out);
+
+  &[data-state='closed'] {
+    animation: dialog-out var(--dur-normal) var(--ease-in-out);
+  }
+
+  /* Dialog content size variants */
+  &[data-content-size='auto'],
+  &[data-content-size='form'],
+  &[data-content-size='text'] {
+    max-height: 80dvh;
+  }
+
+  &[data-content-size='auto'] {
+    max-width: var(--dialog-auto);
+  }
+
+  &[data-content-size='form'] {
+    max-width: var(--dialog-form);
+  }
+
+  &[data-content-size='text'] {
+    max-width: var(--dialog-text);
+  }
+
+  &[data-content-size='image'] {
+    max-width: var(--dialog-image);
+    max-height: 85dvh;
+  }
+
+  &[data-content-size='code'] {
+    max-width: var(--dialog-code);
+    max-height: 90dvh;
+  }
+
+  &[data-content-size='full'] {
+    max-width: 95vw;
+    max-height: 95dvh;
+  }
+}
+
+.dndev-alert-dialog-content {
+  max-width: var(--dialog-auto);
+}
+
+.dndev-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-md);
+  flex-shrink: 0;
+  min-height: var(--touch-target);
+  padding-inline: var(--gap-md);
+}
+
+.dndev-modal-footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--gap-sm);
+  flex-shrink: 0;
+  padding-inline: var(--gap-md);
+
+  @media (width >= 640px) {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.dndev-modal-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: visible;
+  min-height: 0;
+  padding-inline: var(--gap-md);
+}
+
+.dndev-modal-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
+}
+
+.dndev-modal-description {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted-foreground);
+}
+
+.dndev-modal-close {
+  position: absolute;
+  inset-inline-end: var(--gap-sm);
+  top: var(--gap-sm);
+  opacity: var(--opacity-muted);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.dndev-modal-cancel {
+  margin-top: var(--gap-sm);
+
+  @media (width >= 640px) {
+    margin-top: 0;
+  }
+}
+
+/* ===========================
+         MENU SHARED RULES (Dropdown, Context, Select)
+         =========================== */
+
+/* The main content panel for all menus */
+.dndev-menu-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: var(--radius-floating);
+  min-width: 15ch; /* Character-based: scales with font size, ensures readable width */
+  width: fit-content; /* Stretch to fit children */
+  gap: var(--gap-none);
+}
+
+.dndev-menu-item-details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===========================
+         AUTH FORM PATTERNS
+         =========================== */
+
+/* Auth form step indicator */
+.dndev-auth-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5em;
+  padding: var(--gap-sm);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--dur-fast) var(--ease-in-out);
+
+  &[data-state='active'] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  &[data-state='pending'] {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  &[data-state='completed'] {
+    background-color: var(--success);
+    color: var(--success-foreground);
+  }
+}
+
+/* Opacity data attribute */
+[data-opacity='50'] {
+  opacity: 0.5;
+}
+
+[data-opacity='70'] {
+  opacity: 0.7;
+}
+
+/* Inset data attribute - indent content */
+[data-inset='true'] {
+  padding-inline-start: var(--gap-md);
+}
+
+/* Bare mode - no visual chrome, used inside FloatingLabel or custom wrappers */
+[data-bare] {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+
+  &:hover,
+  &:focus,
+  &:focus-visible {
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+/* Password strength bar height override */
+.dndev-password-strength-bar {
+  height: 4px;
+}
+
+.dndev-password-requirements .dndev-password-requirement-item {
+  transition: color var(--dur-fast) var(--ease-in-out);
+}
+
+.dndev-password-requirements .dndev-password-requirement-item svg {
+  transition: color var(--dur-fast) var(--ease-in-out);
+}
+
+/* ===========================
+         HERO ANIMATIONS
+         =========================== */
+
+.network-node {
+  fill: var(--foreground);
+  animation: universal-float 4s ease-in-out infinite;
+  --opacity-start: 0.3;
+  --opacity-mid: 0.8;
+  --transform-start: scale(1);
+  --transform-mid: scale(1.1);
+}
+
+.network-line {
+  stroke: var(--foreground);
+  stroke-width: 1;
+  animation: universal-float 6s ease-in-out infinite;
+  --opacity-start: 0.1;
+  --opacity-mid: 0.5;
+  --transform-start: scale(1);
+  --transform-mid: scale(1);
+}
+
+.wave-flow {
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    color-mix(in oklab, var(--accent) 20%, transparent) 50%,
+    transparent 70%
+  );
+  animation: universal-float 8s ease-in-out infinite;
+  --transform-start: translateX(-20%) rotate(0deg);
+  --transform-mid: translateX(20%) rotate(3deg);
+}
+
+.particle-float {
+  animation: universal-slide 10s linear infinite;
+  --opacity-start: 0.2;
+  --opacity-end: 0;
+  --transform-start: translateY(0px) rotate(0deg);
+  --transform-end: translateY(-100px) rotate(360deg);
+}
+
+.geometric-rotate {
+  animation: universal-float 20s linear infinite;
+  --opacity-start: 0.1;
+  --opacity-mid: 0.2;
+  --transform-start: rotate(0deg) scale(1);
+  --transform-mid: rotate(180deg) scale(1.1);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.dndev-animate-fade-in-up {
+  animation: universal-slide var(--dur-heavy) ease-out forwards;
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+/* ===========================
+   MARKETING UTILITIES
+   =========================== */
+
+.dndev-marketing-stack {
+  display: grid;
+  gap: var(--gap-md);
+}
+
+.dndev-marketing-cluster {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+  justify-content: center;
+}

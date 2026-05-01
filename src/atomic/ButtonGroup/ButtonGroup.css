@@ -1,0 +1,76 @@
+/* packages/components/src/atomic/ButtonGroup/ButtonGroup.css */
+
+.dndev-button-group {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+/* Orientation */
+.dndev-button-group[data-orientation='horizontal'] {
+  flex-direction: row;
+}
+
+.dndev-button-group[data-orientation='vertical'] {
+  flex-direction: column;
+}
+
+/* --- Horizontal border collapse --- */
+.dndev-button-group[data-orientation='horizontal']
+  > .dndev-interactive
+  + .dndev-interactive {
+  margin-inline-start: -1px;
+}
+
+.dndev-button-group[data-orientation='horizontal']
+  > .dndev-interactive:first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.dndev-button-group[data-orientation='horizontal']
+  > .dndev-interactive:last-child {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.dndev-button-group[data-orientation='horizontal']
+  > .dndev-interactive:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}
+
+/* --- Vertical border collapse --- */
+.dndev-button-group[data-orientation='vertical']
+  > .dndev-interactive
+  + .dndev-interactive {
+  margin-block-start: -1px;
+}
+
+.dndev-button-group[data-orientation='vertical']
+  > .dndev-interactive:first-child {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.dndev-button-group[data-orientation='vertical']
+  > .dndev-interactive:last-child {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.dndev-button-group[data-orientation='vertical']
+  > .dndev-interactive:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}
+
+/* Hover/focus z-index lift to show full border */
+.dndev-button-group > .dndev-interactive:hover,
+.dndev-button-group > .dndev-interactive:focus-visible {
+  z-index: 1;
+  position: relative;
+}
+
+/* Disabled group */
+.dndev-button-group[aria-disabled='true'] {
+  opacity: var(--opacity-muted);
+  pointer-events: none;
+}
