@@ -261,7 +261,8 @@ export interface CardProps
   /**
    * Optional content absolutely positioned on top of the cover.
    * Anchored by `overlayPosition` with theme-token inset. Overlay sits above
-   * both the cover and the body slot (z-index 2).
+   * both the cover and the body slot (z-index 2, or z-index 4 when fullOverlay
+   * is also set so it appears above the scrim).
    */
   overlay?: ReactNode;
   /**
@@ -269,6 +270,17 @@ export interface CardProps
    * @default 'top-left'
    */
   overlayPosition?: CardOverlayPosition;
+  /**
+   * Optional full-card scrim rendered as `position:absolute; inset:0` at the
+   * card root level. Participates in the card's CSS transform (hover lift,
+   * etc.) because it is a direct child of `.dndev-card`.
+   *
+   * Use for status overlays (sold, reserved, signed) that must cover the
+   * entire card surface. Clipped to the card's border-radius via
+   * `overflow:hidden`. `pointer-events:none` — card click-through is
+   * preserved. z-index 3 (above body, below `overlay` at z-index 4).
+   */
+  fullOverlay?: ReactNode;
   /**
    * Background treatment for the body slot (the padded region holding
    * title/subtitle/icon/content/footer/children, if any).
@@ -358,6 +370,7 @@ const Card = ({
   coverAspect,
   overlay,
   overlayPosition = 'top-left',
+  fullOverlay,
   bodyBackground = 'transparent',
   style,
   ref,
@@ -388,6 +401,7 @@ const Card = ({
     ...(cover !== undefined && { 'data-has-cover': 'true' }),
     ...(cover !== undefined && !hasBody && { 'data-cover-only': 'true' }),
     ...(overlay !== undefined && { 'data-overlay-position': overlayPosition }),
+    ...(fullOverlay !== undefined && { 'data-has-full-overlay': 'true' }),
   };
 
   // When cover-only, the card itself owns the aspectRatio so the cover fills it.
@@ -430,6 +444,9 @@ const Card = ({
       {...props}
     >
       {coverNode}
+      {fullOverlay && (
+        <div className="dndev-card-full-overlay">{fullOverlay}</div>
+      )}
       {overlay && <div className="dndev-card-overlay">{overlay}</div>}
       {hasBody && (
         <div

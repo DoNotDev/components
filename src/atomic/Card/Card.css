@@ -114,11 +114,29 @@
   object-fit: cover;
 }
 
-/* Overlay — sits above both cover and body slot. */
+/* Full-card overlay — covers entire card surface, participates in card transform.
+   Enabled via data-has-full-overlay; overflow:hidden clips to card border-radius. */
+.dndev-card[data-has-full-overlay='true'] {
+  overflow: hidden;
+}
+
+.dndev-card-full-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Corner overlay — sits above both cover and body slot. */
 .dndev-card-overlay {
   position: absolute;
   z-index: 2;
   pointer-events: none;
+}
+
+/* When a full-overlay scrim is present, raise the corner overlay above it. */
+.dndev-card[data-has-full-overlay='true'] > .dndev-card-overlay {
+  z-index: 4;
 }
 
 .dndev-card[data-overlay-position='top-left'] > .dndev-card-overlay {
