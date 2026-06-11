@@ -1,6 +1,6 @@
 {
   "name": "@donotdev/components",
-  "version": "0.1.43",
+  "version": "0.1.44",
   "type": "module",
   "private": false,
   "description": "Styled UI components for DoNotDev",
