@@ -9,14 +9,13 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { VariantProps } from 'class-variance-authority';
 import { useRef, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { buttonVariants } from '../Button';
 import Slot from '../Slot';
 import './FileButton.css';
-
-import type { VariantProps } from 'class-variance-authority';
 
 /** Props for the FileButton component -- styled button that triggers file input selection. */
 export interface FileButtonProps

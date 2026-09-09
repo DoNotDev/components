@@ -10,6 +10,8 @@
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { ReactNode, CSSProperties } from 'react';
+import type { ComponentProps } from 'react';
 
 import {
   TabsPrimitive,
@@ -19,9 +21,6 @@ import {
 } from './TabsPrimitive';
 import { THEME_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
-import type { ReactNode, CSSProperties } from 'react';
-import type { ComponentProps } from 'react';
 
 /** Single tab definition within Tabs. */
 export interface TabItem {

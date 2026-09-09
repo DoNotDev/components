@@ -11,13 +11,12 @@
 
 import * as SliderRadix from '@radix-ui/react-slider';
 import { cva } from 'class-variance-authority';
+import type { ComponentProps } from 'react';
 
 import { SliderPrimitive } from './SliderPrimitive';
 import { CONTROL_VARIANT } from '../../utils/constants';
-import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
 import type { ControlVariant } from '../../utils/constants';
-import type { ComponentProps } from 'react';
+import { cn, getVariantDataAttrs } from '../../utils/helpers';
 
 import './Slider.css';
 

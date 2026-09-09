@@ -13,18 +13,17 @@
  */
 
 import { ChevronRight } from 'lucide-react';
-import { forwardRef, memo, useCallback, useRef, useState } from 'react';
-
-import { cn } from '../../utils/helpers';
-import Icon from '../Icons/Icon';
-
 import type { LucideProps } from 'lucide-react';
+import { forwardRef, memo, useCallback, useRef, useState } from 'react';
 import type {
   ComponentType,
   HTMLAttributes,
   KeyboardEvent,
   ReactNode,
 } from 'react';
+
+import { cn } from '../../utils/helpers';
+import Icon from '../Icons/Icon';
 
 import './TreeView.css';
 

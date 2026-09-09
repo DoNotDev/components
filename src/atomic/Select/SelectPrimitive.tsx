@@ -10,10 +10,9 @@
  */
 
 import * as SelectPrimitive from '@radix-ui/react-select';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const SelectRootPrimitive = SelectPrimitive.Root;
 

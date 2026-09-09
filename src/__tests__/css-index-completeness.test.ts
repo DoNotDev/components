@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { resolve, relative, join } from 'path';
+
+import { describe, it, expect } from 'vitest';
 
 /** Recursively find all CSS files under a directory (posix-style relative paths). */
 function findCssFiles(dir: string, base: string): string[] {

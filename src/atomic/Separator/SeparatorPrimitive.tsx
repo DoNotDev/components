@@ -9,10 +9,9 @@
  */
 
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 export interface SeparatorPrimitiveProps extends ComponentProps<
   typeof SeparatorPrimitive.Root

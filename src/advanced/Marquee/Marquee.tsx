@@ -10,11 +10,10 @@
  */
 
 import { Suspense, lazy } from 'react';
+import type { ComponentProps } from 'react';
 
 import MarqueeSkeleton from './MarqueeSkeleton';
 import { GAP_VARIANT } from '../../styles/componentConstants';
-
-import type { ComponentProps } from 'react';
 
 // Re-export props from MarqueeContent
 export type { MarqueeProps } from './MarqueeContent';

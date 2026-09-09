@@ -10,6 +10,7 @@
  */
 
 import { Mail, MailCheck } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 
 import AppleIcon from './AppleIcon';
 import DiscordIcon from './DiscordIcon';
@@ -29,8 +30,6 @@ import TwitchIcon from './TwitchIcon';
 import XIcon from './XIcon';
 import YahooIcon from './YahooIcon';
 import YouTubeIcon from './YouTubeIcon';
-
-import type { ComponentType, SVGProps } from 'react';
 
 // Import all the existing icon components
 

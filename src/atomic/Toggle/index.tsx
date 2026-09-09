@@ -10,12 +10,11 @@
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { ComponentPropsWithoutRef } from 'react';
 
 import { TogglePrimitive } from './TogglePrimitive';
 import { THEME_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
-import type { ComponentPropsWithoutRef } from 'react';
 
 const toggleVariants = cva('dndev-interactive', {
   variants: {

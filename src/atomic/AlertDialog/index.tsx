@@ -9,6 +9,8 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ReactNode, ComponentProps } from 'react';
+
 import { cn } from '../../utils/helpers';
 import Button from '../Button';
 import VisuallyHidden from '../VisuallyHidden';
@@ -25,8 +27,6 @@ import {
   AlertDialogOverlayPrimitive as OverlayPrimitive,
   AlertDialogPortalPrimitive,
 } from './AlertDialogPrimitive';
-
-import type { ReactNode, ComponentProps } from 'react';
 
 // Wrapper components that apply dndev-* classes
 const AlertDialogOverlay = ({

@@ -10,11 +10,10 @@
  */
 
 import { Suspense, lazy } from 'react';
-
-import CodeSkeleton from './CodeSkeleton';
+import type { ComponentType } from 'react';
 
 import type { CodeProps } from './CodeContent';
-import type { ComponentType } from 'react';
+import CodeSkeleton from './CodeSkeleton';
 
 export type { CodeProps };
 

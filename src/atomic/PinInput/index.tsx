@@ -13,11 +13,11 @@
 
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
+import type { InputHTMLAttributes } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { FloatingLabel } from '../Label';
 
-import type { InputHTMLAttributes } from 'react';
 import './PinInput.css';
 
 /** Props for the PinInput component -- N-digit PIN / OTP input. */
@@ -142,7 +142,6 @@ const PinInput = ({
     if (autoFocus && !disabled) {
       refs.current[0]?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When the parent clears the value (e.g. after a bad PIN) refocus box 0.

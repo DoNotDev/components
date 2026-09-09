@@ -9,9 +9,10 @@
  * @author AMBROISE PARK Consulting
  */
 
-import type { ButtonVariant } from './atomic/Button';
 import type { LucideProps } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
+
+import type { ButtonVariant } from './atomic/Button';
 
 /**
  * Icon type definition

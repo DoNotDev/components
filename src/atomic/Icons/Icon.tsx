@@ -8,12 +8,11 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { LucideProps } from 'lucide-react';
 import { isValidElement } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { LucideProps } from 'lucide-react';
-import type { ComponentType, ReactNode } from 'react';
 
 /** Props for the Icon component -- renders Lucide icons, string names, or ReactNode. */
 export interface IconProps {

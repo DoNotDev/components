@@ -10,14 +10,13 @@
  */
 
 import { useRef, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 import Stack from '../../atomic/Stack';
 import { GAP_VARIANT } from '../../styles/componentConstants';
 import { addEventListener } from '../../utils/eventListener';
 import { cn } from '../../utils/helpers';
 import { observeElement } from '../../utils/intersectionObserver';
-
-import type { ReactNode } from 'react';
 
 /** Props for the Marquee component -- infinitely scrolling content strip. */
 export type MarqueeProps<T = unknown> = {

@@ -69,6 +69,20 @@
   /* Level overrides — headline font for all heading levels */
   &[data-level^='h'] {
     font-family: var(--font-headline);
+
+    /* A single word wider than its column is the one thing text cannot solve by
+       wrapping, and display type hits it first: uppercase, letter-spaced headings
+       reach 10+ em on one word. Left alone the heading raises its container's
+       min-content width, a 1fr track grows past the viewport, and an ancestor's
+       overflow silently clips the end of the title.
+       hyphens breaks the word at a syllable when the browser has a dictionary for
+       the page language — so this depends on <html lang> being correct. overflow-wrap
+       is the fallback for the rest, and must be `anywhere` rather than `break-word`:
+       only `anywhere` lowers min-content, which is what stops the container growing.
+       Both are inert until a word genuinely does not fit. */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    overflow-wrap: anywhere;
   }
 
   &[data-level='h1'] {

@@ -9,14 +9,14 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ReactNode, ComponentType } from 'react';
+
 import Card from '../../atomic/Card';
 import Grid from '../../atomic/Grid';
 import Text from '../../atomic/Text';
 import { GAP_VARIANT } from '../../styles/componentConstants';
 import { cn } from '../../utils/helpers';
 import Reveal from '../Reveal';
-
-import type { ReactNode, ComponentType } from 'react';
 
 /**
  * Stat card data structure

@@ -10,9 +10,9 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { cn } from '../../utils/helpers';
-
 import type { ReactNode, CSSProperties, Ref } from 'react';
+
+import { cn } from '../../utils/helpers';
 
 /**
  * Individual cell data for the Bento grid

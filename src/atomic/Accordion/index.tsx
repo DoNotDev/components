@@ -10,6 +10,7 @@
  */
 
 import { ChevronDown } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import {
   AccordionPrimitive,
@@ -18,8 +19,6 @@ import {
   AccordionContentPrimitive,
 } from './AccordionPrimitive';
 import { cn } from '../../utils/helpers';
-
-import type { ReactNode } from 'react';
 
 /** Single item within an Accordion. */
 export interface AccordionItemType {

@@ -11,6 +11,7 @@
 
 import { X } from 'lucide-react';
 import { useRef } from 'react';
+import type { ReactNode, ComponentProps, RefObject } from 'react';
 
 import {
   Dialog as Root,
@@ -28,8 +29,6 @@ import { useSwipeToClose } from '../../hooks';
 import { SURFACE_VARIANT, type SurfaceVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Button, { BUTTON_VARIANT, type ButtonVariant } from '../Button';
-
-import type { ReactNode, ComponentProps, RefObject } from 'react';
 
 /** Preset content width for Dialog. Controls max-width of the dialog content area. */
 export type ContentSize = 'auto' | 'form' | 'text' | 'image' | 'code' | 'full';

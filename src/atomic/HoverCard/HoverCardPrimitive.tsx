@@ -10,10 +10,9 @@
  */
 
 import * as RadixHoverCard from '@radix-ui/react-hover-card';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const HoverCardPrimitive = ({
   openDelay = 0,

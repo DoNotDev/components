@@ -11,10 +11,9 @@
 
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const DropdownMenuPrimitive = RadixDropdownMenu.Root;
 const DropdownMenuTriggerPrimitive = RadixDropdownMenu.Trigger;

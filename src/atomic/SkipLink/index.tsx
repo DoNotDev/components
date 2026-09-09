@@ -11,9 +11,9 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { cn } from '../../utils/helpers';
-
 import type { HTMLAttributes, MouseEvent } from 'react';
+
+import { cn } from '../../utils/helpers';
 
 import './SkipLink.css';
 

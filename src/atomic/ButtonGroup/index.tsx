@@ -12,12 +12,11 @@
  */
 
 import { forwardRef } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Button from '../Button';
-
 import type { ButtonVariant } from '../Button';
-import type { HTMLAttributes, ReactNode } from 'react';
 
 import './ButtonGroup.css';
 

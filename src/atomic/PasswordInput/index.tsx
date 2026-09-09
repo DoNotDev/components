@@ -11,11 +11,11 @@
 
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, useId } from 'react';
+import type { InputHTMLAttributes } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { FloatingLabel } from '../Label';
 
-import type { InputHTMLAttributes } from 'react';
 import './PasswordInput.css';
 
 /** Props for the PasswordInput component -- input with show/hide toggle. */

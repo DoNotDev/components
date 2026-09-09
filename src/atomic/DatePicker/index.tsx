@@ -10,19 +10,10 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { Fragment, useEffect, useId, useRef, useState } from 'react';
-
 import { CalendarDays } from 'lucide-react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
+import type { KeyboardEvent, ClipboardEvent, Ref } from 'react';
 
-import Calendar from '../Calendar';
-import Icon from '../Icons/Icon';
-import { FloatingLabel } from '../Label';
-import {
-  PopoverPrimitive,
-  PopoverTrigger,
-  PopoverContent,
-} from '../Popover/PopoverPrimitive';
-import { cn } from '../../utils/helpers';
 import {
   DATE_SEGMENT_BASE,
   clampDay,
@@ -34,13 +25,20 @@ import {
   toDate,
   toISODate,
 } from '../../utils/date';
-
 import type {
   DateSegmentConfig,
   DateSegmentType,
   DateSegmentValues,
 } from '../../utils/date';
-import type { KeyboardEvent, ClipboardEvent, Ref } from 'react';
+import { cn } from '../../utils/helpers';
+import Calendar from '../Calendar';
+import Icon from '../Icons/Icon';
+import { FloatingLabel } from '../Label';
+import {
+  PopoverPrimitive,
+  PopoverTrigger,
+  PopoverContent,
+} from '../Popover/PopoverPrimitive';
 
 import './DatePicker.css';
 

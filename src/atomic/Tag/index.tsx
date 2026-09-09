@@ -11,12 +11,11 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
 import Icon from '../Icons/Icon';
 import './Tag.css';
-
-import type { HTMLAttributes, ReactNode } from 'react';
 
 export const TAG_VARIANT = {
   DEFAULT: 'default',

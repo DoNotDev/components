@@ -14,6 +14,7 @@
  */
 
 import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   TooltipPrimitive,
@@ -23,8 +24,6 @@ import {
 } from './TooltipPrimitive';
 import { FLOATING_VARIANT, type FloatingVariant } from '../../utils/constants';
 import { getVariantDataAttrs } from '../../utils/helpers';
-
-import type { ReactNode } from 'react';
 
 type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
 

@@ -10,9 +10,9 @@
  * @author AMBROISE PARK Consulting
  */
 
-import RoadmapContent from './RoadmapContent';
-
 import type { ComponentProps } from 'react';
+
+import RoadmapContent from './RoadmapContent';
 
 export type { RoadmapProps, RoadmapStep } from './RoadmapContent';
 

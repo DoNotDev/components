@@ -11,14 +11,13 @@
 
 import { Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { cn } from '../../utils/helpers';
 import Button, { BUTTON_VARIANT } from '../Button';
 import Dialog from '../Dialog';
 import Spinner from '../Spinner';
-
-import type { ReactNode } from 'react';
 
 /**
  * Video configuration object for explicit URL construction

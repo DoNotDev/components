@@ -11,6 +11,7 @@
  */
 
 import { cva } from 'class-variance-authority';
+import type { ReactNode } from 'react';
 
 import {
   RadioGroupPrimitive,
@@ -21,8 +22,6 @@ import {
 import { CONTROL_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Grid from '../Grid';
-
-import type { ReactNode } from 'react';
 import type { RadioOption, RadioGroupRootProps } from './RadioGroupPrimitive';
 import type { ControlVariant } from '../../utils/constants';
 import type { GridCols } from '../Grid';

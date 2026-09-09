@@ -10,10 +10,9 @@
  */
 
 import * as ProgressPrimitive from '@radix-ui/react-progress';
+import type { ComponentProps } from 'react';
 
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 export interface ProgressPrimitiveProps extends ComponentProps<
   typeof ProgressPrimitive.Root

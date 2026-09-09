@@ -9,19 +9,19 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { type VariantProps } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
 import { forwardRef } from 'react';
+import type { ReactNode, HTMLAttributes } from 'react';
 
+import type { IconType } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import { surfaceVariants } from '../../utils/variants';
 import { renderCardContent, renderCardHeader } from '../Card';
+import type { CardVariant, CardContent } from '../Card';
 import Separator, { SEPARATOR_VARIANT } from '../Separator';
 import Stack from '../Stack';
 
-import type { IconType } from '../../types';
-import type { CardVariant, CardContent } from '../Card';
-import type { ReactNode, HTMLAttributes } from 'react';
 import './DualCard.css';
 
 /** Union of available DualCard variant values. */

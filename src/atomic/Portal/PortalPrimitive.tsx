@@ -10,7 +10,6 @@
  */
 
 import * as PortalPrimitive from '@radix-ui/react-portal';
-
 import type { ComponentProps } from 'react';
 
 export interface PortalPrimitiveProps extends ComponentProps<

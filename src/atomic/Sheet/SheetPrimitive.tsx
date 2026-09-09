@@ -10,10 +10,9 @@
  */
 
 import * as SheetPrimitive from '@radix-ui/react-dialog';
+import type { ComponentProps, HTMLAttributes, Ref } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps, HTMLAttributes, Ref } from 'react';
 
 const SheetPrimitiveRoot = SheetPrimitive.Root;
 const SheetTriggerPrimitive = SheetPrimitive.Trigger;

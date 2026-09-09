@@ -10,6 +10,7 @@
  */
 
 import { cva } from 'class-variance-authority';
+import { useId, type ReactNode } from 'react';
 
 import {
   CheckboxPrimitive,
@@ -19,8 +20,6 @@ import { CONTROL_VARIANT, type ControlVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Label from '../Label';
 import Stack from '../Stack';
-
-import { useId, type ReactNode } from 'react';
 
 import './Checkbox.css';
 

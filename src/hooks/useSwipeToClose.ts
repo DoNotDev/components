@@ -23,7 +23,6 @@
  */
 
 import { useRef, useCallback } from 'react';
-
 import type { RefObject, PointerEvent } from 'react';
 
 /** Options for the useSwipeToClose hook. */

@@ -9,10 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ReactNode, HTMLAttributes } from 'react';
+
 import { GAP_VARIANT } from '../../styles/componentConstants';
 import { cn } from '../../utils/helpers';
 
-import type { ReactNode, HTMLAttributes } from 'react';
 import './List.css';
 
 /** Single item within a List. */

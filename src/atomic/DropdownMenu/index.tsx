@@ -13,6 +13,7 @@
 
 import { ChevronRight, Check } from 'lucide-react';
 import { Children } from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
 import {
   DropdownMenuPrimitive,
@@ -28,8 +29,6 @@ import {
 } from './DropdownMenuPrimitive';
 import { cn } from '../../utils/helpers';
 import ScrollArea from '../ScrollArea';
-
-import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
 import './DropdownMenu.css';
 

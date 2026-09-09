@@ -9,6 +9,8 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps, ComponentType, ReactNode } from 'react';
+
 import {
   NavigationMenuPrimitive,
   NavigationMenuListPrimitive,
@@ -22,7 +24,6 @@ import { DISPLAY } from '../../styles/componentConstants';
 import { cn } from '../../utils/helpers';
 import Tooltip from '../Tooltip';
 
-import type { ComponentProps, ComponentType, ReactNode } from 'react';
 import './NavigationMenu.css';
 
 /** Single item within a NavigationMenu. */

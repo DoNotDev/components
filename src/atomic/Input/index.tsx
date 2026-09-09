@@ -10,14 +10,13 @@
  */
 
 import { useId } from 'react';
+import type { InputHTMLAttributes, Ref } from 'react';
 
+import type { IconType } from '../../types';
 import { cn } from '../../utils/helpers';
 import Icon from '../Icons/Icon';
 import { FloatingLabel } from '../Label';
 import './Input.css';
-
-import type { IconType } from '../../types';
-import type { InputHTMLAttributes, Ref } from 'react';
 
 /** Props for the Input component. */
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {

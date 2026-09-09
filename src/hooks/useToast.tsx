@@ -26,13 +26,13 @@
  */
 
 import { useSyncExternalStore, useMemo } from 'react';
+import type { ReactNode } from 'react';
 
 import type { ToastType } from '../atomic/Toaster/Toast.types';
 import type {
   ToastActionElement,
   ToastProps as ToastPrimitiveProps,
 } from '../atomic/Toaster/ToastPrimitive';
-import type { ReactNode } from 'react';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION

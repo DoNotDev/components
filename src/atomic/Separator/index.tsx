@@ -9,10 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps } from 'react';
+
 import { SeparatorPrimitive } from './SeparatorPrimitive';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 
-import type { ComponentProps } from 'react';
 import './Separator.css';
 
 /**

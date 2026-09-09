@@ -6,10 +6,9 @@
  */
 
 import * as VisuallyHiddenRadix from '@radix-ui/react-visually-hidden';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const VisuallyHiddenPrimitive = ({
   className,

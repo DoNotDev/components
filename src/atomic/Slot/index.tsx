@@ -9,10 +9,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps } from 'react';
+
 import { SlotPrimitive } from './SlotPrimitive';
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 /** Props for the Slot component -- Radix Slot for asChild pattern. */
 export type SlotProps = ComponentProps<typeof SlotPrimitive>;

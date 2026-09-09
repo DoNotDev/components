@@ -10,12 +10,11 @@
  */
 
 import { forwardRef } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
 import Stack from '../Stack';
 import Text, { TEXT_VARIANT } from '../Text';
-
-import type { HTMLAttributes, ReactNode } from 'react';
 
 /**
  * Blockquote variant constants - Industry-standard patterns

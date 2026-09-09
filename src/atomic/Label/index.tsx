@@ -9,11 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentType, ReactNode } from 'react';
+
 import { FloatingLabel, type FloatingLabelProps } from './FloatingLabel';
 import { LabelPrimitive, type LabelPrimitiveProps } from './LabelPrimitive';
 import { cn } from '../../utils/helpers';
-
-import type { ComponentType, ReactNode } from 'react';
 
 /** Props for the Label component. */
 export interface LabelProps extends LabelPrimitiveProps {

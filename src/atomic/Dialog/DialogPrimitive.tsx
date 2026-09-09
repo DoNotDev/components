@@ -6,10 +6,9 @@
  */
 
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import type { ComponentProps, HTMLAttributes, Ref } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps, HTMLAttributes, Ref } from 'react';
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;

@@ -10,10 +10,9 @@
  */
 
 import * as RadixAlertDialog from '@radix-ui/react-alert-dialog';
+import type { ComponentProps, HTMLAttributes } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps, HTMLAttributes } from 'react';
 
 const AlertDialogPrimitive = RadixAlertDialog.Root;
 const AlertDialogTriggerPrimitive = RadixAlertDialog.Trigger;

@@ -12,10 +12,9 @@
 import * as RadixNavigationMenu from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 interface NavigationMenuPrimitiveProps extends ComponentProps<
   typeof RadixNavigationMenu.Root

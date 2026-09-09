@@ -11,6 +11,7 @@
  */
 
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { ReactNode } from 'react';
 
 import {
   ToggleGroupPrimitive,
@@ -18,8 +19,6 @@ import {
   type ToggleGroupPrimitiveProps,
 } from './ToggleGroupPrimitive';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
-import type { ReactNode } from 'react';
 
 const toggleGroupVariants = cva('', {
   variants: {

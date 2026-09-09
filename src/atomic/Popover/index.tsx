@@ -9,6 +9,8 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ReactNode } from 'react';
+
 import {
   PopoverPrimitive,
   PopoverTrigger,
@@ -23,8 +25,6 @@ import { cn, getVariantDataAttrs } from '../../utils/helpers';
 const PopoverRoot = PopoverPrimitive;
 const PopoverTriggerComponent = PopoverTrigger;
 const PopoverContentComponent = PopoverContent;
-
-import type { ReactNode } from 'react';
 
 /**
  * Popover variant constants - re-exported from shared FLOATING_VARIANT

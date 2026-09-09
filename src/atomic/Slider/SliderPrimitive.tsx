@@ -10,10 +10,9 @@
  */
 
 import * as SliderPrimitive from '@radix-ui/react-slider';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 /**
  * Props for the Slider component.

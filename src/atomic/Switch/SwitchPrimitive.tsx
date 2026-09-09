@@ -10,10 +10,9 @@
  */
 
 import * as SwitchPrimitives from '@radix-ui/react-switch';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 import './Switch.css';
 

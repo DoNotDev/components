@@ -12,6 +12,7 @@
 import * as SelectRadix from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { useId } from 'react';
+import type { ReactNode, ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { FloatingLabel } from '../Label';
@@ -25,8 +26,6 @@ import {
   SelectLabelPrimitive,
   SelectSeparatorPrimitive,
 } from './SelectPrimitive';
-
-import type { ReactNode, ComponentProps } from 'react';
 
 import './Select.css';
 

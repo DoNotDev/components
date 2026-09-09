@@ -10,10 +10,9 @@
  */
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const ScrollAreaPrimitiveRoot = ScrollAreaPrimitive.Root;
 const ScrollAreaViewportPrimitive = ScrollAreaPrimitive.Viewport;

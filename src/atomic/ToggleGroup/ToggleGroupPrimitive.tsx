@@ -12,10 +12,9 @@
 
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { createContext, use } from 'react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 /**
  * Toggle group context for sharing data attributes (passed from component layer)

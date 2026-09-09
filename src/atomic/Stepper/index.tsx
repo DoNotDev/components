@@ -12,16 +12,15 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
+import type { IconType } from '../../types';
 import { THEME_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Button, { BUTTON_VARIANT } from '../Button';
 import Card from '../Card';
 import Stack from '../Stack';
 import './Stepper.css';
-
-import type { IconType } from '../../types';
-import type { ComponentType, ReactNode } from 'react';
 
 /** Single step definition within a Stepper. */
 export interface StepperStep {

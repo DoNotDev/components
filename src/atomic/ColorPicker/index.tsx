@@ -11,10 +11,9 @@
  */
 
 import { forwardRef, useRef, useState } from 'react';
+import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 import './ColorPicker.css';
 

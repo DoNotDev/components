@@ -11,10 +11,9 @@
 
 import * as CheckboxPrimitives from '@radix-ui/react-checkbox';
 import { Check } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 /**
  * Props for the Checkbox component.

@@ -10,17 +10,17 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentType, CSSProperties } from 'react';
+
 import Button from '../../atomic/Button';
 import { renderCardHeader, renderCardContent } from '../../atomic/Card';
 import Separator, { SEPARATOR_VARIANT } from '../../atomic/Separator';
 import Text from '../../atomic/Text';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import type { ComponentData } from '../../types';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import { surfaceVariants } from '../../utils/variants';
-
-import type { ComponentData } from '../../types';
 import type { SurfaceVariantProps } from '../../utils/variants';
-import type { ComponentType, CSSProperties } from 'react';
 
 /**
  * Card data for StackedCards

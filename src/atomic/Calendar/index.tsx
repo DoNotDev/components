@@ -1,16 +1,15 @@
 // packages/components/src/atomic/Calendar/index.tsx
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { DropdownProps, ChevronProps } from 'react-day-picker';
 
 import { CalendarPrimitive } from './CalendarPrimitive';
 import { cn } from '../../utils/helpers';
 import Button from '../Button';
 import DropdownMenu from '../DropdownMenu';
+import type { CalendarPrimitiveProps } from './CalendarPrimitive';
 import { DropdownMenuItemPrimitive } from '../DropdownMenu/DropdownMenuPrimitive';
 import Icon from '../Icons/Icon';
-
-import type { CalendarPrimitiveProps } from './CalendarPrimitive';
-import type { DropdownProps, ChevronProps } from 'react-day-picker';
 
 /** Props for the Calendar component -- wraps react-day-picker with DoNotDev theming. */
 export type CalendarProps = CalendarPrimitiveProps;

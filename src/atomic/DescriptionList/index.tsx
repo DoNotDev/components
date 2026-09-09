@@ -9,9 +9,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ReactNode, HTMLAttributes } from 'react';
+
 import { cn } from '../../utils/helpers';
 
-import type { ReactNode, HTMLAttributes } from 'react';
 import './DescriptionList.css';
 
 /** Single term/definition pair within a DescriptionList. */

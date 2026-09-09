@@ -10,10 +10,9 @@
  */
 
 import * as TabsPrimitive from '@radix-ui/react-tabs';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const TabsPrimitiveRoot = TabsPrimitive.Root;
 

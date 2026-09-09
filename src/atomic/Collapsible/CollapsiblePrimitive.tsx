@@ -10,10 +10,9 @@
  */
 
 import * as RadixCollapsible from '@radix-ui/react-collapsible';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const CollapsiblePrimitive = RadixCollapsible.Root;
 const CollapsibleTrigger = RadixCollapsible.CollapsibleTrigger;

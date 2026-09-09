@@ -13,13 +13,12 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Star } from 'lucide-react';
 import { useState, useId } from 'react';
+import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 import { CONTROL_VARIANT, type ControlVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 
 import './Rating.css';
-
-import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 const ratingVariants = cva('dndev-rating', {
   variants: {

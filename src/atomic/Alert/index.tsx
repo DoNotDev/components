@@ -11,13 +11,12 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 import { THEME_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Icon from '../Icons/Icon';
 import Stack from '../Stack';
-
-import type { HTMLAttributes, ReactNode } from 'react';
 
 /**
  * Alert variant constants - THEME_VARIANT + Alert-specific semantic names

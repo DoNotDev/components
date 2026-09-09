@@ -11,12 +11,12 @@
 
 import { Suspense, lazy } from 'react';
 
+import type { CarouselProps } from './CarouselContent';
 import CarouselSkeleton from './CarouselSkeleton';
 
 // Re-export props and ref types from CarouselContent
 export type { CarouselRef } from './CarouselContent';
 
-import type { CarouselProps } from './CarouselContent';
 export type { CarouselProps };
 
 // Lazy load the actual carousel implementation

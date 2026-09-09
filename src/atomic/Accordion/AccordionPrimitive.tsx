@@ -12,10 +12,9 @@
 import * as RadixAccordion from '@radix-ui/react-accordion';
 import { Slot } from '@radix-ui/react-slot';
 import { ChevronDown } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const AccordionPrimitive = RadixAccordion.Root;
 

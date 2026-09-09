@@ -9,6 +9,8 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps, ReactNode } from 'react';
+
 import {
   ScrollAreaPrimitive,
   ScrollAreaViewportPrimitive,
@@ -16,8 +18,6 @@ import {
   ScrollBarPrimitive,
 } from './ScrollAreaPrimitive';
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps, ReactNode } from 'react';
 
 /** Props for the ScrollArea component -- custom cross-browser scrollbars. */
 export interface ScrollAreaProps extends ComponentProps<

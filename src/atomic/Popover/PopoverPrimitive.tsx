@@ -10,10 +10,9 @@
  */
 
 import * as PopoverPrimitive from '@radix-ui/react-popover';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const Popover = PopoverPrimitive.Root;
 

@@ -9,9 +9,9 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { VisuallyHiddenPrimitive } from './VisuallyHiddenPrimitive';
-
 import type { ComponentProps } from 'react';
+
+import { VisuallyHiddenPrimitive } from './VisuallyHiddenPrimitive';
 
 /** Props for the VisuallyHidden component -- screen reader-only content. */
 export type VisuallyHiddenProps = ComponentProps<

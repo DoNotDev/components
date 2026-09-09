@@ -10,10 +10,9 @@
  */
 
 import * as RadixAvatar from '@radix-ui/react-avatar';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const AvatarPrimitive = ({
   className,

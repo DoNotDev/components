@@ -11,7 +11,6 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-
 import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
 
 import Dialog from '../../atomic/Dialog';

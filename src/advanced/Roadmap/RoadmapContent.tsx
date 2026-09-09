@@ -10,12 +10,14 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { LucideIcon } from 'lucide-react';
 import { useState, useEffect, useSyncExternalStore } from 'react';
+import type { ComponentType, RefObject } from 'react';
 
 import Card, { renderCardContent } from '../../atomic/Card';
+import type { CardContent, CardVariant } from '../../atomic/Card';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { cn } from '../../utils/helpers';
-import type { CardContent, CardVariant } from '../../atomic/Card';
 
 /** Laptop breakpoint threshold (1024px) — matches @donotdev/core BREAKPOINT_THRESHOLDS */
 const LAPTOP_QUERY = '(min-width: 1024px)';
@@ -34,9 +36,6 @@ const getServerSnapshot = () => true;
 function useIsLaptopOrDesktop(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
-
-import type { LucideIcon } from 'lucide-react';
-import type { ComponentType, RefObject } from 'react';
 
 import './Roadmap.css';
 

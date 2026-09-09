@@ -11,6 +11,7 @@
  */
 
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   HoverCardPrimitive,
@@ -19,8 +20,6 @@ import {
 } from './HoverCardPrimitive';
 import { cn } from '../../utils/helpers';
 import Card, { type CardProps } from '../Card';
-
-import type { ReactNode } from 'react';
 
 /** Props for the HoverCard component -- Card content revealed on hover. */
 export interface HoverCardProps extends Pick<

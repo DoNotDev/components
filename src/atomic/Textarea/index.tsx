@@ -10,10 +10,9 @@
  */
 
 import { forwardRef } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentPropsWithRef } from 'react';
 
 /** Props for the Textarea component. */
 export interface TextareaProps extends ComponentPropsWithRef<'textarea'> {

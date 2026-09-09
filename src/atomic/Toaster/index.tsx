@@ -9,6 +9,8 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps } from 'react';
+
 import {
   ToastProvider,
   ToastViewport,
@@ -20,8 +22,6 @@ import {
 } from './ToastPrimitive';
 import { useToast, type ToasterToast } from '../../hooks/useToast';
 import Stack from '../Stack';
-
-import type { ComponentProps } from 'react';
 
 /**
  * Toast title component with pattern classes

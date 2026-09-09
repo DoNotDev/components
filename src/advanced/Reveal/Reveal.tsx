@@ -9,7 +9,7 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { type ReactNode, type ComponentType, type CSSProperties } from 'react';
+import type { ReactNode, ComponentType, CSSProperties } from 'react';
 
 import { useViewportVisibility } from '../../hooks/useViewportVisibility';
 import { cn } from '../../utils/helpers';

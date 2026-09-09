@@ -9,8 +9,10 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { type VariantProps } from 'class-variance-authority';
+import type { VariantProps } from 'class-variance-authority';
+import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 
+import type { IconType } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import { surfaceVariants } from '../../utils/variants';
@@ -19,9 +21,6 @@ import List from '../List';
 import Slot from '../Slot';
 import Stack from '../Stack';
 import Text from '../Text';
-
-import type { IconType } from '../../types';
-import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 
 /** Corner anchor for the overlay element layered on the card cover. */
 export type CardOverlayPosition =
@@ -385,11 +384,7 @@ const Card = ({
   const contentNode = renderCardContent(content);
   const hasContent = Boolean(contentNode || children);
   const hasBody = Boolean(header || hasContent || footer);
-  const coverNode = renderCardCover(
-    cover,
-    coverAspect,
-    hasBody
-  );
+  const coverNode = renderCardCover(cover, coverAspect, hasBody);
 
   const cardAttrs = {
     ...variantAttrs,
@@ -449,10 +444,7 @@ const Card = ({
       )}
       {overlay && <div className="dndev-card-overlay">{overlay}</div>}
       {hasBody && (
-        <div
-          className="dndev-card-body"
-          data-body-background={bodyBackground}
-        >
+        <div className="dndev-card-body" data-body-background={bodyBackground}>
           {header}
           {hasContent && (
             <div className="dndev-card-content">

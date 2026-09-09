@@ -10,12 +10,11 @@
  */
 
 import { X } from 'lucide-react';
+import type { InputHTMLAttributes } from 'react';
 
 import Input from '../Input';
 import { FloatingLabel } from '../Label';
 import Text from '../Text';
-
-import type { InputHTMLAttributes } from 'react';
 
 import './RangeInput.css';
 

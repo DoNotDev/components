@@ -9,13 +9,13 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentProps } from 'react';
+
 import {
   AvatarPrimitive,
   AvatarImagePrimitive,
   AvatarFallbackPrimitive,
 } from './AvatarPrimitive';
-
-import type { ComponentProps } from 'react';
 
 /** Props for the Avatar component. */
 export interface AvatarProps extends ComponentProps<typeof AvatarPrimitive> {

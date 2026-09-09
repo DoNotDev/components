@@ -9,11 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
-import Icon from './Icon';
-import './IconBox.css';
-
-import type { IconType } from '../../types';
 import type { ComponentType } from 'react';
+
+import Icon from './Icon';
+import type { IconType } from '../../types';
+import './IconBox.css';
 
 /**
  * Icon box component props

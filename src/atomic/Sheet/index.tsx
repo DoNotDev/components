@@ -12,13 +12,12 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useRef, useId } from 'react';
+import type { ComponentProps, ReactNode, RefObject } from 'react';
 
 import { useSwipeToClose } from '../../hooks';
 import { SURFACE_VARIANT, type SurfaceVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Button, { BUTTON_VARIANT } from '../Button';
-
-import type { ComponentProps, ReactNode, RefObject } from 'react';
 
 /** Props for the Sheet component -- slide-out panel for sidebars and editing. */
 export interface SheetProps extends Omit<

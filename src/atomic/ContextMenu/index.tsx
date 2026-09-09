@@ -10,6 +10,7 @@
  */
 
 import { ChevronRight } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import {
   ContextMenuPrimitive,
@@ -26,8 +27,6 @@ import {
   ContextMenuSubContentPrimitive,
   ContextMenuSubTriggerPrimitive,
 } from './ContextMenuPrimitive';
-
-import type { ReactNode } from 'react';
 
 /** Base properties shared by all context menu items */
 type BaseContextMenuItem = {

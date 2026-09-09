@@ -11,10 +11,9 @@
 
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 const ContextMenuPrimitive = RadixContextMenu.Root;
 

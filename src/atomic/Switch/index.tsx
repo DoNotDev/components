@@ -12,13 +12,12 @@
 
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import { cva } from 'class-variance-authority';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { SwitchPrimitive } from './SwitchPrimitive';
 import { CONTROL_VARIANT } from '../../utils/constants';
-import { cn, getVariantDataAttrs } from '../../utils/helpers';
-
 import type { ControlVariant } from '../../utils/constants';
-import type { ComponentProps, ReactNode } from 'react';
+import { cn, getVariantDataAttrs } from '../../utils/helpers';
 
 import './Switch.css';
 

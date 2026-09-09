@@ -10,10 +10,9 @@
  */
 
 import * as LabelPrimitive from '@radix-ui/react-label';
+import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
-
-import type { ComponentProps } from 'react';
 
 /**
  * Label primitive props

@@ -11,6 +11,7 @@
 
 import { CirclePlus, CircleMinus, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   CollapsiblePrimitive,
@@ -19,8 +20,6 @@ import {
 } from './CollapsiblePrimitive';
 import { cn } from '../../utils/helpers';
 import Stack from '../Stack';
-
-import type { ReactNode } from 'react';
 
 import './Collapsible.css';
 

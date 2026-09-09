@@ -12,12 +12,11 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { createContext, useContext, useRef } from 'react';
+import type { ReactNode } from 'react';
 
 import { useSwipeToClose } from '../../hooks';
 import { cn } from '../../utils/helpers';
 import Button, { BUTTON_VARIANT } from '../Button';
-
-import type { ReactNode } from 'react';
 
 /** Context for CommandDialog to pass onClose to children without cloneElement */
 const CommandDialogContext = createContext<{ onClose?: () => void }>({});
