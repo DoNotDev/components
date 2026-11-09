@@ -697,6 +697,15 @@
     opacity: var(--opacity-muted);
   }
 
+  /* Ripple clip layer (injected by JS) - contains the ripple regardless of the host's overflow */
+  & .dndev-ripple-clip {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
   /* Ripple effect element (injected by JS) */
   & .dndev-ripple {
     position: absolute;
@@ -704,6 +713,11 @@
     background: currentColor;
     pointer-events: none;
     animation: dndev-ripple var(--dur-slow) var(--ease-in-out) forwards;
+  }
+
+  &[data-variant='ghost'],
+  &[data-variant='link'] {
+    --ripple-opacity: 0;
   }
 
   &[data-display='compact'] {
@@ -891,8 +905,13 @@
     &[data-highlighted] {
       background: rgb(from var(--primary) r g b / 0.1);
       color: var(--primary);
-      outline: 2px solid var(--ring);
-      outline-offset: 0;
+      outline: none;
+      box-shadow: none;
+    }
+
+    /* Items fill their clipped container: scaling would expose its edges */
+    &:active:not(:disabled) {
+      transform: none;
     }
 
     &[data-disabled] {

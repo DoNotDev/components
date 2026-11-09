@@ -109,9 +109,11 @@
     overflow: hidden;
   }
 
-  /* Default: show overflow when wrap is enabled (allows wrapping) */
-  &[data-direction='row'][data-wrap='wrap']:not([data-overflow]) > *,
-  &[data-direction='row'][data-wrap='wrap-reverse']:not([data-overflow]) > * {
+  /* Default: show overflow when wrap is enabled (allows wrapping); interactive elements keep their own clipping */
+  &[data-direction='row'][data-wrap='wrap']:not([data-overflow])
+    > *:not(.dndev-interactive),
+  &[data-direction='row'][data-wrap='wrap-reverse']:not([data-overflow])
+    > *:not(.dndev-interactive) {
     overflow: visible;
   }
 

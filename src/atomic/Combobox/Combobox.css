@@ -123,6 +123,7 @@
   padding: var(--gap-sm) var(--gap-md);
   cursor: pointer;
   border-radius: var(--radius-interactive);
+  font-weight: var(--font-weight-normal);
   transition: background-color var(--dur-fast) var(--ease-in-out);
 }
 
@@ -153,7 +154,7 @@
 }
 
 .dndev-combobox-option-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-input);
   color: var(--foreground);
 }
 

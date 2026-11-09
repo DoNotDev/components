@@ -100,11 +100,11 @@
 /* ========== RIPPLE EFFECT ========== */
 @keyframes dndev-ripple {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: scale(0);
     opacity: var(--ripple-opacity);
   }
   100% {
-    transform: translate(-50%, -50%) scale(4);
+    transform: scale(4);
     opacity: 0;
   }
 }

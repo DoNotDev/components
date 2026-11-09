@@ -3,7 +3,7 @@
 /**
  * @fileoverview Ripple effect initialization
  * @description Event delegation for ripple effect on all .dndev-interactive elements.
- * Call once at app startup. Uses CSS variable --ripple-opacity (0 = disabled).
+ * Call once at app startup. Uses CSS variable --ripple-opacity (0 or unset = disabled).
  *
  * @version 0.1.0
  * @since 0.1.0
@@ -44,17 +44,19 @@ function handleRipple(event: PointerEvent): void {
 
   // Check if ripple is disabled via CSS variable
   const styles = getComputedStyle(target);
-  const rippleOpacity = parseFloat(
-    styles.getPropertyValue('--ripple-opacity').trim() || '0.2'
-  );
-  if (rippleOpacity <= 0) return;
+  const rippleOpacity = parseFloat(styles.getPropertyValue('--ripple-opacity'));
+  if (!(rippleOpacity > 0)) return;
 
-  // Get click position relative to target
+  // Get click position relative to the target's padding box (the ripple's containing block)
   const rect = target.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
+  const paddingBoxStart = rect.left + target.clientLeft;
+  const inlineOffset =
+    styles.direction === 'rtl'
+      ? paddingBoxStart + target.clientWidth - event.clientX
+      : event.clientX - paddingBoxStart;
+  const blockOffset = event.clientY - rect.top - target.clientTop;
 
-  // Calculate ripple size (diagonal of element)
+  // Base ripple size on the element's longest side
   const size = Math.max(rect.width, rect.height);
 
   // Create ripple element
@@ -63,18 +65,23 @@ function handleRipple(event: PointerEvent): void {
   ripple.style.cssText = `
     width: ${size}px;
     height: ${size}px;
-    left: ${x}px;
-    top: ${y}px;
+    inset-inline-start: ${inlineOffset - size / 2}px;
+    inset-block-start: ${blockOffset - size / 2}px;
   `;
 
+  // Clip inside a dedicated layer: layout rules can override the target's overflow
+  const clip = document.createElement('span');
+  clip.className = 'dndev-ripple-clip';
+  clip.appendChild(ripple);
+
   // Add to target
-  target.appendChild(ripple);
+  target.appendChild(clip);
 
   // Remove after animation completes
   ripple.addEventListener(
     'animationend',
     () => {
-      ripple.remove();
+      clip.remove();
     },
     { once: true }
   );

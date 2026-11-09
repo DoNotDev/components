@@ -177,7 +177,6 @@
   --font-size-xs: 0.75rem; /* 12px - captions, shortcuts, meta */
   --font-size-sm: 0.875rem; /* 14px - small text, captions */
   --font-size-base: 1rem; /* 16px - body text, DEFAULT */
-  --font-size-input: 16px; /* Form field text - hardcoded for iOS zoom + density-proof */
   --font-size-lg: 1.25rem; /* 20px - base × 1.25¹ - emphasized text */
   --font-size-xl: 1.563rem; /* 25px - base × 1.25² - headings */
   --font-size-2xl: 1.953rem; /* 31px - base × 1.25³ - large headings */
@@ -430,4 +429,11 @@
     2vw
   ); /* 32-48px fluid, 2vw floor */
   --line-height: 1.33; /* Perfect Fourth - All text */
+}
+
+/* Form field text: follows density, never below 16px (iOS focus zoom).
+   Declared on [data-density] too, so nested densities resolve their own base. */
+:root,
+[data-density] {
+  --font-size-input: max(16px, var(--font-size-base));
 }
