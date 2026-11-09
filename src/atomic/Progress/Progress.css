@@ -9,7 +9,7 @@
   background-color: var(--secondary);
 }
 
-.dndev-progress [data-radix-progress-indicator] {
+.dndev-progress > [data-state] {
   height: 100%;
   width: 100%;
   flex: 1;

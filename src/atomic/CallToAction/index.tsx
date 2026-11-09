@@ -71,7 +71,7 @@ import './CallToAction.css';
 /**
  * CallToAction-specific props (content directives)
  */
-interface CallToActionOwnProps {
+export interface CallToActionOwnProps {
   /**
    * Element type to render as
    * @default 'section'

@@ -973,6 +973,32 @@
   text-transform: var(--text-transform-label, none);
 }
 
+/* ICON BADGE - count bubble on the icon's top-end corner (Button `badge`) */
+.dndev-interactive-icon-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.dndev-interactive-badge {
+  position: absolute;
+  inset-block-start: -0.5em;
+  inset-inline-end: -0.65em;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  pointer-events: none;
+}
+
 /* Compact mode - always hide label */
 .dndev-interactive-label[data-display='compact'] {
   display: none;

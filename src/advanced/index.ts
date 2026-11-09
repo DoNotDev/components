@@ -23,7 +23,7 @@ export type { CodeProps } from './Code';
 export { default as JsonViewer } from './JsonViewer';
 
 export { default as ImageGallery } from './ImageGallery';
-export type { ImageGalleryProps, ImageData } from './ImageGallery';
+export type { ImageGalleryProps, ImageData, ImageFit } from './ImageGallery';
 
 export { default as Carousel } from './Carousel';
 export type { CarouselProps, CarouselRef } from './Carousel';

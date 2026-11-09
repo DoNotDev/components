@@ -54,7 +54,7 @@ export type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 /**
  * Badge-specific props (styling directives)
  */
-interface BadgeOwnProps extends VariantProps<typeof badgeVariants> {
+export interface BadgeOwnProps extends VariantProps<typeof badgeVariants> {
   /**
    * Element type to render as
    * @default 'div'

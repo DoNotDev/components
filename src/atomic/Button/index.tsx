@@ -123,6 +123,11 @@ export interface ButtonProps
    * @default false
    */
   iconEnd?: boolean;
+  /**
+   * Count bubble on the icon's corner (cart items, notifications). Rendered only with an
+   * icon; `0`, empty or undefined hides it. Decorative: put the count in `aria-label`.
+   */
+  badge?: number | string;
   /** Tooltip text to show on hover */
   tooltip?: string;
   /** Force tooltip to stay open (e.g., after copy action) */
@@ -191,6 +196,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       display = DISPLAY.AUTO,
       icon,
       iconEnd = false,
+      badge,
       children,
       tooltip,
       tooltipForceOpen,
@@ -217,6 +223,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled || loading;
     const showProgress = loading && progress !== undefined && progress < 100;
     const displayText = loading ? (loadingText ?? buttonText) : buttonText;
+
+    // Icon, with the count bubble on its corner when `badge` is set
+    const showBadge = badge !== undefined && badge !== 0 && badge !== '';
+    const iconWithBadge = showBadge ? (
+      <span className="dndev-interactive-icon-anchor">
+        <Icon icon={icon} />
+        <span className="dndev-interactive-badge" aria-hidden="true">
+          {badge}
+        </span>
+      </span>
+    ) : (
+      <Icon icon={icon} />
+    );
 
     // Build button content - Icon handles all types automatically
     const buttonContent = loading ? (
@@ -260,7 +279,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       </>
     ) : (
       <>
-        {icon && !iconEnd && <Icon icon={icon} />}
+        {icon && !iconEnd && iconWithBadge}
         {hasText && (
           <span
             className="dndev-interactive-label"
@@ -269,7 +288,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             {buttonText}
           </span>
         )}
-        {icon && iconEnd && <Icon icon={icon} />}
+        {icon && iconEnd && iconWithBadge}
       </>
     );
 

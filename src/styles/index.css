@@ -76,6 +76,7 @@
 @import '../atomic/Switch/Switch.css';
 @import '../atomic/Table/Table.css';
 @import '../atomic/Tabs/Tabs.css';
+@import '../atomic/QuantityStepper/QuantityStepper.css';
 @import '../atomic/Tag/Tag.css';
 @import '../atomic/Text/Text.css';
 @import '../atomic/Toaster/Toaster.css';

@@ -72,7 +72,10 @@ const heroSectionVariants = cva('', {
   },
 });
 
-interface HeroSectionOwnProps extends VariantProps<typeof heroSectionVariants> {
+/** HeroSection-specific props (merged with the native props of the `as` element). */
+export interface HeroSectionOwnProps extends VariantProps<
+  typeof heroSectionVariants
+> {
   /** Element type to render as @default 'section' */
   as?: 'section' | 'header' | 'div';
   /** Badge text */
@@ -117,6 +120,20 @@ interface HeroSectionOwnProps extends VariantProps<typeof heroSectionVariants> {
    * @default 'cover'
    */
   backgroundFit?: 'cover' | 'contain';
+  /**
+   * Focal point of a `cover` background image (CSS `object-position`), so the
+   * subject stays in frame when the hero crops on narrow screens, e.g. `'70% 30%'`.
+   * @default 'center'
+   */
+  backgroundPosition?: string;
+  /**
+   * Readability scrim over a `cover` background image.
+   * - `'full'` — dark gradient over the whole image (default)
+   * - `'soft'` — light gradient at the bottom only, for bright editorial photography
+   *   with text placed at the bottom (`justify="end"`)
+   * @default 'full'
+   */
+  scrim?: 'full' | 'soft';
   /** Content */
   children?: ReactNode;
 }
@@ -129,6 +146,36 @@ export type HeroSectionProps<T extends ElementType = 'section'> =
   HeroSectionOwnProps &
     Omit<ComponentPropsWithRef<T>, keyof HeroSectionOwnProps>;
 
+/**
+ * Hero section: h1 title, subtitle, optional badge and children (actions).
+ * `bleed` spans the viewport width; `backgroundImage` fills it with a cover photo
+ * under a readability scrim (text turns white).
+ *
+ * @example
+ * ```tsx
+ * <HeroSection title="Build Faster" subtitle="The ultimate framework">
+ *   <Button>Get Started</Button>
+ * </HeroSection>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Editorial photo hero: subject kept in frame on phones, text at the bottom
+ * <HeroSection
+ *   bleed
+ *   fullHeight
+ *   backgroundImage="/images/campaign.webp"
+ *   backgroundPosition="70% 30%"
+ *   scrim="soft"
+ *   justify="end"
+ *   textAlign="start"
+ *   align="start"
+ *   title="Spring collection"
+ * >
+ *   <Button>Discover</Button>
+ * </HeroSection>
+ * ```
+ */
 const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
   function HeroSection(
     {
@@ -145,8 +192,11 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
       bleed = false,
       backgroundImage,
       backgroundFit = 'cover',
+      backgroundPosition,
+      scrim = 'full',
       children,
       className,
+      style,
       ...props
     },
     ref
@@ -171,6 +221,8 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
         'data-justify': justify,
         'data-variant': variant || undefined,
         'data-tone': tone,
+        'data-scrim':
+          backgroundImage && backgroundFit !== 'contain' ? scrim : undefined,
         style: {
           ...(fullHeight
             ? {
@@ -180,10 +232,7 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
                   'calc(100dvh - var(--header-height, 0px) - var(--footer-height, 0px))',
               }
             : {}),
-          ...(backgroundImage && backgroundFit !== 'contain'
-            ? { backgroundImage: `url(${backgroundImage})` }
-            : {}),
-          ...props.style,
+          ...style,
         },
         ...props,
       },
@@ -195,6 +244,9 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
               alt=""
               aria-hidden="true"
               className="dndev-hero-section__img"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />,
             <div key="hero-text" className="dndev-hero-section__text">
               <Stack>
@@ -221,6 +273,28 @@ const HeroSection = forwardRef<HTMLElement, HeroSectionProps>(
             </div>,
           ]
         : [
+            // Cover image as a real <img>, not a CSS background: in the initial HTML the
+            // browser's preload scanner finds it and fetches it first (fetchpriority),
+            // so the hero photo — the page's LCP — starts loading with the document.
+            ...(backgroundImage
+              ? [
+                  <img
+                    key="hero-cover"
+                    src={backgroundImage}
+                    alt=""
+                    aria-hidden="true"
+                    className="dndev-hero-section__cover"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    style={
+                      backgroundPosition
+                        ? { objectPosition: backgroundPosition }
+                        : undefined
+                    }
+                  />,
+                ]
+              : []),
             <Stack key="hero-content">
               {badge && <Badge variant={BADGE_VARIANT.ACCENT}>{badge}</Badge>}
               {title && (

@@ -69,6 +69,9 @@
   /* Level overrides — headline font for all heading levels */
   &[data-level^='h'] {
     font-family: var(--font-headline);
+    /* Display sizes need tighter leading than body copy; themes opt in with
+       --line-height-heading, otherwise headings keep the text line-height. */
+    line-height: var(--line-height-heading, var(--line-height));
 
     /* A single word wider than its column is the one thing text cannot solve by
        wrapping, and display type hits it first: uppercase, letter-spaced headings

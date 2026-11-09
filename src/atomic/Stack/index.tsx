@@ -53,7 +53,7 @@ import './Stack.css';
 /**
  * Stack-specific props (layout directives)
  */
-interface StackOwnProps {
+export interface StackOwnProps {
   /**
    * Element type to render as
    * @default 'div'

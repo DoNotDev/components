@@ -48,7 +48,7 @@ import './Grid.css';
 /**
  * GridArea-specific props (layout directives)
  */
-interface GridAreaOwnProps {
+export interface GridAreaOwnProps {
   /**
    * Element type to render as
    * @default 'div'

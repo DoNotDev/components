@@ -21,3 +21,4 @@ export * from './rtl';
 export * from './viewportDetection';
 export * from './variants';
 export * from './imageRetry';
+export * from './sanitizeHtml';

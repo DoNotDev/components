@@ -45,6 +45,13 @@
     /* Square edges for panel metaphor */
   }
 
+  /* Narrow panel (carts, filters): full width on phones, a column on larger screens */
+  &[data-size='narrow'][data-side='right'],
+  &[data-size='narrow'][data-side='left'] {
+    width: 100%;
+    max-width: 28rem;
+  }
+
   &[data-side='right'] {
     /* Physical positioning: right edge */
     right: 0;

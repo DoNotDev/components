@@ -21,6 +21,11 @@ import List from '../List';
 import Slot from '../Slot';
 import Stack from '../Stack';
 import Text from '../Text';
+import { renderCardCover } from './cover';
+import type { CardCoverMedia } from './cover';
+
+export { renderCardCover } from './cover';
+export type { CardCoverMedia } from './cover';
 
 /** Corner anchor for the overlay element layered on the card cover. */
 export type CardOverlayPosition =
@@ -134,58 +139,6 @@ export function renderCardHeader(
 }
 
 /**
- * Renders the card cover region with optional overlay.
- *
- * Architecture: cover is a relative-positioned header region that sits flush
- * to the card's rounded corners (no negative-margin hack). When the card has
- * body content, the cover's height comes from `coverAspect`. When the card is
- * cover-only (no body), the cover stretches to fill the card — the card
- * itself picks up `coverAspect` via its container.
- *
- * - `string` cover → renders a safe `<img>` with `loading="lazy"`,
- *   `decoding="async"`, `referrerpolicy="no-referrer"`, `alt=""` (decorative).
- * - `ReactNode` cover → passthrough; child `<img>`/`<video>` auto-fill via CSS.
- *
- * Overlay is absolutely positioned over the cover AND over the body slot,
- * anchored by `overlayPosition` with a theme-token inset.
- */
-export function renderCardCover(
-  cover: string | ReactNode | undefined,
-  coverAspect: CSSProperties['aspectRatio'] | undefined,
-  hasBody: boolean
-): ReactNode {
-  if (!cover) return null;
-
-  const isStringCover = typeof cover === 'string';
-
-  // When body is present the cover owns the top region sized by coverAspect.
-  // When body is absent the cover fills the card (card owns the aspect-ratio).
-  const coverStyle: CSSProperties = hasBody
-    ? { aspectRatio: coverAspect ?? '4 / 5' }
-    : {};
-
-  return (
-    <div
-      className="dndev-card-cover"
-      data-has-body={hasBody ? 'true' : undefined}
-      style={coverStyle}
-    >
-      {isStringCover ? (
-        <img
-          src={cover}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div className="dndev-card-cover-media">{cover}</div>
-      )}
-    </div>
-  );
-}
-
-/**
  * Card variant constants - re-exported from shared SURFACE_VARIANT
  * Matches .dndev-surface CSS class
  */
@@ -257,6 +210,25 @@ export interface CardProps
    * @default '4 / 5'
    */
   coverAspect?: CSSProperties['aspectRatio'];
+  /**
+   * How a string `cover` fits its region: `'cover'` crops to fill (default),
+   * `'contain'` shows the whole image (cut-out packshots).
+   * @default 'cover'
+   */
+  coverFit?: CardCoverMedia['fit'];
+  /** Alt text for a string `cover`. Omit for a decorative cover. */
+  coverAlt?: string;
+  /**
+   * Second image URL crossfaded in on hover / keyboard focus (string covers only),
+   * e.g. a lifestyle shot behind a packshot.
+   */
+  coverHover?: string;
+  /**
+   * Load a string `cover` eagerly with high fetch priority. Set on above-the-fold
+   * cards only (hero tiles, first row); others stay lazy.
+   * @default false
+   */
+  coverEager?: boolean;
   /**
    * Optional content absolutely positioned on top of the cover.
    * Anchored by `overlayPosition` with theme-token inset. Overlay sits above
@@ -367,6 +339,10 @@ const Card = ({
   elevated,
   cover,
   coverAspect,
+  coverFit,
+  coverAlt,
+  coverHover,
+  coverEager,
   overlay,
   overlayPosition = 'top-left',
   fullOverlay,
@@ -384,7 +360,12 @@ const Card = ({
   const contentNode = renderCardContent(content);
   const hasContent = Boolean(contentNode || children);
   const hasBody = Boolean(header || hasContent || footer);
-  const coverNode = renderCardCover(cover, coverAspect, hasBody);
+  const coverNode = renderCardCover(cover, coverAspect, hasBody, {
+    fit: coverFit,
+    alt: coverAlt,
+    hover: coverHover,
+    eager: coverEager,
+  });
 
   const cardAttrs = {
     ...variantAttrs,

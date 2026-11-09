@@ -138,6 +138,11 @@
   display: block;
 }
 
+.image-gallery__thumbnail-image[data-fit='contain'] {
+  object-fit: contain;
+  background-color: var(--muted);
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .image-gallery__thumbnail {

@@ -25,7 +25,7 @@ export type { CodeProps } from './advanced/Code';
 export { default as JsonViewer } from './advanced/JsonViewer';
 export type { JsonViewerProps } from './advanced/JsonViewer';
 export { default as ImageGallery } from './advanced/ImageGallery';
-export type { ImageGalleryProps, ImageData } from './advanced/ImageGallery';
+export type { ImageGalleryProps, ImageData, ImageFit } from './advanced/ImageGallery';
 
 export { default as Carousel } from './advanced/Carousel';
 export type { CarouselProps, CarouselRef } from './advanced/Carousel';

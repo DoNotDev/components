@@ -80,7 +80,7 @@ export type ContentWidth = (typeof CONTENT_WIDTH)[keyof typeof CONTENT_WIDTH];
 /**
  * Section-specific props
  */
-interface SectionOwnProps {
+export interface SectionOwnProps {
   /**
    * Element type to render as
    * @default 'section'

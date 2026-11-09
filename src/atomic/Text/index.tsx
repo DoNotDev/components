@@ -32,7 +32,7 @@ export const TEXT_VARIANT = {
 /**
  * Text-specific props (styling and typography directives)
  */
-interface TextOwnProps {
+export interface TextOwnProps {
   /**
    * HTML element to render as
    * @default 'div'

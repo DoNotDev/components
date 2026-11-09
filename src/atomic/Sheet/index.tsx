@@ -49,6 +49,12 @@ export interface SheetProps extends Omit<
   variant?: SurfaceVariant;
   /** Whether to disable swipe-to-close functionality */
   noSwipe?: boolean;
+  /**
+   * Panel width for `left` / `right` sheets: `'default'` (80%, up to 56rem: editing
+   * panels) or `'narrow'` (full width on phones, up to 28rem: carts, filters, previews).
+   * @default 'default'
+   */
+  size?: 'default' | 'narrow';
 }
 
 /**
@@ -83,6 +89,7 @@ const Sheet = ({
   variant,
   className = '',
   noSwipe = false,
+  size = 'default',
   ...contentProps
 }: SheetProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -126,6 +133,7 @@ const Sheet = ({
           ref={ref}
           className={cn('dndev-surface dndev-sheet-content', className)}
           data-side={side}
+          data-size={size === 'default' ? undefined : size}
           onPointerDown={noSwipe ? undefined : onPointerDown}
           onPointerMove={noSwipe ? undefined : onPointerMove}
           onPointerUp={noSwipe ? undefined : onPointerUp}

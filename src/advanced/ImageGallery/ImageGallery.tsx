@@ -11,7 +11,12 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
+import type {
+  CSSProperties,
+  KeyboardEvent,
+  MouseEvent,
+  ReactElement,
+} from 'react';
 
 import Dialog from '../../atomic/Dialog';
 import { handleImageError } from '../../utils/imageRetry';
@@ -21,7 +26,12 @@ import './ImageGallery.css';
 export interface ImageData {
   fullUrl?: string;
   thumbUrl?: string;
+  /** Per-image override of the gallery `fit` (e.g. `'contain'` for a cut-out packshot). */
+  fit?: ImageFit;
 }
+
+/** `'cover'` crops to fill the frame; `'contain'` shows the whole image on the muted frame. */
+export type ImageFit = 'cover' | 'contain';
 
 /** Props for the ImageGallery component -- thumbnail strip with main image preview. */
 export interface ImageGalleryProps {
@@ -38,21 +48,31 @@ export interface ImageGalleryProps {
    * Omit for default behavior (lightbox on).
    */
   nobox?: boolean;
+  /**
+   * How images fill the main frame and thumbnails. Overridden per image by `ImageData.fit`.
+   * @default 'cover'
+   */
+  fit?: ImageFit;
 }
 
 /**
  * Normalize image data to consistent format
  */
-function normalizeImage(img: ImageData | string): {
+function normalizeImage(
+  img: ImageData | string,
+  fit: ImageFit
+): {
   full: string;
   thumb: string;
+  fit: ImageFit;
 } {
   if (typeof img === 'string') {
-    return { full: img, thumb: img };
+    return { full: img, thumb: img, fit };
   }
   return {
     full: img.fullUrl || img.thumbUrl || '',
     thumb: img.thumbUrl || img.fullUrl || '',
+    fit: img.fit ?? fit,
   };
 }
 
@@ -83,6 +103,7 @@ export function ImageGallery({
   altPrefix = 'Image',
   onImageChange,
   nobox,
+  fit = 'cover',
 }: ImageGalleryProps): ReactElement {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -93,7 +114,7 @@ export function ImageGallery({
   // Track whether the index changed via user navigation (not initial mount)
   const isUserNavigationRef = useRef(false);
 
-  const normalizedImages = images.map(normalizeImage);
+  const normalizedImages = images.map((img) => normalizeImage(img, fit));
   const hasMultiple = normalizedImages.length > 1;
 
   // Trim stale refs when the image list shrinks
@@ -241,6 +262,11 @@ export function ImageGallery({
 
   const clampedIndex = Math.min(selectedIndex, normalizedImages.length - 1);
   const currentImage = normalizedImages[clampedIndex]!;
+  // Contained images (cut-out packshots) sit inset from the frame edges.
+  const containInset: CSSProperties =
+    currentImage.fit === 'contain'
+      ? { boxSizing: 'border-box', padding: '6%' }
+      : {};
 
   return (
     <div
@@ -270,7 +296,8 @@ export function ImageGallery({
               inset: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: currentImage.fit,
+              ...containInset,
               opacity: loadedFullUrls.has(clampedIndex) ? 0 : 1,
               transition: 'opacity 0.3s ease',
               zIndex: 1,
@@ -290,7 +317,8 @@ export function ImageGallery({
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: currentImage.fit,
+            ...containInset,
             opacity:
               loadedFullUrls.has(clampedIndex) ||
               currentImage.full === currentImage.thumb
@@ -380,6 +408,7 @@ export function ImageGallery({
                 src={img.thumb}
                 alt=""
                 className="image-gallery__thumbnail-image"
+                data-fit={img.fit}
                 onError={handleImageError}
               />
             </button>

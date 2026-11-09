@@ -34,7 +34,7 @@ export type { AvatarProps } from './Avatar';
 
 export { default as Badge } from './Badge';
 export { BADGE_VARIANT } from './Badge';
-export type { BadgeVariant } from './Badge';
+export type { BadgeProps, BadgeOwnProps, BadgeVariant } from './Badge';
 
 export { default as Blockquote } from './Blockquote';
 export { BLOCKQUOTE_VARIANT } from './Blockquote';
@@ -48,7 +48,7 @@ export { default as ButtonGroup } from './ButtonGroup';
 export type { ButtonGroupProps, ButtonGroupItem } from './ButtonGroup';
 
 export { default as CallToAction } from './CallToAction';
-export type { CallToActionProps } from './CallToAction';
+export type { CallToActionProps, CallToActionOwnProps } from './CallToAction';
 
 export { default as Calendar } from './Calendar';
 export type { CalendarProps } from './Calendar';
@@ -62,7 +62,7 @@ export type { DateTimePickerProps } from './DateTimePicker';
 
 export { default as Card, renderCardContent, renderCardHeader } from './Card';
 export { CARD_VARIANT } from './Card';
-export type { CardProps, CardVariant, CardContent } from './Card';
+export type { CardProps, CardVariant, CardContent, CardCoverMedia } from './Card';
 
 export { default as DualCard } from './DualCard';
 export type { DualCardProps, DualCardVariant } from './DualCard';
@@ -126,14 +126,16 @@ export type { FileButtonProps } from './FileButton';
 export { default as Grid, GridArea } from './Grid';
 export type {
   GridProps,
+  GridOwnProps,
   GridAreaProps,
+  GridAreaOwnProps,
   GridCols,
   ResponsiveCols,
   ResponsiveTemplate,
 } from './Grid';
 
 export { default as HeroSection } from './HeroSection';
-export type { HeroSectionProps } from './HeroSection';
+export type { HeroSectionProps, HeroSectionOwnProps } from './HeroSection';
 
 export { default as HoverCard } from './HoverCard';
 export * from './HoverCard/HoverCardPrimitive';
@@ -202,7 +204,7 @@ export * from './ScrollArea/ScrollAreaPrimitive';
 export type { ScrollAreaProps, ScrollBarProps } from './ScrollArea';
 
 export { default as Section } from './Section';
-export type { SectionProps } from './Section';
+export type { SectionProps, SectionOwnProps } from './Section';
 
 export {
   default as Select,
@@ -239,7 +241,7 @@ export { default as Spinner } from './Spinner';
 export type { SpinnerProps } from './Spinner';
 
 export { default as Stack, GAP_VARIANT } from './Stack';
-export type { StackProps, GapVariant } from './Stack';
+export type { StackProps, StackOwnProps, GapVariant } from './Stack';
 
 export { default as Stepper } from './Stepper';
 export type { StepperProps, StepperStep } from './Stepper';
@@ -252,6 +254,8 @@ export { default as Table } from './Table';
 export { DataTable } from './Table';
 export type { TableColumn, DataTableProps } from './Table';
 
+export { default as QuantityStepper } from './QuantityStepper';
+export type { QuantityStepperProps } from './QuantityStepper';
 export { default as Tag } from './Tag';
 export { TAG_VARIANT, tagVariants } from './Tag';
 export type { TagProps } from './Tag';
@@ -262,7 +266,7 @@ export type { TabsProps, TabItem } from './Tabs';
 
 export { default as Text, TEXT_VARIANT } from './Text';
 export { default as Typography } from './Text'; // MUI compatibility alias
-export type { TextProps, TextVariant } from './Text';
+export type { TextProps, TextOwnProps, TextVariant } from './Text';
 export type { TextProps as TypographyProps } from './Text'; // MUI compatibility alias
 
 export { default as Textarea } from './Textarea';

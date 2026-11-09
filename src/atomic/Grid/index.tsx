@@ -76,7 +76,7 @@ export type GridCols = number | string | ResponsiveCols | ResponsiveTemplate;
 /**
  * Grid-specific props (layout directives)
  */
-interface GridOwnProps {
+export interface GridOwnProps {
   /**
    * Element type to render as
    * @default 'div'
@@ -234,6 +234,6 @@ const Grid = forwardRef<HTMLElement, GridProps>(
 Grid.displayName = 'Grid';
 
 export { default as GridArea } from './GridArea';
-export type { GridAreaProps } from './GridArea';
+export type { GridAreaProps, GridAreaOwnProps } from './GridArea';
 
 export default Grid;
