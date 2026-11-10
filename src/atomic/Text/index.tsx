@@ -89,14 +89,8 @@ export interface TextOwnProps {
 
   /**
    * Text alignment
-   * Preferred prop — use this over `align`
    */
   textAlign?: TextAlign;
-
-  /**
-   * @deprecated Use `textAlign` instead. Kept for backward compatibility.
-   */
-  align?: TextAlign;
 
   /**
    * Font weight
@@ -183,7 +177,6 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
     variant = TEXT_VARIANT.DEFAULT,
     level,
     textAlign,
-    align,
     weight,
     italic,
     className,
@@ -223,7 +216,7 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
     {
       ref,
       className: cn('dndev-text-base', className),
-      'data-text-align': textAlign ?? align ?? undefined,
+      'data-text-align': textAlign,
       'data-font-weight': weight || undefined,
       'data-italic': italic || undefined,
       ...variantAttrs,

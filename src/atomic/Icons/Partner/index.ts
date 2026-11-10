@@ -9,6 +9,7 @@ export { default as DiscordIcon } from './DiscordIcon';
 export { default as FacebookIcon } from './FacebookIcon';
 export { default as GitHubIcon } from './GitHubIcon';
 export { default as GoogleIcon } from './GoogleIcon';
+export { default as InstagramIcon } from './InstagramIcon';
 export { default as LinkedInIcon } from './LinkedinIcon';
 export { default as MastodonIcon } from './MastodonIcon';
 export { default as MediumIcon } from './MediumIcon';
