@@ -194,9 +194,9 @@ const Tabs = ({
     'data-justify': justify,
   };
 
-  const mergedListStyle = {
+  const mergedListStyle: CSSProperties = {
     ...listStyle,
-  } as CSSProperties;
+  };
 
   return (
     <TabsPrimitive

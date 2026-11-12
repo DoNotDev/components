@@ -15,6 +15,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import type { IconType } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { useLinkRenderer } from '../../utils/linkComponent';
 import { surfaceVariants } from '../../utils/variants';
 import Icon from '../Icons/Icon';
 import List from '../List';
@@ -22,10 +23,10 @@ import Slot from '../Slot';
 import Stack from '../Stack';
 import Text from '../Text';
 import { renderCardCover } from './cover';
-import type { CardCoverMedia } from './cover';
+import type { CardCoverImage, CardCoverMedia } from './cover';
 
 export { renderCardCover } from './cover';
-export type { CardCoverMedia } from './cover';
+export type { CardCoverImage, CardCoverMedia } from './cover';
 
 /** Corner anchor for the overlay element layered on the card cover. */
 export type CardOverlayPosition =
@@ -176,12 +177,19 @@ export interface CardProps
   footer?: ReactNode;
   /** Tooltip text */
   tooltip?: string;
-  /** Click handler */
+  /** Click handler. Ignored when `href` is set (the link navigates). */
   onClick?: () => void;
+  /**
+   * Destination of the card: renders a real `<a href>` (the title; its hit area
+   * stretches over the whole card) through the app router's link, so crawlers
+   * follow it and clicks navigate client-side. Buttons and inputs inside the card
+   * stay clickable. Without a title, give the card an `aria-label`.
+   */
+  href?: string;
   /**
    * Whether the card is clickable (enables hover styles).
    * Set to true when wrapped in Link or when onClick is provided.
-   * @default false (auto-detected from onClick)
+   * @default false (auto-detected from onClick / href)
    */
   clickable?: boolean;
   /**
@@ -193,6 +201,8 @@ export interface CardProps
    * Optional full-bleed cover.
    * - `string` → rendered as a safe `<img>` (lazy, async-decoded, no-referrer,
    *   empty `alt` = decorative). Cover fills the region via `object-fit: cover`.
+   * - `{ fullUrl, thumbUrl }` (a CRUD `Picture`) → same `<img>`; phones
+   *   (below 768px) download the thumbnail, larger screens the full image.
    * - `ReactNode` → passthrough (consumer supplies `<img alt="...">`, `<video>`,
    *   `<picture>`, etc.). Child media auto-fills via CSS.
    *
@@ -202,7 +212,7 @@ export interface CardProps
    * `coverAspect`. When the card does have body content, the cover occupies
    * a top header region sized by `coverAspect`.
    */
-  cover?: string | ReactNode;
+  cover?: CardCoverImage | ReactNode;
   /**
    * Aspect-ratio for the cover region. Any valid CSS aspect-ratio value.
    * When body content is present, applied to the cover header region.
@@ -219,10 +229,10 @@ export interface CardProps
   /** Alt text for a string `cover`. Omit for a decorative cover. */
   coverAlt?: string;
   /**
-   * Second image URL crossfaded in on hover / keyboard focus (string covers only),
+   * Second image crossfaded in on hover / keyboard focus (image covers only),
    * e.g. a lifestyle shot behind a packshot.
    */
-  coverHover?: string;
+  coverHover?: CardCoverImage;
   /**
    * Load a string `cover` eagerly with high fetch priority. Set on above-the-fold
    * cards only (hero tiles, first row); others stay lazy.
@@ -335,6 +345,7 @@ const Card = ({
   children,
   tooltip,
   onClick,
+  href,
   clickable,
   elevated,
   cover,
@@ -354,9 +365,22 @@ const Card = ({
   const Comp = asChild ? Slot : 'div';
 
   const variantAttrs = getVariantDataAttrs({ variant });
-  const isClickable = clickable !== undefined ? clickable : !!onClick;
+  const isClickable =
+    clickable !== undefined ? clickable : !!onClick || !!href;
+  const LinkComponent = useLinkRenderer();
+  const hasLink = !!href && !asChild;
 
-  const header = renderCardHeader(icon, title, subtitle);
+  const header = renderCardHeader(
+    icon,
+    hasLink && title ? (
+      <LinkComponent href={href} className="dndev-card-link">
+        {title}
+      </LinkComponent>
+    ) : (
+      title
+    ),
+    subtitle
+  );
   const contentNode = renderCardContent(content);
   const hasContent = Boolean(contentNode || children);
   const hasBody = Boolean(header || hasContent || footer);
@@ -374,6 +398,7 @@ const Card = ({
       'data-elevated': elevated ? 'true' : 'false',
     }),
     ...(isClickable && { 'data-clickable': 'true' }),
+    ...(hasLink && { 'data-has-link': 'true' }),
     ...(cover !== undefined && { 'data-has-cover': 'true' }),
     ...(cover !== undefined && !hasBody && { 'data-cover-only': 'true' }),
     ...(overlay !== undefined && { 'data-overlay-position': overlayPosition }),
@@ -415,10 +440,17 @@ const Card = ({
       className={cn('dndev-card', surfaceVariants({ variant }), className)}
       style={rootStyle}
       {...cardAttrs}
-      onClick={onClick}
+      onClick={hasLink ? undefined : onClick}
       title={tooltip}
       {...props}
     >
+      {hasLink && !title && (
+        <LinkComponent
+          href={href}
+          className="dndev-card-link"
+          aria-label={props['aria-label']}
+        />
+      )}
       {coverNode}
       {fullOverlay && (
         <div className="dndev-card-full-overlay">{fullOverlay}</div>

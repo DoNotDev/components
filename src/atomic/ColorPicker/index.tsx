@@ -14,6 +14,7 @@ import { forwardRef, useRef, useState } from 'react';
 import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { withCssVars } from '../../utils/cssVars';
 
 import './ColorPicker.css';
 
@@ -293,7 +294,7 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
           role="radiogroup"
           aria-label={ariaLabel}
           className="dndev-color-swatches"
-          style={{ '--color-picker-columns': columns } as React.CSSProperties}
+          style={withCssVars({ '--color-picker-columns': columns })}
           onKeyDown={handleSwatchKeyDown}
         >
           {resolvedSwatches.map((swatch, index) => {
@@ -310,9 +311,7 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
                 disabled={disabled}
                 className="dndev-color-swatch"
                 data-light={isLightColor(swatch.value)}
-                style={
-                  { '--swatch-color': swatch.value } as React.CSSProperties
-                }
+                style={withCssVars({ '--swatch-color': swatch.value })}
                 onClick={() => selectColor(swatch.value)}
                 onFocus={() => setFocusedIndex(index)}
               />

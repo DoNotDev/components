@@ -107,6 +107,16 @@ export interface TextOwnProps {
  * Polymorphic Text props
  * Combines Text-specific props with native element props based on 'as' prop
  */
+/** Heading tags that map the `as` prop to a typography level. */
+const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+type HeadingTag = (typeof HEADING_TAGS)[number];
+
+/** Narrows an element tag to a heading tag (h1-h6). */
+function isHeadingTag(tag: string): tag is HeadingTag {
+  const headingTags: readonly string[] = HEADING_TAGS;
+  return headingTags.includes(tag);
+}
+
 export type TextProps<T extends ElementType = 'div'> = TextOwnProps &
   Omit<ComponentPropsWithRef<T>, keyof TextOwnProps>;
 
@@ -189,13 +199,7 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
 
   // Auto-map as prop to level if level not explicitly provided
   // Only h1-h6 can map to level (p, span, div, etc. default to 'body')
-  const headingElements: readonly ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')[] =
-    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-  const effectiveLevel =
-    level ??
-    (headingElements.includes(as as any)
-      ? (as as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')
-      : 'body');
+  const effectiveLevel = level ?? (isHeadingTag(as) ? as : 'body');
 
   const levelAttrs =
     effectiveLevel !== 'body' ? { 'data-level': effectiveLevel } : {};

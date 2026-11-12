@@ -10,9 +10,10 @@
  * @author AMBROISE PARK Consulting
  */
 
-import type { ReactNode, CSSProperties, Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
 
 import { cn } from '../../utils/helpers';
+import type { CSSPropertiesWithVars } from '../../utils/cssVars';
 
 /**
  * Individual cell data for the Bento grid
@@ -97,12 +98,12 @@ export function Bento({
   ariaLabel,
   ref,
 }: BentoProps) {
-  const gridStyle: CSSProperties = {
+  const gridStyle: CSSPropertiesWithVars = {
     '--bento-columns-mobile': columns.mobile,
     '--bento-columns-tablet': columns.tablet,
     '--bento-columns-desktop': columns.desktop,
     '--bento-columns-wide': columns.wide,
-  } as CSSProperties;
+  };
 
   return (
     <div
@@ -115,10 +116,10 @@ export function Bento({
       aria-label={ariaLabel}
     >
       {items.map((item) => {
-        const cellStyle: CSSProperties = {
+        const cellStyle: CSSPropertiesWithVars = {
           '--cell-cols': item.span?.cols ?? 1,
           '--cell-rows': item.span?.rows ?? 1,
-        } as CSSProperties;
+        };
 
         return (
           <div

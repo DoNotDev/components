@@ -71,9 +71,12 @@ const PasswordInput = ({
   onFocus,
   onBlur,
   required,
+  id: idProp,
   ...props
 }: PasswordInputProps) => {
-  const id = useId();
+  // A passed id must reach both the input and its label
+  const generatedId = useId();
+  const id = idProp ?? generatedId;
   const [internalVisible, setInternalVisible] = useState(false);
 
   // Use controlled or internal state

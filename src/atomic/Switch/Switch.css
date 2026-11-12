@@ -75,6 +75,11 @@
   will-change: transform;
 }
 
+/* Primary while on: thumb in the primary foreground (as Checkbox), readable on the track */
+.dndev-switch[data-variant='primary'][data-state='checked'] .dndev-switch-thumb {
+  background-color: var(--primary-foreground);
+}
+
 .dndev-switch[data-state='checked'] .dndev-switch-thumb {
   transform: translateX(calc(2.75rem - 1.25rem - 0.125rem));
 }
@@ -128,4 +133,9 @@
 .dndev-switch-with-labels[data-checked='false'] .dndev-switch-label-checked {
   color: var(--muted-foreground);
   font-weight: var(--font-weight-normal);
+}
+
+/* Switch with a label after it: the switch keeps its size, the label wraps */
+.dndev-switch-field > .dndev-switch {
+  flex-shrink: 0;
 }

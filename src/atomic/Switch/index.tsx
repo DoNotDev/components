@@ -10,14 +10,18 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { useId } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import { cva } from 'class-variance-authority';
-import type { ComponentProps, ReactNode } from 'react';
 
 import { SwitchPrimitive } from './SwitchPrimitive';
 import { CONTROL_VARIANT } from '../../utils/constants';
 import type { ControlVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import Label from '../Label';
+import Stack from '../Stack';
 
 import './Switch.css';
 
@@ -31,6 +35,10 @@ export interface SwitchProps extends ComponentProps<
   uncheckedLabel?: string;
   /** Label for checked state (e.g., "Automatic") */
   checkedLabel?: string;
+  /**
+   * Label after the switch, like Checkbox: `[switch] label`, clickable.
+   */
+  label?: ReactNode;
 }
 
 const switchVariants = cva('dndev-switch', {
@@ -61,6 +69,14 @@ const switchVariants = cva('dndev-switch', {
  * // Simple switch without labels
  * <Switch checked={enabled} onCheckedChange={setEnabled} variant="success" />
  *
+ * // Form boolean: [switch] label, track muted while off, primary while on
+ * <Switch
+ *   checked={restock}
+ *   onCheckedChange={setRestock}
+ *   label="Remettre en stock à l'annulation"
+ *   variant={restock ? 'primary' : 'muted'}
+ * />
+ *
  * // Switch with labels (Manual/Automatic)
  * <Switch
  *   checked={isAutomatic}
@@ -79,8 +95,12 @@ const Switch = ({
   uncheckedLabel,
   checkedLabel,
   checked,
+  label,
+  id,
   ...props
 }: SwitchProps) => {
+  const generatedId = useId();
+  const switchId = id ?? generatedId;
   const variantAttrs = getVariantDataAttrs({ variant });
   const hasLabels = uncheckedLabel || checkedLabel;
 
@@ -88,6 +108,7 @@ const Switch = ({
     <SwitchPrimitives.Root
       className={cn(switchVariants({ variant }), className)}
       {...variantAttrs}
+      id={switchId}
       checked={checked}
       {...props}
     >
@@ -95,18 +116,11 @@ const Switch = ({
     </SwitchPrimitives.Root>
   );
 
-  // If no labels, return just the switch
-  if (!hasLabels) {
-    return switchElement;
-  }
-
-  // With labels: render [uncheckedLabel] [Switch] [checkedLabel]
-  // Add data-checked attribute to container for CSS styling
-  const isChecked = checked ?? false;
-  return (
+  // On/off texts around the switch: [uncheckedLabel] [switch] [checkedLabel]
+  const control = hasLabels ? (
     <div
       className="dndev-switch-with-labels"
-      data-checked={isChecked ? 'true' : 'false'}
+      data-checked={checked ? 'true' : 'false'}
     >
       {uncheckedLabel && (
         <span className="dndev-switch-label dndev-switch-label-unchecked">
@@ -120,6 +134,18 @@ const Switch = ({
         </span>
       )}
     </div>
+  ) : (
+    switchElement
+  );
+
+  if (!label) return control;
+
+  // Label after the control, clickable (same layout as Checkbox)
+  return (
+    <Stack direction="row" align="center" gap="tight" className="dndev-switch-field">
+      {control}
+      <Label htmlFor={switchId}>{label}</Label>
+    </Stack>
   );
 };
 

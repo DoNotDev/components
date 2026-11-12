@@ -38,10 +38,14 @@ export interface ActionButtonProps<T = unknown> extends Omit<
   confirmText?: string;
   /** Title for the confirmation dialog */
   confirmTitle?: string;
+  /** Confirm button label of the confirmation dialog (pass a translated string). @default 'Confirm' */
+  confirmLabel?: string;
+  /** Cancel button label of the confirmation dialog (pass a translated string). @default 'Cancel' */
+  cancelLabel?: string;
   /** Additional disabled condition */
   disabled?: boolean;
-  /** Button content */
-  children: ReactNode;
+  /** Button content. Omit for an icon-only button (set `icon` and `aria-label`). */
+  children?: ReactNode;
 }
 
 /**
@@ -74,6 +78,8 @@ function ActionButton<T = unknown>({
   loadingText,
   confirmText,
   confirmTitle = 'Confirm',
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   disabled = false,
   children,
   ...buttonProps
@@ -133,8 +139,8 @@ function ActionButton<T = unknown>({
           onOpenChange={setConfirmOpen}
           title={confirmTitle}
           description={confirmText}
-          confirmLabel="Confirm"
-          cancelLabel="Cancel"
+          confirmLabel={confirmLabel}
+          cancelLabel={cancelLabel}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
         />

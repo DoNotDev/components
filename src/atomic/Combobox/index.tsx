@@ -16,6 +16,7 @@ import Input from '../Input';
 import { FloatingLabel } from '../Label';
 import ScrollArea from '../ScrollArea';
 import Spinner from '../Spinner';
+import { withCssVars } from '../../utils/cssVars';
 
 import './Combobox.css';
 
@@ -344,7 +345,7 @@ const Combobox = ({
               'dndev-relative dndev-combobox-wrapper',
               'dndev-combobox-wrapper--chips'
             )}
-            style={{ '--combobox-pad-end': trailingPad } as React.CSSProperties}
+            style={withCssVars({ '--combobox-pad-end': trailingPad })}
             onClick={handleInputClick}
           >
             {chips}
@@ -416,7 +417,7 @@ const Combobox = ({
             'dndev-relative dndev-combobox-wrapper',
             chips && 'dndev-combobox-wrapper--chips'
           )}
-          style={{ '--combobox-pad-end': trailingPad } as React.CSSProperties}
+          style={withCssVars({ '--combobox-pad-end': trailingPad })}
           onClick={chips ? handleInputClick : undefined}
         >
           {chips}

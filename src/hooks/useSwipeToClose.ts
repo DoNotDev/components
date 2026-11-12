@@ -151,10 +151,16 @@ export function useSwipeToClose(
         return;
       }
 
+      // Swipe is a touch/pen gesture. A mouse press must never capture the pointer:
+      // capture retargets mouseup/click to the dialog, so labels, text selection and
+      // any click on non-control content inside the dialog stop working.
+      if (e.pointerType === 'mouse') return;
+
       const content = contentRef.current;
       if (!content) return;
 
-      // Don't capture pointer events on interactive elements (buttons, links, inputs, dropdowns, command items, etc.)
+      // Don't capture pointer events on interactive elements (buttons, links, inputs,
+      // labels, dropdowns, command items, etc.): capture would steal their click.
       const target = e.target as HTMLElement;
       const isInteractive =
         target.tagName === 'BUTTON' ||
@@ -162,9 +168,10 @@ export function useSwipeToClose(
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
         target.tagName === 'SELECT' ||
+        target.tagName === 'LABEL' ||
         target.hasAttribute('role') ||
         target.closest(
-          'button, a, input, textarea, select, [role="button"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="tab"], [role="link"], [data-radix-collection-item], [data-radix-select-item]'
+          'button, a, input, textarea, select, label, [contenteditable="true"], [role="button"], [role="checkbox"], [role="switch"], [role="radio"], [role="slider"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="tab"], [role="link"], [data-radix-collection-item], [data-radix-select-item]'
         );
 
       if (isInteractive) {

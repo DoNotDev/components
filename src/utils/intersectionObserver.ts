@@ -25,7 +25,10 @@ export function polyfillIntersectionObserver(): void {
   // Limitation: This mock fires the callback once on observe() but does NOT
   // re-fire on scroll/resize. unobserve() removes the element from the set
   // but cannot cancel an already-scheduled setTimeout callback.
-  (globalThis as any).IntersectionObserver = class IntersectionObserver {
+  // Write-only view of the global: the polyfill class is partial (no root/rootMargin/thresholds/takeRecords)
+  const writableGlobal: { IntersectionObserver: unknown } = globalThis;
+  type NativeIntersectionObserver = IntersectionObserver;
+  writableGlobal.IntersectionObserver = class IntersectionObserver {
     private callback: IntersectionObserverCallback;
     private elements: Set<Element>;
     private options: IntersectionObserverOptions;
@@ -57,7 +60,12 @@ export function polyfillIntersectionObserver(): void {
       };
 
       // Use setTimeout to ensure DOM is ready
-      setTimeout(() => this.callback([entry], this as any), 0);
+      // why: callback expects a full IntersectionObserver; this partial polyfill lacks root/rootMargin/thresholds/takeRecords
+      setTimeout(
+        () =>
+          this.callback([entry], this as unknown as NativeIntersectionObserver),
+        0
+      );
     }
 
     unobserve(element: Element): void {

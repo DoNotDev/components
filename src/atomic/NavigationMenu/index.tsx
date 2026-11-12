@@ -63,6 +63,7 @@ interface NavigationMenuProps extends Omit<
   /** Additional CSS classes */
   className?: string;
   /** Custom link component (e.g., Next.js Link) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: public prop; router Link components have incompatible prop types (narrowing is an API change, see any-audit)
   LinkComponent?: ComponentType<any>;
 }
 
@@ -100,7 +101,7 @@ const NavigationMenu = ({
   vertical = false,
   display = DISPLAY.AUTO,
   className,
-  LinkComponent = 'a' as any,
+  LinkComponent,
   children,
   ...props
 }: NavigationMenuProps) => {
@@ -119,7 +120,7 @@ const NavigationMenu = ({
         </span>
       );
 
-    const Link = LinkComponent as any;
+    const Link = LinkComponent === undefined ? 'a' : LinkComponent;
 
     // WCAG: aria-label provides context for COMPACT/AUTO (icon-only when collapsed)
     const ariaLabel =

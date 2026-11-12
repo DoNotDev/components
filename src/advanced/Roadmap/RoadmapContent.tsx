@@ -18,6 +18,7 @@ import Card, { renderCardContent } from '../../atomic/Card';
 import type { CardContent, CardVariant } from '../../atomic/Card';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { cn } from '../../utils/helpers';
+import { withCssVars } from '../../utils/cssVars';
 
 /** Laptop breakpoint threshold (1024px) — matches @donotdev/core BREAKPOINT_THRESHOLDS */
 const LAPTOP_QUERY = '(min-width: 1024px)';
@@ -91,7 +92,7 @@ const RoadmapContent = function RoadmapContent({
       <div className={cn('dndev-roadmap', className)}>
         <div
           className="dndev-roadmap-desktop"
-          style={{ ['--step-count' as any]: steps.length }}
+          style={withCssVars({ '--step-count': steps.length })}
         >
           {/* Progress line */}
           <div className="dndev-roadmap-timeline">

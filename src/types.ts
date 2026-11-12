@@ -21,8 +21,10 @@ import type { ButtonVariant } from './atomic/Button';
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
+// why: public type; accepts icon components with arbitrary props (narrowing is an API change, see any-audit)
 export type IconType =
   | ComponentType<LucideProps>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: see the why: comment above
   | ComponentType<any>
   | string
   | ReactNode;

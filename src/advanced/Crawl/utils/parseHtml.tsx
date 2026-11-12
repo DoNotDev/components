@@ -92,9 +92,9 @@ export function parseHtml(
     // Check if it's a self-closing tag (like <br/> or <br />)
     const selfClosingMatch = part.match(/^<(\w+)(?:\s[^>]*)?\s*\/>$/);
     if (selfClosingMatch && selfClosingMatch[1]) {
-      const tagName = selfClosingMatch[1].toLowerCase() as SupportedHtmlTag;
+      const tagName = selfClosingMatch[1].toLowerCase();
 
-      if (allowedTags.includes(tagName)) {
+      if (isAllowedTag(tagName, allowedTags)) {
         // Create the React element for self-closing tags
         const element = createHtmlElement(tagName, '', className, key++);
         if (element) {
@@ -107,9 +107,9 @@ export function parseHtml(
     // Check if it's an opening tag
     const openingTagMatch = part.match(/^<(\w+)(?:\s[^>]*)?>$/);
     if (openingTagMatch && openingTagMatch[1]) {
-      const tagName = openingTagMatch[1].toLowerCase() as SupportedHtmlTag;
+      const tagName = openingTagMatch[1].toLowerCase();
 
-      if (allowedTags.includes(tagName)) {
+      if (isAllowedTag(tagName, allowedTags)) {
         // Find the corresponding closing tag using depth tracking
         // to handle nested identical tags (e.g., <b>outer <b>inner</b> outer</b>)
         const openingTag = `<${tagName}>`;
@@ -156,6 +156,17 @@ export function parseHtml(
 }
 
 /**
+ * Narrows a lowercased tag name to an allowed SupportedHtmlTag
+ */
+function isAllowedTag(
+  tagName: string,
+  allowedTags: readonly SupportedHtmlTag[]
+): tagName is SupportedHtmlTag {
+  const allowed: readonly string[] = allowedTags;
+  return allowed.includes(tagName);
+}
+
+/**
  * Create a React element for the given HTML tag
  */
 function createHtmlElement(
@@ -164,7 +175,7 @@ function createHtmlElement(
   className?: string,
   key?: number
 ): ReactNode {
-  const props: any = { key };
+  const props: { key?: number; className?: string } = { key };
   if (className) {
     props.className = className;
   }
@@ -214,9 +225,5 @@ export function parseHtmlElement(
   const parsed = parseHtml(html, options);
   const { className } = options;
 
-  return createElement(
-    wrapper,
-    className ? { className } : {},
-    ...(parsed as ReactNode[])
-  );
+  return createElement(wrapper, className ? { className } : {}, ...parsed);
 }

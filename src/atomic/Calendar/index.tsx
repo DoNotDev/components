@@ -40,6 +40,7 @@ function CalendarDropdown({
   };
 
   const handleSelect = (newValue: string) => {
+    // why: react-day-picker's DropdownProps.onChange wants a native select ChangeEvent; it only reads target.value
     onChange?.({
       target: { value: newValue },
     } as unknown as React.ChangeEvent<HTMLSelectElement>);

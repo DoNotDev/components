@@ -9,10 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
-import type { ReactNode, ComponentType, CSSProperties } from 'react';
+import type { ReactNode, ComponentType } from 'react';
 
 import { useViewportVisibility } from '../../hooks/useViewportVisibility';
 import { cn } from '../../utils/helpers';
+import { withCssVars } from '../../utils/cssVars';
 
 /** Props for the Reveal component -- scroll-triggered entrance animations. */
 export interface RevealProps {
@@ -109,18 +110,16 @@ const Reveal: ComponentType<RevealProps> = ({
           className="dndev-reveal-item"
           data-direction={itemDirection}
           data-visible={shouldAnimate}
-          style={
-            {
-              '--reveal-delay': `${delayMs}ms`,
-              '--reveal-index': index,
-              ...(distance !== undefined && {
-                '--reveal-distance': `${distance}vw`,
-              }),
-              ...(duration !== undefined && {
-                '--reveal-duration': `${duration}ms`,
-              }),
-            } as CSSProperties
-          }
+          style={withCssVars({
+            '--reveal-delay': `${delayMs}ms`,
+            '--reveal-index': index,
+            ...(distance !== undefined && {
+              '--reveal-distance': `${distance}vw`,
+            }),
+            ...(duration !== undefined && {
+              '--reveal-duration': `${duration}ms`,
+            }),
+          })}
         >
           {item}
         </div>

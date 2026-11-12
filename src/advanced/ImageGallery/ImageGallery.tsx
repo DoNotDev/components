@@ -3,23 +3,30 @@
 
 /**
  * @fileoverview ImageGallery component
- * @description Full-featured image gallery with keyboard navigation, arrows, and wrapping thumbnails
+ * @description Image gallery: swipeable main view, arrows, keyboard navigation, wrapping
+ * thumbnails and a full-screen zoomable lightbox.
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import type {
-  CSSProperties,
-  KeyboardEvent,
-  MouseEvent,
-  ReactElement,
-} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
+import { flushSync } from 'react-dom';
 
 import Dialog from '../../atomic/Dialog';
 import { handleImageError } from '../../utils/imageRetry';
+import { ResponsiveImg } from '../../utils/responsiveImage';
+import { GalleryArrows } from './GalleryArrows';
+import { LightboxViewer, prepareFrame } from './LightboxViewer';
+import { blockContextMenu } from './protectImages';
+import {
+  arrowStep,
+  isNearSlide,
+  scrollToSlide,
+  useCurrentSlide,
+} from './snapStrip';
 import './ImageGallery.css';
 
 /** Image source data for ImageGallery. */
@@ -55,6 +62,20 @@ export interface ImageGalleryProps {
   fit?: ImageFit;
 }
 
+/** `view-transition-name` of the image morphing between the gallery and the lightbox. */
+const MORPH_NAME = 'image-gallery-image';
+
+/**
+ * Whether open / close can morph: view transitions supported and motion allowed.
+ * Same conditions as the CSS that turns the dialog's own fade off.
+ */
+function canMorph(): boolean {
+  return (
+    typeof document.startViewTransition === 'function' &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 /**
  * Normalize image data to consistent format
  */
@@ -80,11 +101,13 @@ function normalizeImage(
  * ImageGallery - Full-featured image gallery component
  *
  * Features:
- * - Keyboard navigation (← → arrows)
- * - Previous/Next buttons on main image
+ * - Main view swipes natively (CSS scroll-snap, browser-driven scrolling)
+ * - Previous/Next buttons, keyboard navigation (← → Home End)
  * - Wrapping thumbnail grid
- * - Focus management for accessibility
- * - Lightbox on main image click (opt out with `nobox`)
+ * - Lightbox on main image click (opt out with `nobox`): the image morphs into it and
+ *   back (view transition); swipe to page, swipe up/down to close, pinch / double-tap /
+ *   ctrl+wheel to zoom, drag to pan with momentum and elastic edges
+ * - Current and neighbouring images load eagerly, the rest lazily
  *
  * @example
  * ```tsx
@@ -107,149 +130,101 @@ export function ImageGallery({
 }: ImageGalleryProps): ReactElement {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [loadedFullUrls, setLoadedFullUrls] = useState<Set<number>>(new Set());
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lightboxPanelRef = useRef<HTMLDivElement>(null);
-  const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  // Track whether the index changed via user navigation (not initial mount)
-  const isUserNavigationRef = useRef(false);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
+  const lightboxFrameRef = useRef<HTMLDivElement>(null);
 
-  const normalizedImages = images.map((img) => normalizeImage(img, fit));
-  const hasMultiple = normalizedImages.length > 1;
-
-  // Trim stale refs when the image list shrinks
-  thumbnailRefs.current = thumbnailRefs.current.slice(
-    0,
-    normalizedImages.length
+  const normalizedImages = useMemo(
+    () => images.map((img) => normalizeImage(img, fit)),
+    [images, fit]
   );
+  const count = normalizedImages.length;
+  const hasMultiple = count > 1;
+  const clampedIndex = Math.min(selectedIndex, Math.max(count - 1, 0));
 
   // Clamp selectedIndex when images array shrinks
   useEffect(() => {
-    if (
-      normalizedImages.length > 0 &&
-      selectedIndex >= normalizedImages.length
-    ) {
-      setSelectedIndex(normalizedImages.length - 1);
+    if (count > 0 && selectedIndex >= count) {
+      setSelectedIndex(count - 1);
     }
-  }, [normalizedImages.length, selectedIndex]);
+  }, [count, selectedIndex]);
 
-  const goToImage = useCallback(
-    (index: number) => {
-      const newIndex =
-        (index + normalizedImages.length) % normalizedImages.length;
-      isUserNavigationRef.current = true;
-      setSelectedIndex(newIndex);
-      onImageChange?.(newIndex);
+  /** Updates the current index; reports it when it changed. */
+  const commitIndex = (index: number): void => {
+    if (index === clampedIndex) return;
+    setSelectedIndex(index);
+    onImageChange?.(index);
+  };
 
-      // Preload full image if not already loaded
-      const image = normalizedImages[newIndex];
-      if (
-        image &&
-        image.full !== image.thumb &&
-        !loadedFullUrls.has(newIndex)
-      ) {
-        const img = new Image();
-        img.onload = () => {
-          setLoadedFullUrls((prev) => new Set(prev).add(newIndex));
-        };
-        img.onerror = () => {
-          // Mark as loaded so we stop retrying — the thumbnail remains visible as fallback
-          setLoadedFullUrls((prev) => new Set(prev).add(newIndex));
-        };
-        img.src = image.full;
-      }
-    },
-    [normalizedImages, onImageChange, loadedFullUrls]
-  );
+  /** Navigation from buttons, keys, thumbnails and the lightbox. Wraps around. */
+  const goToImage = (raw: number, instant = false): number => {
+    const index = (raw + count) % count;
+    commitIndex(index);
+    if (stripRef.current) scrollToSlide(stripRef.current, index, instant);
+    return index;
+  };
 
-  const goNext = useCallback(
-    () => goToImage(selectedIndex + 1),
-    [goToImage, selectedIndex]
-  );
-  const goPrev = useCallback(
-    () => goToImage(selectedIndex - 1),
-    [goToImage, selectedIndex]
-  );
+  // Swipes / trackpad scrolls are native: the slide that is mostly visible is current.
+  useCurrentSlide(stripRef, count, commitIndex);
 
-  const handleMainAreaClick = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (nobox) return;
-      if ((e.target as HTMLElement).closest('.image-gallery__nav')) return;
-      setLightboxOpen(true);
-    },
-    [nobox]
-  );
+  /**
+   * Opens / closes the lightbox. With view transitions, the current image morphs:
+   * gallery slide -> lightbox frame on open, back on close (whatever closes it: swipe,
+   * background tap, close button, Esc). One element carries the name at a time.
+   */
+  const setLightbox = (open: boolean): void => {
+    if (open === lightboxOpen) return;
+    const slide = stripRef.current?.children[clampedIndex];
+    const from = open ? slide : lightboxFrameRef.current;
+    if (!canMorph() || !(from instanceof HTMLElement)) {
+      setLightboxOpen(open);
+      return;
+    }
+    from.style.viewTransitionName = MORPH_NAME;
+    let to: HTMLElement | null = null;
+    const transition = document.startViewTransition(async () => {
+      from.style.viewTransitionName = '';
+      flushSync(() => setLightboxOpen(open));
+      const target = open ? lightboxFrameRef.current : slide;
+      if (!(target instanceof HTMLElement)) return;
+      if (open) await prepareFrame(target);
+      target.style.viewTransitionName = MORPH_NAME;
+      to = target;
+    });
+    void transition.finished.then(() => {
+      if (to) to.style.viewTransitionName = '';
+    });
+  };
 
-  const handleLightboxKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
-      if (!hasMultiple) return;
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          goPrev();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          goNext();
-          break;
-        default:
-          break;
-      }
-    },
-    [hasMultiple, goPrev, goNext]
-  );
+  const handleMainAreaClick = (e: MouseEvent<HTMLDivElement>): void => {
+    if (nobox) return;
+    if ((e.target as HTMLElement).closest('.image-gallery__nav')) return;
+    setLightbox(true);
+  };
 
   useEffect(() => {
-    if (normalizedImages.length === 0) setLightboxOpen(false);
-  }, [normalizedImages.length]);
+    if (count === 0) setLightboxOpen(false);
+  }, [count]);
 
   useEffect(() => {
     if (nobox) setLightboxOpen(false);
   }, [nobox]);
 
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const id = requestAnimationFrame(() => {
-      lightboxPanelRef.current?.focus();
-    });
-    return () => cancelAnimationFrame(id);
-  }, [lightboxOpen]);
+  // Keyboard navigation; focus follows the selected thumbnail (tablist pattern).
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (!hasMultiple || lightboxOpen) return;
+    const step = arrowStep(e);
+    let target: number;
+    if (step !== 0) target = clampedIndex + step;
+    else if (e.key === 'Home') target = 0;
+    else if (e.key === 'End') target = count - 1;
+    else return;
+    e.preventDefault();
+    const thumbnail = thumbnailsRef.current?.children[goToImage(target)];
+    if (thumbnail instanceof HTMLElement) thumbnail.focus();
+  };
 
-  // Keyboard navigation
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!hasMultiple) return;
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          goPrev();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          goNext();
-          break;
-        case 'Home':
-          e.preventDefault();
-          goToImage(0);
-          break;
-        case 'End':
-          e.preventDefault();
-          goToImage(normalizedImages.length - 1);
-          break;
-      }
-    },
-    [hasMultiple, goPrev, goNext, goToImage, normalizedImages.length]
-  );
-
-  // Focus thumbnail only on user-driven navigation, not on initial mount (WCAG)
-  useEffect(() => {
-    if (!isUserNavigationRef.current) return;
-    isUserNavigationRef.current = false;
-    thumbnailRefs.current[selectedIndex]?.focus();
-  }, [selectedIndex]);
-
-  if (normalizedImages.length === 0) {
+  if (count === 0) {
     return (
       <div
         className="image-gallery image-gallery--empty"
@@ -260,129 +235,76 @@ export function ImageGallery({
     );
   }
 
-  const clampedIndex = Math.min(selectedIndex, normalizedImages.length - 1);
-  const currentImage = normalizedImages[clampedIndex]!;
-  // Contained images (cut-out packshots) sit inset from the frame edges.
-  const containInset: CSSProperties =
-    currentImage.fit === 'contain'
-      ? { boxSizing: 'border-box', padding: '6%' }
-      : {};
-
   return (
     <div
-      ref={containerRef}
       className="image-gallery"
       onKeyDown={handleKeyDown}
+      onContextMenu={blockContextMenu}
       tabIndex={0}
       role="region"
       aria-label="Image gallery"
       aria-roledescription="carousel"
     >
-      {/* Main Image */}
+      {/* Main view */}
       <div
         className={`image-gallery__main${nobox ? '' : ' image-gallery__main--lightbox'}`}
         style={{ aspectRatio }}
         onClick={handleMainAreaClick}
       >
-        {/* Thumbnail shown immediately for instant feedback */}
-        {currentImage.full !== currentImage.thumb && (
-          <img
-            src={currentImage.thumb}
-            alt=""
-            className="image-gallery__main-image"
-            onError={handleImageError}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: currentImage.fit,
-              ...containInset,
-              opacity: loadedFullUrls.has(clampedIndex) ? 0 : 1,
-              transition: 'opacity 0.3s ease',
-              zIndex: 1,
-            }}
-          />
-        )}
-        {/* Full resolution image - fades in when loaded */}
-        <img
-          src={currentImage.full}
-          alt={`${altPrefix} ${clampedIndex + 1} of ${normalizedImages.length}`}
-          className="image-gallery__main-image"
-          style={{
-            position:
-              currentImage.full !== currentImage.thumb
-                ? 'absolute'
-                : 'relative',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: currentImage.fit,
-            ...containInset,
-            opacity:
-              loadedFullUrls.has(clampedIndex) ||
-              currentImage.full === currentImage.thumb
-                ? 1
-                : 0,
-            transition: 'opacity 0.3s ease',
-            zIndex: 2,
-          }}
-          onError={handleImageError}
-          onLoad={() => {
-            if (currentImage.full !== currentImage.thumb) {
-              setLoadedFullUrls((prev) => new Set(prev).add(clampedIndex));
-            }
-          }}
-        />
+        <div ref={stripRef} className="image-gallery__strip">
+          {normalizedImages.map((img, index) => {
+            // Current and neighbours load now, so a swipe never reveals an empty slide.
+            const loading = isNearSlide(index, clampedIndex, count)
+              ? 'eager'
+              : 'lazy';
+            return (
+              <div
+                key={index}
+                className="image-gallery__slide"
+                aria-hidden={index === clampedIndex ? undefined : true}
+              >
+                {/* Cached thumbnail under the full image: instant content while it loads.
+                    Cover only: a contained (transparent) image would show it through. */}
+                {img.fit === 'cover' && img.full !== img.thumb && (
+                  <img
+                    src={img.thumb}
+                    alt=""
+                    className="image-gallery__slide-img image-gallery__slide-placeholder"
+                    loading={loading}
+                    decoding="async"
+                    draggable={false}
+                    onError={handleImageError}
+                  />
+                )}
+                {/* Phones get the thumbnail, larger screens the full image;
+                    the lightbox always shows the full image. */}
+                <ResponsiveImg
+                  image={{ fullUrl: img.full, thumbUrl: img.thumb }}
+                  alt={`${altPrefix} ${index + 1} of ${count}`}
+                  className="image-gallery__slide-img"
+                  data-fit={img.fit}
+                  loading={loading}
+                  decoding="async"
+                  draggable={false}
+                  onError={handleImageError}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-        {/* Navigation Arrows */}
         {hasMultiple && (
-          <>
-            <button
-              type="button"
-              className="image-gallery__nav image-gallery__nav--prev"
-              onClick={goPrev}
-              aria-label="Previous image"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="image-gallery__nav image-gallery__nav--next"
-              onClick={goNext}
-              aria-label="Next image"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          </>
+          <GalleryArrows
+            onPrev={() => goToImage(clampedIndex - 1)}
+            onNext={() => goToImage(clampedIndex + 1)}
+          />
         )}
       </div>
 
       {/* Thumbnails */}
       {hasMultiple && (
         <div
+          ref={thumbnailsRef}
           className="image-gallery__thumbnails"
           role="tablist"
           aria-label="Image thumbnails"
@@ -390,9 +312,6 @@ export function ImageGallery({
           {normalizedImages.map((img, index) => (
             <button
               key={index}
-              ref={(el) => {
-                thumbnailRefs.current[index] = el;
-              }}
               type="button"
               role="tab"
               aria-selected={index === clampedIndex}
@@ -409,6 +328,7 @@ export function ImageGallery({
                 alt=""
                 className="image-gallery__thumbnail-image"
                 data-fit={img.fit}
+                draggable={false}
                 onError={handleImageError}
               />
             </button>
@@ -419,71 +339,19 @@ export function ImageGallery({
       {!nobox && (
         <Dialog
           open={lightboxOpen}
-          onOpenChange={setLightboxOpen}
+          onOpenChange={setLightbox}
           showClose
+          noSwipe
           className="image-gallery__lightbox"
         >
-          <div
-            ref={lightboxPanelRef}
-            className="image-gallery__lightbox-body"
-            onKeyDown={handleLightboxKeyDown}
-            tabIndex={-1}
-          >
-            <img
-              src={currentImage.full}
-              alt={`${altPrefix} ${clampedIndex + 1} of ${normalizedImages.length}`}
-              className="image-gallery__lightbox-img"
-              onError={handleImageError}
-            />
-            {hasMultiple && (
-              <>
-                <button
-                  type="button"
-                  className="image-gallery__nav image-gallery__nav--prev image-gallery__lightbox-nav"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goPrev();
-                  }}
-                  aria-label="Previous image"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="image-gallery__nav image-gallery__nav--next image-gallery__lightbox-nav"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goNext();
-                  }}
-                  aria-label="Next image"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              </>
-            )}
-          </div>
+          <LightboxViewer
+            images={normalizedImages}
+            index={clampedIndex}
+            onIndexChange={(index) => goToImage(index, true)}
+            onClose={() => setLightbox(false)}
+            altPrefix={altPrefix}
+            frameRef={lightboxFrameRef}
+          />
         </Dialog>
       )}
     </div>

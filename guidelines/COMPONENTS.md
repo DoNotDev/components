@@ -96,7 +96,8 @@ These are the only ways one should handle layout to get to quick results functio
 ## Data Display Components
 
 - **Table** - Accessible table component with sorting and selection.
-- **DataTable** - High-level table with built-in sorting, filtering, search, and pagination.
+- **DataTable** - High-level table with built-in sorting, filtering, search, and pagination. `editable` (+ `getRowId`, `pendingChanges`, `onPendingChange`) edits the columns that declare `edit: { type: 'text' | 'number' | 'select', options }` in place: checked rows take one value from the bulk bar, Excel blocks paste across cells, Enter / arrows move, Esc cancels, Ctrl+Z undoes. The table never saves; the consumer writes `pendingChanges`.
+- **Card / ImageGallery images** - Pass the `{ fullUrl, thumbUrl }` pair (CRUD `Picture`) as `cover` / `coverHover` / `images`: phones (below 768px) download the thumbnail, larger screens the full image (`<picture>`). No width props.
 - **Avatar** - Accessible avatar with image and fallback support.
 - **Badge** - Status indicator with semantic variants (polymorphic: div, span, mark).
 - **Tag** - Tag component for labels and categories.

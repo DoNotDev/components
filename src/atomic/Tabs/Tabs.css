@@ -16,114 +16,57 @@
   word-break: break-word;
   border: var(--border-hairline) solid var(--line-2); /* Show clickable area */
 
-  /* Fallback (no variant): inactive = primary, active = foreground/card */
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  /*
+   * Inactive = neutral surface, active = filled with the variant colour, so the
+   * selected tab is the one that stands out (the panel sits below with a gap, it
+   * is not a folder tab joined to its content). --card not --background: the tab
+   * surface must be opaque (--background can be transparent in some themes).
+   */
+  background-color: var(--card);
+  color: var(--muted-foreground);
+  --tab-active-bg: var(--primary);
+  --tab-active-fg: var(--primary-foreground);
+
+  &:hover:not([data-state='active']):not(:disabled) {
+    color: var(--foreground);
+  }
+
+  &[data-variant='secondary'] {
+    --tab-active-bg: var(--secondary);
+    --tab-active-fg: var(--secondary-foreground);
+  }
+
+  &[data-variant='accent'] {
+    --tab-active-bg: var(--accent);
+    --tab-active-fg: var(--accent-foreground);
+  }
+
+  /* Muted: the muted fill would not stand out as the selection, so primary */
+  &[data-variant='muted'] {
+    --tab-active-bg: var(--primary);
+    --tab-active-fg: var(--primary-foreground);
+  }
+
+  &[data-variant='warning'] {
+    --tab-active-bg: var(--warning);
+    --tab-active-fg: var(--warning-foreground);
+  }
+
+  &[data-variant='success'] {
+    --tab-active-bg: var(--success);
+    --tab-active-fg: var(--success-foreground);
+  }
+
+  &[data-variant='destructive'] {
+    --tab-active-bg: var(--destructive);
+    --tab-active-fg: var(--destructive-foreground);
+  }
 
   &[data-state='active'] {
-    /* --card not --background: active tab surface must be opaque (--background can be transparent in some themes) */
-    background-color: var(--card);
-    color: var(--foreground);
+    background-color: var(--tab-active-bg);
+    color: var(--tab-active-fg);
+    border-color: var(--tab-active-bg);
     box-shadow: var(--shadow-sm);
-    border-color: var(--primary);
-  }
-
-  /* Default/Primary variant: inactive = primary, active = foreground/card */
-  &[data-variant='default'],
-  &[data-variant='primary'] {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--primary);
-    }
-  }
-
-  /* Secondary variant: inactive = secondary, active = foreground/card */
-  &[data-variant='secondary'] {
-    background-color: var(--secondary);
-    color: var(--secondary-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--secondary);
-    }
-  }
-
-  /* Accent variant: inactive = accent, active = foreground/card */
-  &[data-variant='accent'] {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--accent);
-    }
-  }
-
-  /* Muted variant: inactive = muted, active = primary (to contrast) */
-  &[data-variant='muted'] {
-    background-color: var(--muted);
-    color: var(--muted-foreground);
-
-    &[data-state='active'] {
-      background-color: var(--primary);
-      color: var(--primary-foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--primary);
-    }
-  }
-
-  /* Warning variant: inactive = warning, active = foreground/card */
-  &[data-variant='warning'] {
-    background-color: var(--warning);
-    color: var(--warning-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--warning);
-    }
-  }
-
-  /* Success variant: inactive = success, active = foreground/card */
-  &[data-variant='success'] {
-    background-color: var(--success);
-    color: var(--success-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--success);
-    }
-  }
-
-  /* Destructive variant: inactive = destructive, active = foreground/card */
-  &[data-variant='destructive'] {
-    background-color: var(--destructive);
-    color: var(--destructive-foreground);
-
-    &[data-state='active'] {
-      /* --card not --background: active tab surface must be opaque */
-      background-color: var(--card);
-      color: var(--foreground);
-      box-shadow: var(--shadow-sm);
-      border-color: var(--destructive);
-    }
   }
 }
 

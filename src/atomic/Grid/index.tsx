@@ -48,12 +48,12 @@ import {
   type ElementType,
   type ComponentPropsWithRef,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 
 import { GAP_VARIANT } from '../../styles/componentConstants';
 import type { TextAlign } from '../../utils/constants';
 import { cn } from '../../utils/helpers';
+import type { CSSPropertiesWithVars } from '../../utils/cssVars';
 import './Grid.css';
 
 /**
@@ -72,6 +72,16 @@ export type ResponsiveTemplate = [string, string, string, string];
  * Unified column type: equal columns (number) or custom template (string), static or responsive
  */
 export type GridCols = number | string | ResponsiveCols | ResponsiveTemplate;
+
+/** Narrows GridCols to the 4-breakpoint equal-columns tuple. */
+function isResponsiveCols(cols: GridCols): cols is ResponsiveCols {
+  return Array.isArray(cols) && typeof cols[0] === 'number';
+}
+
+/** Narrows GridCols to the 4-breakpoint template tuple. */
+function isResponsiveTemplate(cols: GridCols): cols is ResponsiveTemplate {
+  return Array.isArray(cols) && typeof cols[0] === 'string';
+}
 
 /**
  * Grid-specific props (layout directives)
@@ -169,20 +179,19 @@ const Grid = forwardRef<HTMLElement, GridProps>(
     const Component = as;
 
     // Detect which cols variant we're dealing with
-    const isArray = Array.isArray(cols);
-    const isResponsiveEqual = isArray && typeof cols[0] === 'number';
-    const isResponsiveTpl = isArray && typeof cols[0] === 'string';
+    const isResponsiveEqual = isResponsiveCols(cols);
+    const isResponsiveTpl = isResponsiveTemplate(cols);
     const isStaticTpl = typeof cols === 'string';
     const isResponsiveAreas = Array.isArray(areas);
 
-    const customStyle: Record<string, unknown> = {
+    const customStyle: CSSPropertiesWithVars = {
       display: 'grid',
       width: '100%',
       ...style,
     };
 
     if (isResponsiveTpl) {
-      const tpl = cols as ResponsiveTemplate;
+      const tpl = cols;
       customStyle['--grid-tpl-mobile'] = tpl[0];
       customStyle['--grid-tpl-tablet'] = tpl[1];
       customStyle['--grid-tpl-laptop'] = tpl[2];
@@ -190,9 +199,7 @@ const Grid = forwardRef<HTMLElement, GridProps>(
     } else if (isStaticTpl) {
       customStyle.gridTemplateColumns = cols;
     } else {
-      const [m, t, l, d] = isResponsiveEqual
-        ? (cols as ResponsiveCols)
-        : [cols as number, cols as number, cols as number, cols as number];
+      const [m, t, l, d] = isResponsiveEqual ? cols : [cols, cols, cols, cols];
       customStyle['--grid-cols-mobile'] = m;
       customStyle['--grid-cols-tablet'] = t;
       customStyle['--grid-cols-laptop'] = l;
@@ -223,7 +230,7 @@ const Grid = forwardRef<HTMLElement, GridProps>(
         'data-responsive': isResponsiveEqual ? 'true' : undefined,
         'data-responsive-tpl': isResponsiveTpl ? 'true' : undefined,
         'data-responsive-areas': isResponsiveAreas ? 'true' : undefined,
-        style: customStyle as CSSProperties,
+        style: customStyle,
         ...props,
       },
       children

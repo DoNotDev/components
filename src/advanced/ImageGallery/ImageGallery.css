@@ -7,6 +7,15 @@
   outline: none;
 }
 
+/* Gallery pictures are always protected (with blockContextMenu + draggable=false):
+   no drag, no iOS long-press "Save image" callout, no selection. */
+.image-gallery img,
+.image-gallery__lightbox-stage img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 .image-gallery:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -40,12 +49,53 @@
   cursor: zoom-in;
 }
 
-.image-gallery__main-image {
+/* Swipeable strip (main view and lightbox): native scrolling, one slide per snap point */
+.image-gallery__strip {
+  /* Offset parent of the slides: a slide's offsetLeft is its scroll offset */
+  position: relative;
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.image-gallery__strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* Arrow / thumbnail / key navigation glides to a neighbour (never a touch swipe) */
+@media (prefers-reduced-motion: no-preference) {
+  .image-gallery__strip {
+    scroll-behavior: smooth;
+  }
+}
+
+.image-gallery__slide {
+  position: relative;
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.image-gallery__slide-img {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  position: relative;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.image-gallery__slide-img[data-fit='contain'] {
+  object-fit: contain;
+  box-sizing: border-box;
+  padding: 6%;
 }
 
 /* Navigation arrows */
@@ -162,40 +212,194 @@
   }
 }
 
-/* Lightbox (full-size image dialog) */
+/* Lightbox: full-screen dialog, the viewer owns every gesture */
 .image-gallery__lightbox.dndev-modal-content {
-  max-width: min(96vw, 1400px);
-  max-height: 96dvh;
-  padding: var(--gap-sm);
+  inset: 0;
+  transform: none;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  /* Fade only: the dialog keyframes translate a centred box */
+  animation-name: overlay-in;
+
+  &[data-state='closed'] {
+    animation-name: overlay-out;
+  }
+
+  & .dndev-modal-close {
+    z-index: 4;
+    opacity: 1;
+  }
 }
 
 .image-gallery__lightbox .dndev-modal-body {
+  position: absolute;
+  inset: 0;
   padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-  min-height: 40dvh;
 }
 
-.image-gallery__lightbox-body {
-  position: relative;
+.image-gallery__lightbox-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  outline: none;
+  user-select: none;
+}
+
+/* Opaque layer behind the slides. The close drag fades it with opacity (composited);
+   never animate its colour, that repaints the whole screen every frame. */
+.image-gallery__lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: var(--background);
+  will-change: opacity;
+}
+
+/* pan-x: the browser pages; vertical drags and pinches reach the gesture code */
+.image-gallery__lightbox-strip {
+  touch-action: pan-x;
+}
+
+/* Zoomed: no paging, a drag pans the image */
+.image-gallery__lightbox-stage[data-zoomed] .image-gallery__lightbox-strip {
+  touch-action: none;
+}
+
+.image-gallery__lightbox-slide {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  outline: none;
+  box-sizing: border-box;
+  padding: var(--gap-md);
+  /* The frame sizes itself against the slide's content box (cq units) */
+  container-type: size;
 }
 
-.image-gallery__lightbox-img {
-  max-width: 100%;
-  max-height: 85dvh;
-  width: auto;
+/* Box of one image. Until its aspect ratio is known it fills the slide (the images are
+   `contain`, so they look the same); then it is exactly the fitted image: the zoom, pan,
+   hit-test and open / close morph target. */
+.image-gallery__lightbox-frame {
+  position: relative;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  cursor: zoom-in;
+}
+
+.image-gallery__lightbox-frame[data-sized] {
+  width: min(100cqw, 100cqh * var(--image-ratio));
   height: auto;
+  aspect-ratio: var(--image-ratio);
+}
+
+/* Full image over its cached thumbnail: never an empty slide while it downloads */
+.image-gallery__lightbox-frame > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  -webkit-user-drag: none;
+}
+
+.image-gallery__lightbox-frame[data-loaded] > .image-gallery__lightbox-placeholder {
+  visibility: hidden;
+}
+
+/* Own layer only for what a gesture moves: the dragged slide, the zoomed image */
+.image-gallery__lightbox-stage[data-closing]
+  .image-gallery__lightbox-slide:not([aria-hidden]) {
+  will-change: translate;
+}
+
+.image-gallery__lightbox-stage[data-zoomed]
+  .image-gallery__lightbox-slide:not([aria-hidden])
+  > .image-gallery__lightbox-frame {
+  will-change: transform;
+  cursor: grab;
+}
+
+.image-gallery__lightbox-stage[data-zoomed]:active
+  .image-gallery__lightbox-frame {
+  cursor: grabbing;
+}
+
+/* Settles (snap back, double-tap / click zoom) are transitions, off during a gesture */
+@media (prefers-reduced-motion: no-preference) {
+  .image-gallery__lightbox-stage[data-settle]
+    :is(
+      .image-gallery__lightbox-backdrop,
+      .image-gallery__lightbox-slide,
+      .image-gallery__lightbox-frame
+    ) {
+    transition-property: opacity, translate, transform;
+    transition-duration: var(--dur-normal);
+    transition-timing-function: var(--ease-heavy);
+  }
+
+  /* Pan glide after a fling: a long deceleration. GLIDE_MS in lightboxGestures.ts
+     projects the end point from these two tokens; keep them in step. */
+  .image-gallery__lightbox-stage[data-settle='momentum']
+    .image-gallery__lightbox-frame {
+    transition-duration: var(--dur-slow);
+  }
+}
+
+/* Open / close morph: the tapped image grows into the lightbox and shrinks back
+   (same-document view transition, run by the browser on the compositor). */
+::view-transition-group(image-gallery-image) {
+  animation-duration: var(--dur-normal);
+  animation-timing-function: var(--ease-heavy);
+}
+
+::view-transition-old(image-gallery-image),
+::view-transition-new(image-gallery-image) {
+  height: 100%;
+  object-fit: cover;
+  overflow: clip;
+}
+
+/* With the morph, the view transition animates open / close: the dialog's own
+   fade would run on top of it. Same conditions as `canMorph` in ImageGallery.tsx. */
+@supports (view-transition-name: none) {
+  @media (prefers-reduced-motion: no-preference) {
+    .image-gallery__lightbox.dndev-modal-content[data-state],
+    .dndev-overlay[data-state]:has(+ .image-gallery__lightbox) {
+      animation: none;
+    }
+  }
+}
+
+.image-gallery__lightbox-counter {
+  position: absolute;
+  top: var(--gap-md);
+  inset-inline-start: var(--gap-md);
+  z-index: 3;
+  padding: calc(var(--gap-sm) / 2) var(--gap-sm);
+  border-radius: var(--radius-full);
+  background-color: var(--card);
+  color: var(--foreground);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 .image-gallery__lightbox-nav {
   opacity: 0.92;
   z-index: 3;
+}
+
+/* Touch: swipe pages, so arrows are noise */
+@media (pointer: coarse) {
+  .image-gallery__lightbox-nav {
+    display: none;
+  }
 }

@@ -242,3 +242,80 @@
     opacity: var(--opacity-muted);
   }
 }
+
+/* Editable DataTable --------------------------------------------------- */
+
+/* Scope for editor lookup (keyboard navigation); adds no box. */
+.dndev-table-edit-scope {
+  display: contents;
+}
+
+.dndev-table-bulk-bar {
+  padding: var(--gap-xs) var(--gap-sm);
+  border: 1px solid var(--border);
+  background-color: var(--muted);
+}
+
+/* Cell editor: fills the cell, reads as text until focused. */
+.dndev-table-cell-editor {
+  width: 100%;
+  min-width: 6rem;
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--gap-xs);
+}
+
+.dndev-table-cell-editor:hover {
+  border-color: var(--border);
+}
+
+.dndev-table-cell-editor:focus-visible,
+.dndev-table-cell-editor:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+  background-color: var(--background);
+}
+
+.dndev-table-bulk-bar .dndev-table-cell-editor {
+  width: auto;
+  border-color: var(--border);
+  background-color: var(--background);
+}
+
+.dndev-table-cell[data-editable='true'] {
+  padding-block: 0;
+}
+
+/* Changed, not saved yet */
+.dndev-table-cell[data-dirty='true'] {
+  background-color: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+
+/* Value that does not parse: the save will reject it */
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-editor {
+  border-color: var(--destructive);
+}
+
+/* Open cell: icon link to the row's record (touch-sized hit area) */
+.dndev-table-open-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+}
+
+.dndev-table-open-link:hover {
+  color: var(--foreground);
+  background-color: var(--muted);
+}
+
+.dndev-table-open-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}

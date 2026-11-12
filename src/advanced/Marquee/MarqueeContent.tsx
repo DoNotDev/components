@@ -17,6 +17,7 @@ import { GAP_VARIANT } from '../../styles/componentConstants';
 import { addEventListener } from '../../utils/eventListener';
 import { cn } from '../../utils/helpers';
 import { observeElement } from '../../utils/intersectionObserver';
+import { withCssVars } from '../../utils/cssVars';
 
 /** Props for the Marquee component -- infinitely scrolling content strip. */
 export type MarqueeProps<T = unknown> = {
@@ -274,20 +275,20 @@ function Marquee<T = unknown>({
         data-marquee-direction={isVertical ? 'vertical' : 'horizontal'}
         data-marquee-behavior={finalBehavior}
         data-marquee-reduced-motion={!shouldAnimate}
-        style={{
-          ['--marquee-duration' as any]:
+        style={withCssVars({
+          '--marquee-duration':
             shouldAnimate && isVisible && contentOverflows
               ? `${cycleMs}ms`
               : '0ms',
-          ['--marquee-direction' as any]: getAnimationDirection(),
-          ['--marquee-distance' as any]: isVertical
+          '--marquee-direction': getAnimationDirection(),
+          '--marquee-distance': isVertical
             ? `${scrollDistance}px`
             : `${scrollDistance}px`,
-          ['--marquee-easing' as any]: EASING_VALUES[easing],
+          '--marquee-easing': EASING_VALUES[easing],
           // Pause animation when not visible or reduced motion is preferred
           animationPlayState:
             !shouldAnimate || !isVisible ? 'paused' : 'running',
-        }}
+        })}
       >
         {renderContent()}
       </Stack>

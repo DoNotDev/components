@@ -62,7 +62,13 @@ export type { DateTimePickerProps } from './DateTimePicker';
 
 export { default as Card, renderCardContent, renderCardHeader } from './Card';
 export { CARD_VARIANT } from './Card';
-export type { CardProps, CardVariant, CardContent, CardCoverMedia } from './Card';
+export type {
+  CardProps,
+  CardVariant,
+  CardContent,
+  CardCoverImage,
+  CardCoverMedia,
+} from './Card';
 
 export { default as DualCard } from './DualCard';
 export type { DualCardProps, DualCardVariant } from './DualCard';
@@ -252,7 +258,15 @@ export type { SwitchProps } from './Switch';
 
 export { default as Table } from './Table';
 export { DataTable } from './Table';
-export type { TableColumn, DataTableProps } from './Table';
+export { parseCellText, parseClipboardGrid, setPendingCell } from './Table';
+export type {
+  TableColumn,
+  DataTableProps,
+  DataTableEditLabels,
+  TableCellEdit,
+  TableCellOption,
+  TablePendingChanges,
+} from './Table';
 
 export { default as QuantityStepper } from './QuantityStepper';
 export type { QuantityStepperProps } from './QuantityStepper';

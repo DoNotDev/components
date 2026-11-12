@@ -9,16 +9,24 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { ChevronUp, ChevronDown, Search, Download } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ChevronUp,
+  ChevronDown,
+  Search,
+  Download,
+} from 'lucide-react';
 import {
   useState,
   useMemo,
+  useRef,
   type ReactNode,
   type HTMLAttributes,
   type ChangeEvent,
 } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { useLinkRenderer } from '../../utils/linkComponent';
 import Button, { BUTTON_VARIANT } from '../Button';
 import Checkbox from '../Checkbox';
 import Input from '../Input';
@@ -26,7 +34,29 @@ import Pagination from '../Pagination';
 import Select from '../Select';
 import Stack from '../Stack';
 import Text from '../Text';
+import {
+  DEFAULT_EDIT_LABELS,
+  EditCell,
+  focusEditor,
+  isCellValueValid,
+  parseCellText,
+  setPendingCell,
+} from './editing';
+import type {
+  CellPosition,
+  DataTableEditLabels,
+  TableCellEdit,
+  TablePendingChanges,
+} from './editing';
 import './Table.css';
+
+export { parseCellText, parseClipboardGrid, setPendingCell } from './editing';
+export type {
+  DataTableEditLabels,
+  TableCellEdit,
+  TableCellOption,
+  TablePendingChanges,
+} from './editing';
 
 /**
  * Table column configuration
@@ -66,6 +96,11 @@ export interface TableColumn<T = unknown> {
    * Uses logical alignment for RTL support.
    */
   align?: 'start' | 'center' | 'end';
+  /**
+   * In-place editor of this column's cells when the DataTable is `editable`.
+   * Requires `dataIndex`. In edit mode it replaces `render`.
+   */
+  edit?: TableCellEdit;
 }
 
 /**
@@ -147,6 +182,39 @@ export interface DataTableProps<T = unknown> {
    * @default 'Export'
    */
   exportLabel?: string;
+  /**
+   * Spreadsheet-style editing of the columns that declare `edit`: cells are
+   * edited in place, rows are checked to set one field on all of them (bulk
+   * bar), a block copied from Excel / Sheets pastes across rows and columns.
+   * Implies row selection; `onRowClick` is ignored (open records from a link
+   * cell). Edits go to `pendingChanges` — nothing is saved by the table.
+   * Requires `getRowId`, `pendingChanges` and `onPendingChange`.
+   * @default false
+   */
+  editable?: boolean;
+  /** Stable id of a row. Required with `editable`. */
+  getRowId?: (row: T) => string;
+  /** Edited values not saved yet (controlled). Required with `editable`. */
+  pendingChanges?: TablePendingChanges;
+  /** Called with the new pending changes after every edit, paste, bulk apply or undo. */
+  onPendingChange?: (changes: TablePendingChanges) => void;
+  /** Labels of the bulk edit bar (translated by the consumer). */
+  editLabels?: DataTableEditLabels;
+  /**
+   * Leading "open" cell: an icon link to the row's record. Renders a real
+   * `<a href>` through the app router's link (Ctrl/Cmd-click opens a new tab).
+   * Use it to open records from an `editable` table, where a row click edits.
+   * @since 0.2.3
+   */
+  getRowHref?: (row: T) => string;
+  /**
+   * Leading "open" cell as an icon button, for apps that open records in place
+   * (sheet, dialog) instead of navigating. Takes precedence over `getRowHref`.
+   * @since 0.2.3
+   */
+  onRowOpen?: (row: T) => void;
+  /** Accessible label of the open cell (translated by the consumer). Required with `getRowHref` / `onRowOpen`. */
+  openLabel?: string;
 }
 
 /**
@@ -288,11 +356,39 @@ const DataTable = <T = unknown,>({
   exportFilename = 'export',
   onExport,
   exportLabel = 'Export',
+  editable = false,
+  getRowId,
+  pendingChanges,
+  onPendingChange,
+  editLabels,
+  getRowHref,
+  onRowOpen,
+  openLabel,
 }: DataTableProps<T>): ReactNode => {
+  if (editable && (!getRowId || !pendingChanges || !onPendingChange)) {
+    throw new Error(
+      'DataTable: `editable` requires `getRowId`, `pendingChanges` and `onPendingChange`.'
+    );
+  }
+  const showOpen = !!(getRowHref || onRowOpen);
+  if (showOpen && !openLabel) {
+    throw new Error(
+      'DataTable: `getRowHref` / `onRowOpen` require `openLabel`.'
+    );
+  }
+  const LinkComponent = useLinkRenderer();
+  const showSelection = selectable || editable;
+  const rowClick = editable ? undefined : onRowClick;
+  const tableRef = useRef<HTMLDivElement>(null);
+  // Previous pending states, for Ctrl/Cmd+Z
+  const historyRef = useRef<TablePendingChanges[]>([]);
+  const [bulkKey, setBulkKey] = useState('');
+  // Bulk value stays in the DOM (uncontrolled), read on Apply
+  const bulkValueRef = useRef<HTMLInputElement & HTMLSelectElement>(null);
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRows, setSelectedRows] = useState<T[]>([]);
+  const [checkedRows, setCheckedRows] = useState<T[]>([]);
 
   // Page size state (for client-side pagination) - default 12
   const [internalPageSize, setInternalPageSize] = useState(12);
@@ -342,7 +438,9 @@ const DataTable = <T = unknown,>({
     // Apply sorting
     if (sortColumn) {
       filtered = [...filtered].sort((a, b) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: not yet narrowed (any-audit 2026-11-11 follow-up)
         const aVal = sortColumn ? (a as Record<string, any>)[sortColumn] : '';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: not yet narrowed (any-audit 2026-11-11 follow-up)
         const bVal = sortColumn ? (b as Record<string, any>)[sortColumn] : '';
 
         if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
@@ -382,18 +480,109 @@ const DataTable = <T = unknown,>({
     onSort?.(column, newDirection);
   };
 
+  // Rows compare by id when the table has one (rows are new objects after a refetch)
+  const sameRow = (a: T, b: T) =>
+    getRowId ? getRowId(a) === getRowId(b) : a === b;
+
+  // Selection only holds rows still in the data (deleted or refetched-away rows drop out)
+  const presentIds = getRowId ? new Set(data.map(getRowId)) : null;
+  const selectedRows = checkedRows.filter((r) =>
+    presentIds ? presentIds.has(getRowId!(r)) : data.includes(r)
+  );
+  const selectedIds = getRowId ? new Set(selectedRows.map(getRowId)) : null;
+  const isSelected = (row: T) =>
+    selectedIds ? selectedIds.has(getRowId!(row)) : selectedRows.includes(row);
+
+  // Header checkbox selects every row of the filtered / sorted result, across
+  // client-side pages; with server pagination `data` is the loaded page.
+  const selectableRows = processedData;
+  const allSelected =
+    selectableRows.length > 0 && selectableRows.every((row) => isSelected(row));
+
   const handleSelectAll = (checked: boolean) => {
-    const newSelection = checked ? displayData : [];
-    setSelectedRows(newSelection);
+    const newSelection = checked ? selectableRows : [];
+    setCheckedRows(newSelection);
     onSelect?.(newSelection);
   };
 
   const handleSelectRow = (row: T, checked: boolean) => {
     const newSelection = checked
       ? [...selectedRows, row]
-      : selectedRows.filter((r) => r !== row);
-    setSelectedRows(newSelection);
+      : selectedRows.filter((r) => !sameRow(r, row));
+    setCheckedRows(newSelection);
     onSelect?.(newSelection);
+  };
+
+  // --- Editing ---
+  const editColumns = editable
+    ? columns.filter((c) => c.edit && c.dataIndex)
+    : [];
+
+  const originalValue = (row: T, column: TableColumn<T>) =>
+    row[column.dataIndex as keyof T] as unknown;
+
+  const currentValue = (row: T, column: TableColumn<T>) => {
+    const pending = pendingChanges?.[getRowId!(row)];
+    return pending && column.key in pending
+      ? pending[column.key]
+      : originalValue(row, column);
+  };
+
+  const emitChanges = (next: TablePendingChanges) => {
+    if (next === pendingChanges) return;
+    historyRef.current.push(pendingChanges!);
+    onPendingChange!(next);
+  };
+
+  /** Applies `value` to (row, column) pairs in one change (one undo step). */
+  const applyCells = (
+    cells: ReadonlyArray<{ row: T; column: TableColumn<T>; value: unknown }>
+  ) => {
+    let next = pendingChanges!;
+    for (const { row, column, value } of cells) {
+      next = setPendingCell(
+        next,
+        getRowId!(row),
+        column.key,
+        value,
+        originalValue(row, column)
+      );
+    }
+    emitChanges(next);
+  };
+
+  const undo = () => {
+    const previous = historyRef.current.pop();
+    if (!previous) return false;
+    onPendingChange!(previous);
+    return true;
+  };
+
+  const pasteGrid = (start: CellPosition, grid: string[][]) => {
+    const cells: Array<{ row: T; column: TableColumn<T>; value: unknown }> = [];
+    grid.forEach((line, r) => {
+      const row = displayData[start.row + r];
+      if (!row) return;
+      line.forEach((text, c) => {
+        const column = editColumns[start.col + c];
+        if (!column) return;
+        cells.push({
+          row,
+          column,
+          value: parseCellText(text, column.edit!).value,
+        });
+      });
+    });
+    applyCells(cells);
+  };
+
+  const labels = { ...DEFAULT_EDIT_LABELS, ...editLabels };
+  const bulkColumn = editColumns.find((c) => c.key === bulkKey);
+  const applyBulk = () => {
+    if (!bulkColumn) return;
+    const text = bulkValueRef.current?.value ?? '';
+    const { value } = parseCellText(text, bulkColumn.edit!);
+    applyCells(selectedRows.map((row) => ({ row, column: bulkColumn, value })));
   };
 
   const handleSearch = (query: string) => {
@@ -499,167 +688,307 @@ const DataTable = <T = unknown,>({
         </Stack>
       )}
 
-      {/* Table */}
-      <Table className={cn(gridLines && 'dndev-table-grid')}>
-        <TableHeader>
-          <TableRow>
-            {selectable && (
-              <TableHead className="dndev-w-touch">
-                <Checkbox
-                  checked={
-                    selectedRows.length === displayData.length &&
-                    displayData.length > 0
-                  }
-                  onCheckedChange={handleSelectAll}
-                  aria-label="Select all rows"
-                />
-              </TableHead>
-            )}
-            {columns.map((column) => (
-              <TableHead
-                key={column.key}
-                className={cn(column.sortable && 'dndev-cursor-pointer')}
-                data-sortable={column.sortable}
-                data-align={column.align}
-                style={{ width: column.width }}
-                onClick={(e) => {
-                  // Only sort if clicking on header, not on interactive elements (buttons, inputs, etc.)
-                  if (column.sortable) {
-                    const target = e.target as HTMLElement;
-                    const isInteractive = target.closest(
-                      'button, input, a, [role="button"]'
-                    );
-                    if (!isInteractive) {
-                      handleSort(column.key);
-                    }
-                  }
-                }}
-              >
-                <Stack
-                  direction="row"
-                  align="center"
-                  justify={column.align || 'start'}
-                  gap="tight"
-                >
-                  {typeof column.title === 'string' ? (
-                    <Text level="body">{column.title}</Text>
-                  ) : (
-                    column.title
-                  )}
-                  {column.sortable &&
-                    (sortColumn === column.key ? (
-                      sortDirection === 'asc' ? (
-                        <ChevronUp className="dndev-size-md" />
-                      ) : (
-                        <ChevronDown className="dndev-size-md" />
-                      )
-                    ) : (
-                      <ChevronUp
-                        className="dndev-size-md"
-                        style={{ opacity: 0.3 }}
-                      />
-                    ))}
-                </Stack>
-              </TableHead>
+      {/* Bulk edit bar: set one field on every checked row */}
+      {editable && selectedRows.length > 0 && editColumns.length > 0 && (
+        <Stack
+          direction="row"
+          align="center"
+          gap="tight"
+          wrap="wrap"
+          className="dndev-table-bulk-bar"
+          role="toolbar"
+          aria-label={labels.apply}
+        >
+          <Text level="body">
+            {labels.selected.replace('{{count}}', String(selectedRows.length))}
+          </Text>
+          <select
+            className="dndev-table-cell-editor"
+            aria-label={labels.field}
+            value={bulkKey}
+            onChange={(e) => setBulkKey(e.target.value)}
+          >
+            <option value="">{labels.field}</option>
+            {editColumns.map((c) => (
+              <option key={c.key} value={c.key}>
+                {typeof c.title === 'string' ? c.title : c.key}
+              </option>
             ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {finalDisplayData.map((row, index) => {
-            const isSkeletonRow =
-              loading &&
-              Object.keys(row as Record<string, unknown>).length === 0;
-            return (
-              <TableRow
-                key={index}
-                onClick={(e) => {
-                  if (onRowClick && !isSkeletonRow) {
-                    const target = e.target as HTMLElement;
-                    // Prevent row click if clicking interactive elements
-                    const isInteractive = target.closest(
-                      'button, a, input, [role="button"], label'
-                    );
-                    if (!isInteractive) {
-                      onRowClick(row);
+          </select>
+          {bulkColumn?.edit?.type === 'select' ? (
+            <select
+              key={bulkKey}
+              ref={bulkValueRef}
+              className="dndev-table-cell-editor"
+              aria-label={labels.value}
+              defaultValue=""
+            >
+              <option value="" />
+              {bulkColumn.edit.options?.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              key={bulkKey}
+              ref={bulkValueRef}
+              className="dndev-table-cell-editor"
+              aria-label={labels.value}
+              placeholder={labels.value}
+              inputMode={
+                bulkColumn?.edit?.type === 'number' ? 'decimal' : undefined
+              }
+              defaultValue=""
+              disabled={!bulkColumn}
+            />
+          )}
+          <Button
+            variant="outline"
+            display="compact"
+            onClick={applyBulk}
+            disabled={!bulkColumn}
+          >
+            {labels.apply}
+          </Button>
+        </Stack>
+      )}
+
+      {/* Table */}
+      <div ref={tableRef} className="dndev-table-edit-scope">
+        <Table className={cn(gridLines && 'dndev-table-grid')}>
+          <TableHeader>
+            <TableRow>
+              {showOpen && (
+                <TableHead className="dndev-w-touch">
+                  <span className="dndev-sr-only">{openLabel}</span>
+                </TableHead>
+              )}
+              {showSelection && (
+                <TableHead className="dndev-w-touch">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all rows"
+                  />
+                </TableHead>
+              )}
+              {columns.map((column) => (
+                <TableHead
+                  key={column.key}
+                  className={cn(column.sortable && 'dndev-cursor-pointer')}
+                  data-sortable={column.sortable}
+                  data-align={column.align}
+                  style={{ width: column.width }}
+                  onClick={(e) => {
+                    // Only sort if clicking on header, not on interactive elements (buttons, inputs, etc.)
+                    if (column.sortable) {
+                      const target = e.target as HTMLElement;
+                      const isInteractive = target.closest(
+                        'button, input, a, [role="button"]'
+                      );
+                      if (!isInteractive) {
+                        handleSort(column.key);
+                      }
                     }
-                  }
-                }}
-                className={cn(
-                  isSkeletonRow && 'dndev-skeleton-row',
-                  onRowClick &&
-                    !isSkeletonRow &&
-                    'dndev-cursor-pointer dndev-hover-bg-muted'
-                )}
-              >
-                {selectable && (
-                  <TableCell>
-                    {isSkeletonRow ? (
-                      <div
-                        className="dndev-skeleton dndev-skeleton-pulse"
-                        style={{
-                          width: 'var(--icon-md)',
-                          height: 'var(--icon-md)',
-                          borderRadius: 'var(--radius)',
-                        }}
-                        aria-hidden="true"
-                      />
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    align="center"
+                    justify={column.align || 'start'}
+                    gap="tight"
+                  >
+                    {typeof column.title === 'string' ? (
+                      <Text level="body">{column.title}</Text>
                     ) : (
-                      <Checkbox
-                        checked={selectedRows.includes(row)}
-                        onCheckedChange={(checked: boolean) =>
-                          handleSelectRow(row, !!checked)
-                        }
-                        aria-label={`Select row ${index + 1}`}
-                      />
+                      column.title
                     )}
-                  </TableCell>
-                )}
-                {columns.map((column) => {
-                  const cellValue = column.dataIndex
-                    ? row[column.dataIndex]
-                    : null;
-                  const isEmpty =
-                    cellValue === null ||
-                    cellValue === undefined ||
-                    cellValue === '';
-
-                  // Always call render function if it exists (for action columns, etc.)
-                  // Let the render function decide what to show for empty/skeleton states
-                  if (column.render) {
-                    return (
-                      <TableCell key={column.key} data-align={column.align}>
-                        {column.render(cellValue, row, index)}
-                      </TableCell>
-                    );
-                  }
-
-                  // For data columns: show skeleton only when loading AND empty
-                  // When not loading but empty, show empty string (fallback)
-                  return (
-                    <TableCell key={column.key} data-align={column.align}>
+                    {column.sortable &&
+                      (sortColumn === column.key ? (
+                        sortDirection === 'asc' ? (
+                          <ChevronUp className="dndev-size-md" />
+                        ) : (
+                          <ChevronDown className="dndev-size-md" />
+                        )
+                      ) : (
+                        <ChevronUp
+                          className="dndev-size-md"
+                          style={{ opacity: 0.3 }}
+                        />
+                      ))}
+                  </Stack>
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {finalDisplayData.map((row, index) => {
+              const isSkeletonRow =
+                loading &&
+                Object.keys(row as Record<string, unknown>).length === 0;
+              return (
+                <TableRow
+                  key={index}
+                  onClick={(e) => {
+                    if (rowClick && !isSkeletonRow) {
+                      const target = e.target as HTMLElement;
+                      // Prevent row click if clicking interactive elements
+                      const isInteractive = target.closest(
+                        'button, a, input, [role="button"], label'
+                      );
+                      if (!isInteractive) {
+                        rowClick(row);
+                      }
+                    }
+                  }}
+                  className={cn(
+                    isSkeletonRow && 'dndev-skeleton-row',
+                    rowClick &&
+                      !isSkeletonRow &&
+                      'dndev-cursor-pointer dndev-hover-bg-muted'
+                  )}
+                >
+                  {showOpen && (
+                    <TableCell className="dndev-table-open-cell">
+                      {isSkeletonRow ? null : onRowOpen ? (
+                        <Button
+                          variant="ghost"
+                          display="compact"
+                          icon={ArrowUpRight}
+                          onClick={() => onRowOpen(row)}
+                          aria-label={openLabel}
+                        />
+                      ) : (
+                        <LinkComponent
+                          href={getRowHref!(row)}
+                          className="dndev-table-open-link"
+                          aria-label={openLabel}
+                          title={openLabel}
+                        >
+                          <ArrowUpRight
+                            className="dndev-size-md"
+                            aria-hidden="true"
+                          />
+                        </LinkComponent>
+                      )}
+                    </TableCell>
+                  )}
+                  {showSelection && (
+                    <TableCell>
                       {isSkeletonRow ? (
                         <div
                           className="dndev-skeleton dndev-skeleton-pulse"
                           style={{
-                            height: 'var(--gap-md)',
-                            width: index % 2 === 0 ? '80%' : '60%',
+                            width: 'var(--icon-md)',
+                            height: 'var(--icon-md)',
                             borderRadius: 'var(--radius)',
                           }}
                           aria-hidden="true"
                         />
-                      ) : isEmpty ? (
-                        '' // Empty state - show nothing, not skeleton
                       ) : (
-                        String(cellValue || '')
+                        <Checkbox
+                          checked={isSelected(row)}
+                          onCheckedChange={(checked: boolean) =>
+                            handleSelectRow(row, !!checked)
+                          }
+                          aria-label={`Select row ${index + 1}`}
+                        />
                       )}
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                  )}
+                  {columns.map((column) => {
+                    const cellValue = column.dataIndex
+                      ? row[column.dataIndex]
+                      : null;
+                    const isEmpty =
+                      cellValue === null ||
+                      cellValue === undefined ||
+                      cellValue === '';
+
+                    const editCol = column.edit
+                      ? editColumns.indexOf(column)
+                      : -1;
+                    if (editCol >= 0 && !isSkeletonRow) {
+                      const value = currentValue(row, column);
+                      const pending = pendingChanges?.[getRowId!(row)];
+                      return (
+                        <TableCell
+                          key={column.key}
+                          data-align={column.align}
+                          data-editable="true"
+                          data-dirty={
+                            pending && column.key in pending
+                              ? 'true'
+                              : undefined
+                          }
+                          data-invalid={
+                            isCellValueValid(value, column.edit!)
+                              ? undefined
+                              : 'true'
+                          }
+                        >
+                          <EditCell
+                            edit={column.edit!}
+                            value={value}
+                            position={{ row: index, col: editCol }}
+                            label={
+                              typeof column.title === 'string'
+                                ? column.title
+                                : column.key
+                            }
+                            commit={(v) =>
+                              applyCells([{ row, column, value: v }])
+                            }
+                            focusCell={(p) => focusEditor(tableRef, p)}
+                            pasteGrid={(grid) =>
+                              pasteGrid({ row: index, col: editCol }, grid)
+                            }
+                            undo={undo}
+                          />
+                        </TableCell>
+                      );
+                    }
+
+                    // Always call render function if it exists (for action columns, etc.)
+                    // Let the render function decide what to show for empty/skeleton states
+                    if (column.render) {
+                      return (
+                        <TableCell key={column.key} data-align={column.align}>
+                          {column.render(cellValue, row, index)}
+                        </TableCell>
+                      );
+                    }
+
+                    // For data columns: show skeleton only when loading AND empty
+                    // When not loading but empty, show empty string (fallback)
+                    return (
+                      <TableCell key={column.key} data-align={column.align}>
+                        {isSkeletonRow ? (
+                          <div
+                            className="dndev-skeleton dndev-skeleton-pulse"
+                            style={{
+                              height: 'var(--gap-md)',
+                              width: index % 2 === 0 ? '80%' : '60%',
+                              borderRadius: 'var(--radius)',
+                            }}
+                            aria-hidden="true"
+                          />
+                        ) : isEmpty ? (
+                          '' // Empty state - show nothing, not skeleton
+                        ) : (
+                          String(cellValue || '')
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* Pagination */}
       {pagination && totalPages > 1 && (

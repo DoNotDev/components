@@ -29,6 +29,7 @@ import { addEventListener } from '../../utils/eventListener';
 import { cn } from '../../utils/helpers';
 import { observeElement } from '../../utils/intersectionObserver';
 import { isRTLLanguage } from '../../utils/rtl';
+import { withCssVars } from '../../utils/cssVars';
 
 import './Carousel.css';
 
@@ -737,15 +738,13 @@ function CarouselComponent<T = unknown>({
     <div
       ref={containerRef}
       className={cn('dndev-relative dndev-overflow-hidden', className)}
-      style={
-        {
-          outline: 'none',
-          '--carousel-slides-mobile': mobileSlides,
-          '--carousel-slides-tablet': tabletSlides,
-          '--carousel-slides-laptop': laptopSlides,
-          '--carousel-slides-desktop': desktopSlides,
-        } as React.CSSProperties
-      }
+      style={withCssVars({
+        outline: 'none',
+        '--carousel-slides-mobile': mobileSlides,
+        '--carousel-slides-tablet': tabletSlides,
+        '--carousel-slides-laptop': laptopSlides,
+        '--carousel-slides-desktop': desktopSlides,
+      })}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
       onKeyDown={handleKeyDown}
@@ -1004,9 +1003,11 @@ function CarouselComponent<T = unknown>({
 }
 
 // Create typed generic component with display name
-const Carousel = memo(CarouselComponent) as <T = unknown>(
+const MemoCarousel = memo(CarouselComponent);
+MemoCarousel.displayName = 'Carousel';
+// why: memo() erases the generic T; re-assert the generic call signature
+const Carousel = MemoCarousel as <T = unknown>(
   props: CarouselProps<T>
 ) => ReactElement;
-(Carousel as any).displayName = 'Carousel';
 
 export default Carousel;

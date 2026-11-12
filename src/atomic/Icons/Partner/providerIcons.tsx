@@ -105,9 +105,17 @@ export const PROVIDER_ICONS = {
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: public return type; icon components have heterogeneous props (narrowing is an API change, see any-audit)
 export function getProviderIcon(partnerId: string): ComponentType<any> {
   return (
-    PROVIDER_ICONS[partnerId as keyof typeof PROVIDER_ICONS] ||
+    (isProviderIconKey(partnerId) && PROVIDER_ICONS[partnerId]) ||
     DefaultProviderIcon
   );
+}
+
+/** Narrows a schema icon value to a PROVIDER_ICONS key. */
+function isProviderIconKey(
+  partnerId: string
+): partnerId is keyof typeof PROVIDER_ICONS {
+  return partnerId in PROVIDER_ICONS;
 }

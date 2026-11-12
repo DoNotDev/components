@@ -128,7 +128,9 @@ function Code({
         const [
           { createHighlighterCore },
           { createJavaScriptRegexEngine },
-          ...langAndThemeModules
+          darkThemeModule,
+          lightThemeModule,
+          ...langModules
         ] = await Promise.all([
           import('shiki/core'),
           import('shiki/engine/javascript'),
@@ -147,10 +149,8 @@ function Code({
           import('shiki/langs/markdown.mjs'),
         ]);
 
-        const themes = langAndThemeModules
-          .slice(0, 2)
-          .map((m: any) => m.default);
-        const langs = langAndThemeModules.slice(2).map((m: any) => m.default);
+        const themes = [darkThemeModule.default, lightThemeModule.default];
+        const langs = langModules.map((m) => m.default);
 
         const shiki = await createHighlighterCore({
           themes,

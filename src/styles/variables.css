@@ -47,9 +47,7 @@
    * applies regardless of density tier.
    */
   --gap-none: 0;
-  --gap-sm: min(0.5rem, 2vw); /* 8px or 2vw, whichever is smaller */
-  --gap-md: min(1rem, 2vw); /* 16px or 2vw */
-  --gap-lg: min(2rem, 2vw); /* 32px or 2vw */
+  /* --gap-sm / --gap-md / --gap-lg: see DENSITY SYSTEM below */
 
   /* ===========================
      DIALOG SIZE VARIANTS
@@ -176,14 +174,7 @@
   /* Typography Scale - Musical Scale System (STANDARD density defaults - Major Third 1.25×) */
   --font-size-xs: 0.75rem; /* 12px - captions, shortcuts, meta */
   --font-size-sm: 0.875rem; /* 14px - small text, captions */
-  --font-size-base: 1rem; /* 16px - body text, DEFAULT */
-  --font-size-lg: 1.25rem; /* 20px - base × 1.25¹ - emphasized text */
-  --font-size-xl: 1.563rem; /* 25px - base × 1.25² - headings */
-  --font-size-2xl: 1.953rem; /* 31px - base × 1.25³ - large headings */
-  --font-size-3xl: 2.441rem; /* 39px - base × 1.25⁴ - hero text */
-
-  /* Line Height - Musical Scale System (matches font scale ratio) */
-  --line-height: 1.25; /* Major Third - Standard density default */
+  /* --font-size-base…3xl and --line-height: see DENSITY SYSTEM below */
 
   /* Font Weight - Semantic weights */
   --font-weight-normal: 400;
@@ -315,12 +306,36 @@
 
 /* ===========================
    DENSITY SYSTEM
-   Semantic spacing and typography presets based on context
-   Applied via [data-density] attribute on root or container
+   Semantic spacing and typography presets based on context.
+
+   App density: the layout wrapper (.dndev-layout) carries data-density in the
+   server HTML, and the tokens are declared on <html> from it (:has), so they
+   resolve on the first paint, before and without hydration.
+   Nested density: PageContainer / List set data-density on their own element.
+
+   The tokens are never declared on .dndev-layout itself: every element of the
+   app sits under it, so a declaration there would shadow the app's :root
+   overrides (themes.css). The <html> rules carry zero specificity (:where), so
+   an app :root override wins whatever the stylesheet order.
    =========================== */
 
+/* Base values (standard density), used until a density applies */
+:where(:root) {
+  --gap-sm: min(0.5rem, 2vw); /* 8px or 2vw, whichever is smaller */
+  --gap-md: min(1rem, 2vw); /* 16px or 2vw */
+  --gap-lg: min(2rem, 2vw); /* 32px or 2vw */
+  --font-size-base: 1rem; /* 16px - body text, DEFAULT */
+  --font-size-lg: 1.25rem; /* 20px - base × 1.25¹ - emphasized text */
+  --font-size-xl: 1.563rem; /* 25px - base × 1.25² - headings */
+  --font-size-2xl: 1.953rem; /* 31px - base × 1.25³ - large headings */
+  --font-size-3xl: 2.441rem; /* 39px - base × 1.25⁴ - hero text */
+  /* Line Height - Musical Scale System (matches font scale ratio) */
+  --line-height: 1.25; /* Major Third - Standard density default */
+}
+
 /* Compact (Admin/Data) - Dense, information-dense layouts - Minor Third (1.2×) */
-[data-density='compact'] {
+:where(:root:has(.dndev-layout[data-density='compact'])),
+[data-density='compact']:where(:not(.dndev-layout)) {
   /* Base sizes: Fluid responsiveness for all text, zoom-safe */
   --font-size-base: clamp(
     0.875rem,
@@ -360,7 +375,8 @@
 }
 
 /* Standard (Docs/SaaS) - DEFAULT, balanced for readability */
-[data-density='standard'] {
+:where(:root:has(.dndev-layout[data-density='standard'])),
+[data-density='standard']:where(:not(.dndev-layout)) {
   /* Base sizes: Fluid responsiveness for all text, zoom-safe */
   --font-size-base: clamp(
     1rem,
@@ -400,7 +416,8 @@
 }
 
 /* Expressive (Marketing) - Perfect Fourth (1.333×) + Fluid typography (2025 best practice) */
-[data-density='expressive'] {
+:where(:root:has(.dndev-layout[data-density='expressive'])),
+[data-density='expressive']:where(:not(.dndev-layout)) {
   /* Base sizes: Fluid responsiveness for all text, zoom-safe */
   --font-size-base: clamp(1rem, 0.875rem + 0.5vw, 1.125rem); /* 16-18px fluid */
   --font-size-lg: clamp(1.25rem, 1rem + 0.75vw, 1.5rem); /* 20-24px fluid */
@@ -432,8 +449,8 @@
 }
 
 /* Form field text: follows density, never below 16px (iOS focus zoom).
-   Declared on [data-density] too, so nested densities resolve their own base. */
-:root,
-[data-density] {
+   Declared on nested [data-density] too, so they resolve their own base. */
+:where(:root),
+[data-density]:where(:not(.dndev-layout)) {
   --font-size-input: max(16px, var(--font-size-base));
 }
