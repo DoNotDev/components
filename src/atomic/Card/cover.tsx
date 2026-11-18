@@ -7,6 +7,7 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 
+import type { MediaBackground } from '../../types';
 import { isResponsiveImage, ResponsiveImg } from '../../utils/responsiveImage';
 import type { ResponsiveImage } from '../../utils/responsiveImage';
 
@@ -20,7 +21,8 @@ export type CardCoverImage = string | ResponsiveImage;
 export interface CardCoverMedia {
   /**
    * `'cover'` fills the region and crops (photography). `'contain'` shows the whole
-   * image on the muted cover background (cut-out packshots, logos).
+   * image inside the cover frame (cut-out packshots, logos); pair with
+   * `background` for a fill behind it.
    * @default 'cover'
    */
   fit?: 'cover' | 'contain';
@@ -30,6 +32,11 @@ export interface CardCoverMedia {
   hover?: CardCoverImage;
   /** Load eagerly with high fetch priority (above-the-fold covers). @default false */
   eager?: boolean;
+  /**
+   * Opt-in background behind the media. `'transparent'` paints nothing.
+   * @default 'transparent'
+   */
+  background?: MediaBackground;
 }
 
 /** Image pair for a URL (one rendition) or a {@link ResponsiveImage}. */
@@ -66,7 +73,13 @@ export function renderCardCover(
 
   const image: CardCoverImage | null =
     typeof cover === 'string' || isResponsiveImage(cover) ? cover : null;
-  const { fit = 'cover', alt = '', hover, eager = false } = media;
+  const {
+    fit = 'cover',
+    alt = '',
+    hover,
+    eager = false,
+    background = 'transparent',
+  } = media;
 
   // When body is present the cover owns the top region sized by coverAspect.
   // When body is absent the cover fills the card (card owns the aspect-ratio).
@@ -79,6 +92,7 @@ export function renderCardCover(
       className="dndev-card-cover"
       data-has-body={hasBody ? 'true' : undefined}
       data-fit={fit}
+      data-background={background}
       data-has-hover={image && hover ? 'true' : undefined}
       style={coverStyle}
     >

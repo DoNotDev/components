@@ -18,7 +18,7 @@ import type {
   Ref,
 } from 'react';
 
-import type { IconType } from '../../types';
+import type { IconType, MediaBackground } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import { useLinkRenderer } from '../../utils/linkComponent';
@@ -238,6 +238,15 @@ export interface CardProps
    * @default 'cover'
    */
   coverFit?: CardCoverMedia['fit'];
+  /**
+   * Opt-in background behind the cover media, visible where the image does not
+   * fill the frame (`coverFit="contain"`, transparent PNG/WebP cut-outs).
+   * `'transparent'` paints nothing; `'muted'`, `'primary'`, `'secondary'` and
+   * `'accent'` fill with the theme token of the same name. The reserved space
+   * (`coverAspect`) is unaffected. String / image covers only.
+   * @default 'transparent'
+   */
+  coverBackground?: MediaBackground;
   /** Alt text for a string `cover`. Omit for a decorative cover. */
   coverAlt?: string;
   /**
@@ -364,6 +373,7 @@ const Card = ({
   cover,
   coverAspect,
   coverFit,
+  coverBackground = 'transparent',
   coverAlt,
   coverHover,
   coverEager,
@@ -413,6 +423,7 @@ const Card = ({
   const hasBody = Boolean(header || hasContent || footer);
   const coverNode = renderCardCover(cover, coverAspect, hasBody, {
     fit: coverFit,
+    background: coverBackground,
     alt: coverAlt,
     hover: coverHover,
     eager: coverEager,

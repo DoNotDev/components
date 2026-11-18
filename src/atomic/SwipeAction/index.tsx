@@ -1,38 +1,33 @@
 'use client';
 
-import { Ellipsis, Trash2 } from 'lucide-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
 import './SwipeAction.css';
 
-/** Localized, non-destructive reveal controls for a trailing destructive action. */
+/** A trailing destructive action revealed by a touch swipe. */
 export interface SwipeActionProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onAction'> {
   children: ReactNode;
   onAction: () => void;
   actionLabel: string;
-  revealLabel: string;
-  closeLabel: string;
   disabled?: boolean;
 }
 
 /** Native scrolling only reveals; destruction requires explicit button activation. */
 export default function SwipeAction({
-  children, onAction, actionLabel, revealLabel, closeLabel, disabled = false,
+  children, onAction, actionLabel, disabled = false,
   className, onKeyDown, ...props
 }: SwipeActionProps) {
   const [open, setOpen] = useState(false);
-  const actionId = useId();
   const viewport = useRef<HTMLDivElement>(null);
-  const toggle = useRef<HTMLButtonElement>(null);
   const revealed = open && !disabled;
 
   function reveal(next: boolean) {
     const element = viewport.current;
     if (!element) return;
-    // Instant programmatic scrolling keeps the explicit trash action immediately
-    // usable, independent of motion preferences and native snap animations.
+    // Instant programmatic scrolling, independent of motion preferences and native snap animations.
     element.scrollLeft = next
       ? (getComputedStyle(element).direction === 'rtl' ? -1 : 1) * (element.scrollWidth - element.clientWidth)
       : 0;
@@ -68,7 +63,6 @@ export default function SwipeAction({
           if (revealed || (element && element.scrollLeft !== 0)) {
             event.preventDefault();
             reveal(false);
-            toggle.current?.focus();
           }
         }
       }}
@@ -94,7 +88,6 @@ export default function SwipeAction({
           {children}
         </div>
         <button
-          id={actionId}
           type="button"
           className="dndev-swipe-action-delete"
           aria-hidden={!revealed}
@@ -104,7 +97,6 @@ export default function SwipeAction({
           onClick={() => {
             if (!revealed || disabled) return;
             reveal(false);
-            toggle.current?.focus();
             onAction();
           }}
         >
@@ -112,18 +104,6 @@ export default function SwipeAction({
           <span>{actionLabel}</span>
         </button>
       </div>
-      <button
-        ref={toggle}
-        type="button"
-        className="dndev-swipe-action-toggle"
-        aria-label={revealed ? closeLabel : revealLabel}
-        aria-expanded={revealed}
-        aria-controls={actionId}
-        disabled={disabled}
-        onClick={() => reveal(!revealed)}
-      >
-        <Ellipsis aria-hidden="true" focusable="false" />
-      </button>
     </div>
   );
 }

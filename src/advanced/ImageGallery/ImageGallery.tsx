@@ -16,6 +16,7 @@ import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
 import { flushSync } from 'react-dom';
 
 import Dialog from '../../atomic/Dialog';
+import type { MediaBackground } from '../../types';
 import { handleImageError } from '../../utils/imageRetry';
 import { ResponsiveImg } from '../../utils/responsiveImage';
 import { GalleryArrows } from './GalleryArrows';
@@ -37,7 +38,7 @@ export interface ImageData {
   fit?: ImageFit;
 }
 
-/** `'cover'` crops to fill the frame; `'contain'` shows the whole image on the muted frame. */
+/** `'cover'` crops to fill the frame; `'contain'` shows the whole image on the frame (see `background`). */
 export type ImageFit = 'cover' | 'contain';
 
 /** Props for the ImageGallery component -- thumbnail strip with main image preview. */
@@ -60,6 +61,15 @@ export interface ImageGalleryProps {
    * @default 'cover'
    */
   fit?: ImageFit;
+  /**
+   * Opt-in background behind the main stage and the contained thumbnails, visible
+   * where an image does not fill its frame (`fit: 'contain'`, transparent cut-outs).
+   * `'transparent'` paints nothing; `'muted'`, `'primary'`, `'secondary'` and
+   * `'accent'` fill with the theme token of the same name. The reserved space
+   * (`aspectRatio`) is unaffected.
+   * @default 'transparent'
+   */
+  background?: MediaBackground;
 }
 
 /** `view-transition-name` of the image morphing between the gallery and the lightbox. */
@@ -127,6 +137,7 @@ export function ImageGallery({
   onImageChange,
   nobox,
   fit = 'cover',
+  background = 'transparent',
 }: ImageGalleryProps): ReactElement {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -249,6 +260,7 @@ export function ImageGallery({
       <div
         className={`image-gallery__main${nobox ? '' : ' image-gallery__main--lightbox'}`}
         style={{ aspectRatio }}
+        data-background={background}
         onClick={handleMainAreaClick}
       >
         <div ref={stripRef} className="image-gallery__strip">
@@ -328,6 +340,7 @@ export function ImageGallery({
                 alt=""
                 className="image-gallery__thumbnail-image"
                 data-fit={img.fit}
+                data-background={background}
                 draggable={false}
                 onError={handleImageError}
               />

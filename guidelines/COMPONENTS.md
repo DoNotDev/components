@@ -40,7 +40,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **FileButton** - Button that triggers file input selection.
 - **PortalButton** - Button that opens content in a portal overlay.
 - **ButtonGroup** - Visual grouping of buttons with joined borders. Supports horizontal/vertical orientation, variant propagation, and items-based API.
-- **SwipeAction** - Swipe-to-reveal trailing destructive action with a keyboard-accessible toggle; only explicit action-button activation invokes `onAction`. Exported with `SwipeActionProps` from `@donotdev/components`. Supply translated `actionLabel`, `revealLabel`, and `closeLabel`. See [SwipeAction](./SWIPE_ACTION.md).
+- **SwipeAction** - Touch swipe-to-reveal trailing destructive action; only explicit action-button activation invokes `onAction`. Exported with `SwipeActionProps` from `@donotdev/components`. Supply a translated `actionLabel`. See [SwipeAction](./SWIPE_ACTION.md).
 
 ---
 
@@ -101,7 +101,7 @@ These are the only ways one should handle layout to get to quick results functio
 
 - **Table** - Accessible table component with sorting and selection.
 - **DataTable** - High-level table with built-in sorting, filtering, search, and pagination. `editable` (+ `getRowId`, `pendingChanges`, `onPendingChange`) edits the columns that declare `edit: { type: 'text' | 'number' | 'select', options }` in place: checked rows take one value from the bulk bar, Excel blocks paste across cells, Enter / arrows move, Esc cancels, Ctrl+Z undoes. The table never saves; the consumer writes `pendingChanges`. `cellErrors={{ [rowId]: { [columnKey]: message } }}` (+ `getRowId`, translated messages) marks cells that break a rule, like a value that does not parse: `data-invalid`, editors `aria-invalid` + `aria-describedby` to the message shown under the value (read-only cells show the message too).
-- **Card / ImageGallery images** - Pass the `{ fullUrl, thumbUrl }` pair (CRUD `Picture`) as `cover` / `coverHover` / `images`: phones (below 768px) download the thumbnail, larger screens the full image (`<picture>`). No width props.
+- **Card / ImageGallery images** - Pass the `{ fullUrl, thumbUrl }` pair (CRUD `Picture`) as `cover` / `coverHover` / `images`: phones (below 768px) download the thumbnail, larger screens the full image (`<picture>`). No width props. The frame background is opt-in: `coverBackground` (Card) / `background` (ImageGallery) take `'transparent'` (default, paints nothing) | `'muted'` | `'primary'` | `'secondary'` | `'accent'` (theme tokens); the reserved aspect-ratio space is unchanged.
 - **Avatar** - Accessible avatar with image and fallback support.
 - **Badge** - Status indicator with semantic variants (polymorphic: div, span, mark).
 - **Tag** - Tag component for labels and categories. `removeLabel`: remove button label (default `'Remove'`).

@@ -48,4 +48,16 @@ describe('Card picture cover', () => {
     expect(html).toContain('src="/x.jpg"');
     expect(html).not.toContain('<picture>');
   });
+
+  it('paints no cover background by default', () => {
+    const html = renderToStaticMarkup(<Card title="P" cover="/x.jpg" />);
+    expect(html).toMatch(/class="dndev-card-cover"[^>]*data-background="transparent"/);
+  });
+
+  it('applies coverBackground on the cover element', () => {
+    const html = renderToStaticMarkup(
+      <Card title="P" cover="/x.jpg" coverBackground="accent" />
+    );
+    expect(html).toMatch(/class="dndev-card-cover"[^>]*data-background="accent"/);
+  });
 });

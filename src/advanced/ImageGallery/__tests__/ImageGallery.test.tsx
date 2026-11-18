@@ -288,4 +288,26 @@ describe('ImageGallery', () => {
       expect(img.getAttribute('draggable')).toBe('false');
     }
   });
+
+  it('paints no background by default', () => {
+    const { container } = render(<ImageGallery images={IMAGES} />);
+    expect(
+      container.querySelector('.image-gallery__main')!.getAttribute('data-background')
+    ).toBe('transparent');
+    for (const t of container.querySelectorAll('.image-gallery__thumbnail-image')) {
+      expect(t.getAttribute('data-background')).toBe('transparent');
+    }
+  });
+
+  it('applies background to the stage and the thumbnails', () => {
+    const { container } = render(
+      <ImageGallery images={IMAGES} background="accent" />
+    );
+    expect(
+      container.querySelector('.image-gallery__main')!.getAttribute('data-background')
+    ).toBe('accent');
+    const thumbs = container.querySelectorAll('.image-gallery__thumbnail-image');
+    expect(thumbs.length).toBeGreaterThan(0);
+    for (const t of thumbs) expect(t.getAttribute('data-background')).toBe('accent');
+  });
 });

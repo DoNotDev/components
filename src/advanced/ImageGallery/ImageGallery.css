@@ -42,7 +42,6 @@
   width: 100%;
   overflow: hidden;
   border-radius: var(--radius-surface);
-  background-color: var(--muted);
 }
 
 .image-gallery__main--lightbox {
@@ -190,7 +189,27 @@
 
 .image-gallery__thumbnail-image[data-fit='contain'] {
   object-fit: contain;
+}
+
+/* Opt-in fill (background prop); transparent paints nothing. Thumbnails only fill when contained. */
+.image-gallery__main[data-background='muted'],
+.image-gallery__thumbnail-image[data-fit='contain'][data-background='muted'] {
   background-color: var(--muted);
+}
+
+.image-gallery__main[data-background='primary'],
+.image-gallery__thumbnail-image[data-fit='contain'][data-background='primary'] {
+  background-color: var(--primary);
+}
+
+.image-gallery__main[data-background='secondary'],
+.image-gallery__thumbnail-image[data-fit='contain'][data-background='secondary'] {
+  background-color: var(--secondary);
+}
+
+.image-gallery__main[data-background='accent'],
+.image-gallery__thumbnail-image[data-fit='contain'][data-background='accent'] {
+  background-color: var(--accent);
 }
 
 /* Responsive adjustments */

@@ -18,7 +18,7 @@ afterEach(() => {
 });
 function update(disabled = false) {
   act(() => root.render(<SwipeAction onAction={onAction} actionLabel="Remove item"
-    revealLabel="Show actions" closeLabel="Hide actions" disabled={disabled}>
+    disabled={disabled}>
     <p>Cart item</p><input aria-label="Quantity" /><a href="#item">Item</a>
   </SwipeAction>));
 }
@@ -31,24 +31,22 @@ function mount(dir = 'ltr') {
 }
 function viewport() { return host.querySelector<HTMLDivElement>('.dndev-swipe-action-viewport')!; }
 function action() { return host.querySelector<HTMLButtonElement>('.dndev-swipe-action-delete')!; }
-function toggle() { return host.querySelector<HTMLButtonElement>('.dndev-swipe-action-toggle')!; }
 function click(element: HTMLElement) { act(() => element.click()); }
 function scroll(offset: number) {
   act(() => { viewport().scrollLeft = offset; viewport().dispatchEvent(new Event('scroll')); });
 }
 function exposed(expected: boolean) {
-  expect(toggle().getAttribute('aria-expanded')).toBe(String(expected));
+  expect(host.querySelector('.dndev-swipe-action')!.hasAttribute('data-open')).toBe(expected);
   expect(action().getAttribute('aria-hidden')).toBe(String(!expected));
   expect(action().hasAttribute('inert')).toBe(!expected);
   expect(action().disabled).toBe(!expected);
   expect(action().tabIndex).toBe(expected ? 0 : -1);
 }
 describe('SwipeAction native scroll state', () => {
-  it('renders SSR closed with translated controls', () => {
-    const html = renderToString(<SwipeAction onAction={onAction} actionLabel="Remove"
-      revealLabel="Reveal" closeLabel="Close">Item</SwipeAction>);
-    expect(html).toContain('aria-expanded="false"');
-    expect(html).toContain('aria-hidden="true"'); expect(html).toContain('Reveal');
+  it('renders SSR closed with no reveal toggle', () => {
+    const html = renderToString(<SwipeAction onAction={onAction} actionLabel="Remove">Item</SwipeAction>);
+    expect(html).toContain('aria-hidden="true"'); expect(html).toContain('Remove');
+    expect(html).not.toContain('dndev-swipe-action-toggle');
     expect(onAction).not.toHaveBeenCalled();
   });
   for (const dir of ['ltr', 'rtl']) {
@@ -58,13 +56,11 @@ describe('SwipeAction native scroll state', () => {
       scroll(dir === 'rtl' ? -88 : 88); exposed(true);
       scroll(0); exposed(false); expect(onAction).not.toHaveBeenCalled();
     });
-    it(`explicit toggle scrolls instantly in ${dir}; trash works immediately`, () => {
-      mount(dir); click(toggle()); exposed(true);
-      expect(viewport().scrollLeft).toBe(dir === 'rtl' ? -88 : 88);
-      expect(toggle().getAttribute('aria-controls')).toBe(action().id);
-      expect(toggle().getAttribute('aria-label')).toBe('Hide actions');
+    it(`swipe to the end enables the trash action in ${dir}; trash closes then fires`, () => {
+      mount(dir); expect(host.querySelector('.dndev-swipe-action-toggle')).toBeNull();
+      scroll(dir === 'rtl' ? -88 : 88); exposed(true);
       click(action()); exposed(false); expect(viewport().scrollLeft).toBe(0);
-      expect(onAction).toHaveBeenCalledTimes(1); expect(document.activeElement).toBe(toggle());
+      expect(onAction).toHaveBeenCalledTimes(1);
     });
   }
   it('closed and partially revealed actions cannot activate or enter tab order', () => {
@@ -75,17 +71,17 @@ describe('SwipeAction native scroll state', () => {
       expect(onAction).not.toHaveBeenCalled();
     }
   });
-  it('Escape restores toggle focus, content focus closes without stealing it', () => {
-    mount(); click(toggle());
+  it('Escape closes, content focus closes without stealing it', () => {
+    mount(); scroll(88); exposed(true);
     act(() => { action().focus(); action().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
-    exposed(false); expect(document.activeElement).toBe(toggle());
-    click(toggle()); const input = host.querySelector('input')!;
+    exposed(false); expect(viewport().scrollLeft).toBe(0);
+    scroll(88); const input = host.querySelector('input')!;
     act(() => input.focus()); exposed(false);
     expect(document.activeElement).toBe(input); expect(viewport().scrollLeft).toBe(0);
   });
   it('disabled resets scroll and does not reopen when enabled again', () => {
     mount(); scroll(88); update(true); exposed(false);
-    expect(viewport().scrollLeft).toBe(0); expect(toggle().disabled).toBe(true);
+    expect(viewport().scrollLeft).toBe(0);
     click(action()); update(false); exposed(false); expect(onAction).not.toHaveBeenCalled();
   });
   it('classifies actual pointer input without measuring or capturing movement', () => {

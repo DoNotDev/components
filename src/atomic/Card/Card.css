@@ -40,7 +40,11 @@
 
 /* href: stretched link. The title is the <a href>; its ::after covers the whole
    card so the tile is clickable, while controls inside stay above it. The body
-   must not be the containing block, or the hit area would stop at the cover. */
+   must not be the containing block, or the hit area would stop at the cover.
+   The lift list must name every control root and its value: a group whose own
+   opacity (e.g. a disabled QuantityStepper, role="group") makes it a stacking
+   context paints below the overlay, and an <output> value would be covered, so
+   taps there would open the link instead of reaching the control. */
 .dndev-card[data-has-link='true'] > .dndev-card-body {
   position: static;
 }
@@ -76,6 +80,9 @@
     textarea,
     label,
     [role='button'],
+    [role='group'],
+    fieldset,
+    output,
     [tabindex]
   ):not(.dndev-card-link) {
   position: relative;
@@ -121,7 +128,23 @@
   overflow: hidden;
   z-index: 0;
   width: 100%;
+}
+
+/* Opt-in fill behind the media (coverBackground); transparent paints nothing. */
+.dndev-card-cover[data-background='muted'] {
   background: var(--muted);
+}
+
+.dndev-card-cover[data-background='primary'] {
+  background: var(--primary);
+}
+
+.dndev-card-cover[data-background='secondary'] {
+  background: var(--secondary);
+}
+
+.dndev-card-cover[data-background='accent'] {
+  background: var(--accent);
 }
 
 /* Cover-only: fill the card completely. Card root owns the aspect-ratio. */
@@ -143,13 +166,11 @@
   object-fit: cover;
 }
 
-/* Contain: whole image visible on the muted cover background (cut-outs), inset
-   proportionally so a packshot never touches the frame. */
+/* Contain: whole image visible at full frame size, no inset (cut-outs;
+   `coverBackground` opts into a fill). */
 .dndev-card-cover[data-fit='contain'] > img:not(.dndev-card-cover-hover),
 .dndev-card-cover[data-fit='contain'] > picture > img:not(.dndev-card-cover-hover) {
   object-fit: contain;
-  box-sizing: border-box;
-  padding: 8%;
 }
 
 /* Hover view: stacked over the cover, crossfades in on hover / keyboard focus. */

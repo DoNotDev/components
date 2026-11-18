@@ -30,6 +30,19 @@ export type IconType =
   | ReactNode;
 
 /**
+ * Background painted behind an image frame (Card cover, ImageGallery stage and
+ * thumbnails). `'transparent'` (default) paints nothing; the others fill the
+ * frame with the theme token of the same name (`--muted`, `--primary`,
+ * `--secondary`, `--accent`). The reserved space (aspect ratio) is unaffected.
+ */
+export type MediaBackground =
+  | 'transparent'
+  | 'muted'
+  | 'primary'
+  | 'secondary'
+  | 'accent';
+
+/**
  * Standardized content data structure for all marketing components.
  * This ensures consistency across Reveal, Carousel, etc.
  *
