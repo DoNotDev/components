@@ -36,7 +36,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--gap-tight, 0.25rem);
+  padding: 0.25rem; /* 4px: tighter than --gap-sm (8px), the smallest gap token */
   margin-inline-start: var(--gap-sm, 0.5rem);
   display: inline-flex;
   align-items: center;

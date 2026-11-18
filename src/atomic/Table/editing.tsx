@@ -10,7 +10,7 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type {
   ClipboardEvent,
   KeyboardEvent,
@@ -184,6 +184,8 @@ export interface EditCellProps extends EditCellHandlers {
   position: CellPosition;
   /** Accessible name, e.g. the column title. */
   label: string;
+  /** Message of a rule the value breaks (`DataTable` `cellErrors`): marks it invalid. */
+  error?: string;
 }
 
 /**
@@ -197,14 +199,16 @@ export function EditCell({
   value,
   position,
   label,
+  error,
   commit,
   focusCell,
   pasteGrid,
   undo,
 }: EditCellProps): ReactElement {
   const ref = useRef<HTMLInputElement & HTMLSelectElement>(null);
+  const errorId = useId();
   const stored = cellText(value);
-  const invalid = !isCellValueValid(value, edit);
+  const invalid = !isCellValueValid(value, edit) || !!error;
 
   // Paste, bulk apply and undo change the stored value from outside: sync the DOM
   useEffect(() => {
@@ -258,15 +262,23 @@ export function EditCell({
     className: 'dndev-table-cell-editor',
     'aria-label': label,
     'aria-invalid': invalid || undefined,
+    'aria-describedby': error ? errorId : undefined,
     'data-edit-row': position.row,
     'data-edit-col': position.col,
     onKeyDown,
     onPaste,
   };
 
+  const message = error ? (
+    <span id={errorId} className="dndev-table-cell-error">
+      {error}
+    </span>
+  ) : null;
+
   if (edit.type === 'select') {
     const known = edit.options?.some((o) => o.value === stored);
     return (
+      <>
       <select
         ref={ref}
         {...common}
@@ -281,18 +293,23 @@ export function EditCell({
           </option>
         ))}
       </select>
+      {message}
+      </>
     );
   }
 
   return (
-    <input
-      ref={ref}
-      {...common}
-      type="text"
-      inputMode={edit.type === 'number' ? 'decimal' : undefined}
-      defaultValue={stored}
-      onBlur={(e) => store(e.target.value)}
-    />
+    <>
+      <input
+        ref={ref}
+        {...common}
+        type="text"
+        inputMode={edit.type === 'number' ? 'decimal' : undefined}
+        defaultValue={stored}
+        onBlur={(e) => store(e.target.value)}
+      />
+      {message}
+    </>
   );
 }
 

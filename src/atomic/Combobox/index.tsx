@@ -43,9 +43,19 @@ export interface ComboboxProps {
   emptyMessage?: string;
   multiple?: boolean;
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   creatable?: boolean;
   createLabel?: string;
   clearable?: boolean;
+  /** Accessible label of the clear button (default: 'Clear') */
+  clearLabel?: string;
+  /**
+   * `multiple` without `chips`: text shown for a selection of several values;
+   * `{{count}}` is replaced by their number (default: '{{count}} selected').
+   * One value shows its option label.
+   */
+  selectedLabel?: string;
   onOpenChange?: (open: boolean) => void;
   onSearchChange?: (search: string) => void;
   /** Whether the field is required - shows asterisk indicator */
@@ -63,13 +73,14 @@ export interface ComboboxProps {
  * All inline controls (clear, create, chevron) are full touch targets
  * (`--touch-target`, 48px) via `.dndev-inline-action-btn`. Spinner matches
  * the chevron width so there's no layout shift on loading.
- * Gaps between items = `--gap-tight`. Outer inset on both sides = `--gap-sm`.
+ * Gaps between items = 4px (hardcoded in Combobox.css, tighter than `--gap-sm`).
+ * Outer inset on both sides = `--gap-sm`.
  */
 function computeTrailingPad(actionCount: number): string {
   const parts = ['var(--gap-sm)'];
   if (actionCount > 0) parts.push(`${actionCount} * var(--touch-target)`);
   parts.push('var(--touch-target)'); // chevron / spinner slot
-  if (actionCount > 0) parts.push(`${actionCount} * var(--gap-tight, 4px)`);
+  if (actionCount > 0) parts.push(`${actionCount} * 4px`);
   parts.push('var(--gap-sm)');
   return `calc(${parts.join(' + ')})`;
 }
@@ -85,9 +96,12 @@ const Combobox = ({
   variant,
   multiple = false,
   label,
+  info,
   creatable = false,
   createLabel = 'Create',
   clearable = false,
+  clearLabel = 'Clear',
+  selectedLabel = '{{count}} selected',
   onOpenChange,
   onSearchChange,
   required,
@@ -269,12 +283,26 @@ const Combobox = ({
     }
   };
 
+  // `multiple` without chips: the selection as text (chips show it themselves).
+  // One value: its option label; several, or one without a known option: the count.
+  const singleSelectedLabel =
+    selectedValues.length === 1
+      ? options.find((opt) => opt.value === selectedValues[0])?.label
+      : undefined;
+  const selectionSummary =
+    !multiple || chips || selectedValues.length === 0
+      ? ''
+      : singleSelectedLabel
+        ? singleSelectedLabel
+        : selectedLabel.replace('{{count}}', String(selectedValues.length));
+
   const getDisplayValue = () => {
     // User is actively typing/backspacing — always show the search text (even if empty)
     if (open && isSearchingRef.current) return search;
     if (open && search) return search;
     if (selectedValues.length === 0) return '';
-    if (multiple) return '';
+    // Multiple: open = search field (the summary stays visible as placeholder)
+    if (multiple) return open ? '' : selectionSummary;
     const selectedOption = options.find(
       (opt) => opt.value === selectedValues[0]
     );
@@ -337,6 +365,7 @@ const Combobox = ({
         <FloatingLabel
           htmlFor={id}
           label={label}
+          info={info}
           disabled={disabled}
           required={required}
         >
@@ -385,7 +414,7 @@ const Combobox = ({
                   type="button"
                   className="dndev-inline-action-btn dndev-combobox-action-btn dndev-combobox-action-btn--clear"
                   onClick={handleClear}
-                  aria-label="Clear"
+                  aria-label={clearLabel}
                 >
                   <X />
                 </button>
@@ -430,7 +459,13 @@ const Combobox = ({
             onFocus={handleInputFocus}
             onClick={chips ? undefined : handleInputClick}
             onKeyDown={handleKeyDown}
-            placeholder={hasSelection && chips ? '' : placeholder}
+            placeholder={
+              hasSelection && chips
+                ? ''
+                : selectionSummary
+                  ? selectionSummary
+                  : placeholder
+            }
             disabled={disabled}
             required={required}
             bare={!!chips}
@@ -460,7 +495,7 @@ const Combobox = ({
                 type="button"
                 className="dndev-inline-action-btn dndev-combobox-action-btn dndev-combobox-action-btn--clear"
                 onClick={handleClear}
-                aria-label="Clear"
+                aria-label={clearLabel}
               >
                 <X />
               </button>
@@ -487,8 +522,8 @@ const Combobox = ({
             insetInlineStart: 0,
             insetInlineEnd: 0,
             width: '100%',
-            marginTop: 'var(--gap-tight)',
-            padding: 'var(--gap-tight)',
+            marginTop: 'var(--gap-sm)',
+            padding: 'var(--gap-sm)',
             textAlign: 'start',
           }}
           data-glow="blank"

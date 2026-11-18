@@ -53,7 +53,7 @@ interface ToastProps
   toastType?: ToastType;
 }
 
-type ToastActionElement = ReactElement<typeof ToastAction>;
+type ToastActionElement = ReactElement<ComponentProps<typeof ToastAction>>;
 
 function Toast({ className, variant, toastType, ...props }: ToastProps) {
   // Map toast type to variant

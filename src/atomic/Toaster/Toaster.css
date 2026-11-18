@@ -3,7 +3,7 @@
 .dndev-toast-viewport {
   position: fixed;
   top: var(--gap-md);
-  z-index: 100;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column-reverse;
   max-height: 100dvh;

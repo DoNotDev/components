@@ -1,0 +1,100 @@
+.dndev-swipe-action {
+  --swipe-action-width: 5.5rem;
+  display: flex;
+  min-inline-size: 0;
+}
+
+.dndev-swipe-action-viewport {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.dndev-swipe-action-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.dndev-swipe-action[data-disabled] .dndev-swipe-action-viewport,
+.dndev-swipe-action-viewport[data-input-blocked] {
+  overflow-x: hidden;
+}
+
+.dndev-swipe-action-content {
+  flex: 0 0 100%;
+  min-inline-size: 0;
+  min-block-size: 44px;
+  scroll-snap-align: start;
+  background: var(--background);
+}
+
+/* Scope to descendants, never a focusable cart/list ancestor. Touch-action is
+   resolved before pointerdown, so controls cannot start horizontal scrolling. */
+.dndev-swipe-action-content :is(
+  button, a, input, textarea, select, label, summary, [tabindex],
+  [contenteditable]:not([contenteditable="false"]), [draggable="true"],
+  [role="button"], [role="link"], [role="checkbox"], [role="switch"],
+  [role="radio"], [role="slider"], [role="spinbutton"], [role="textbox"],
+  [role="combobox"], [role="searchbox"], [role="menuitem"],
+  [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"],
+  [role="tab"], [role="treeitem"]
+) {
+  touch-action: pan-y pinch-zoom;
+}
+
+.dndev-swipe-action-toggle,
+.dndev-swipe-action-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dndev-swipe-action-toggle {
+  flex-shrink: 0;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Native overflow clips the closed action and progressively reveals its paint.
+   Inert/disabled/ARIA state gates interaction until the open endpoint. */
+.dndev-swipe-action-delete {
+  flex: 0 0 var(--swipe-action-width);
+  scroll-snap-align: end;
+  flex-direction: column;
+  padding: var(--gap-sm);
+  overflow-wrap: anywhere;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.dndev-swipe-action svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+  flex-shrink: 0;
+}
+
+.dndev-swipe-action button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -3px;
+}
+
+.dndev-swipe-action button:disabled {
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dndev-swipe-action-viewport {
+    scroll-behavior: auto;
+  }
+}

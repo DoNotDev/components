@@ -73,6 +73,7 @@
 <Card title="Title">children</Card>
 <Card onClick={fn}>children</Card>
 ```
+`onClick` card: `role="button"`, focusable, Enter/Space activate (keep other interactive controls out; use `href` for navigation).
 | Prop | Type | Default |
 |------|------|---------|
 | variant | `'default'` \| `'muted'` \| `'primary'` \| `'secondary'` \| `'accent'` | `'default'` |
@@ -176,8 +177,8 @@
 |------|------|---------|
 | entity | `Entity` | required |
 | operation | `'create'` \| `'edit'` | `'create'` |
-| onSubmit | `(data) => void` | required |
-| defaultValues | `Record<string, unknown>` | - |
+| onSubmit | `(data) => void` (data = the fields the form writes) | - (default writer: record + joined child rows) |
+| defaultValues | `Record<string, unknown>` (edit: the stored row as read) | - |
 | loading | `boolean` | `false` |
 | submitText | `string` | - |
 | cancelText | `string` | - |

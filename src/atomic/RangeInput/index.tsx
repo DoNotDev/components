@@ -25,6 +25,8 @@ export interface RangeInputProps extends Omit<
 > {
   /** Label for the range (single FloatingLabel wrapping both inputs) */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /** Placeholder for min input */
   minPlaceholder?: string;
   /** Placeholder for max input */
@@ -66,6 +68,7 @@ export interface RangeInputProps extends Omit<
 export function RangeInput({
   type = 'number',
   label,
+  info,
   minPlaceholder = 'Min',
   maxPlaceholder = 'Max',
   minValue = '',
@@ -149,7 +152,7 @@ export function RangeInput({
 
   if (label) {
     return (
-      <FloatingLabel label={label}>
+      <FloatingLabel label={label} info={info}>
         <div className="dndev-range-input">{inputs}</div>
       </FloatingLabel>
     );

@@ -62,7 +62,11 @@ export interface CarouselProps<T = unknown> {
   /** Whether to show progress bar */
   showProgress?: boolean;
 
-  /** Whether to enable autoplay */
+  /**
+   * Whether to enable autoplay. Stops while the pointer or keyboard focus is inside,
+   * and never runs under `prefers-reduced-motion: reduce`.
+   * @default false
+   */
   autoplay?: boolean;
 
   /** Autoplay interval in milliseconds */
@@ -71,7 +75,10 @@ export interface CarouselProps<T = unknown> {
   /** Transition type */
   transition?: 'slide' | 'fade' | 'scale' | 'parallax';
 
-  /** Whether to enable infinite loop */
+  /**
+   * Whether to loop infinitely (clones the edge slides; they come first in the server HTML).
+   * @default false
+   */
   infinite?: boolean;
 
   /**
@@ -104,8 +111,41 @@ export interface CarouselProps<T = unknown> {
   /** Optional unique key extractor */
   keyExtractor?: (item: T, index: number) => string | number;
 
-  /** Accessibility label */
+  /**
+   * Accessible name of the carousel region (WAI-ARIA carousel pattern).
+   * @default 'Carousel'
+   */
   'aria-label'?: string;
+
+  /** Accessible name of the previous button @default 'Previous slide' */
+  previousLabel?: string;
+
+  /** Accessible name of the next button @default 'Next slide' */
+  nextLabel?: string;
+
+  /** Accessible name of the play button @default 'Play carousel' */
+  playLabel?: string;
+
+  /** Accessible name of the pause button @default 'Pause carousel' */
+  pauseLabel?: string;
+
+  /**
+   * Slide name, also announced on slide change (1-based).
+   * @default (current, total) => `Slide ${current} of ${total}`
+   */
+  slideLabel?: (current: number, total: number) => string;
+
+  /**
+   * Accessible name of a dot (1-based).
+   * @default (index) => `Go to slide ${index}`
+   */
+  goToSlideLabel?: (index: number) => string;
+
+  /** Text shown when `items` is empty @default 'No items to display' */
+  emptyLabel?: string;
+
+  /** Accessible name of the loading placeholder @default 'Loading carousel' */
+  loadingLabel?: string;
 
   /** Whether to pause autoplay on hover */
   pauseOnHover?: boolean;
@@ -133,6 +173,15 @@ export interface CarouselRef {
   getCurrentIndex: () => number;
 }
 
+const defaultSlideLabel = (current: number, total: number) =>
+  `Slide ${current} of ${total}`;
+const defaultGoToSlideLabel = (index: number) => `Go to slide ${index}`;
+
+/** Controls are hidden until hovered; keyboard focus reveals them too (WCAG 2.4.7). */
+const revealControl = (e: { currentTarget: HTMLElement }) => {
+  e.currentTarget.style.opacity = '1';
+};
+
 function CarouselComponent<T = unknown>({
   items,
   renderItem,
@@ -141,10 +190,10 @@ function CarouselComponent<T = unknown>({
   showArrows = true,
   showDots = false,
   showProgress = true,
-  autoplay = true,
+  autoplay = false,
   autoplayInterval = 5000,
   transition = 'slide',
-  infinite = true,
+  infinite = false,
   slidesToShow = 1,
   gap = 'none',
   swipeable = true,
@@ -152,7 +201,14 @@ function CarouselComponent<T = unknown>({
   onActiveChange,
   onSlideClick,
   keyExtractor,
-  'aria-label': ariaLabel = 'Premium carousel',
+  'aria-label': ariaLabel = 'Carousel',
+  previousLabel = 'Previous slide',
+  nextLabel = 'Next slide',
+  playLabel = 'Play carousel',
+  pauseLabel = 'Pause carousel',
+  slideLabel = defaultSlideLabel,
+  goToSlideLabel = defaultGoToSlideLabel,
+  emptyLabel = 'No items to display',
   pauseOnHover = true,
   pauseOnInvisible = true,
   showPlayPause = true,
@@ -168,12 +224,20 @@ function CarouselComponent<T = unknown>({
   const [mobileSlides, tabletSlides, laptopSlides, desktopSlides] =
     slidesPerBreakpoint;
   const maxSlides = Math.max(...slidesPerBreakpoint);
+  // Infinite looping needs clones; with every item visible at once there is nothing to loop
+  const loop = infinite && items.length > maxSlides;
+  const cloneCount = loop ? Math.max(maxSlides, 2) : 0;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoplay);
   const [isPaused, setIsPaused] = useState(false);
+  // Keyboard focus inside stops autoplay (WAI-ARIA carousel pattern)
+  const [hasFocus, setHasFocus] = useState(false);
+  // Off-screen slides become inert after hydration only: the server cannot know the breakpoint
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [isVisible, setIsVisible] = useState(true);
   const [dragState, setDragState] = useState({
     isDragging: false,
@@ -209,18 +273,13 @@ function CarouselComponent<T = unknown>({
     );
   }, []);
 
-  // Track current breakpoint for JS calculations (translateX, parallax)
-  // Synchronous initial value — matchMedia is sync, avoids first-paint mismatch with CSS
-  const [currentSlides, setCurrentSlides] = useState(() => {
-    if (typeof window === 'undefined') return mobileSlides;
-    if (window.matchMedia('(min-width: 1440px)').matches) return desktopSlides;
-    if (window.matchMedia('(min-width: 1024px)').matches) return laptopSlides;
-    if (window.matchMedia('(min-width: 768px)').matches) return tabletSlides;
-    return mobileSlides;
-  });
+  // Track current breakpoint for JS calculations (translateX, parallax, inert slides).
+  // Starts at the mobile value on server AND client so hydration matches; the layout
+  // effect below resolves the real breakpoint before the browser paints. Slide widths
+  // come from CSS (Carousel.css), so the server HTML is already laid out correctly.
+  const [currentSlides, setCurrentSlides] = useState(mobileSlides);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  useLayoutEffect(() => {
 
     const queries = [
       { mq: window.matchMedia('(min-width: 1440px)'), value: desktopSlides },
@@ -238,7 +297,7 @@ function CarouselComponent<T = unknown>({
       setCurrentSlides(mobileSlides);
     };
 
-    // Only listen for changes — initial value is already correct
+    resolve();
     const cleanups = queries.map(({ mq }) => {
       const handler = () => resolve();
       mq.addEventListener('change', handler);
@@ -261,14 +320,13 @@ function CarouselComponent<T = unknown>({
   // Enhanced infinite loop with true circular DOM structure
   // Clone count uses maxSlides to ensure enough clones at every breakpoint
   const circularItems = useMemo(() => {
-    if (!infinite || items.length <= maxSlides) return items;
+    if (!loop) return items;
 
-    const cloneCount = Math.max(maxSlides, 2);
     const beforeClones = items.slice(-cloneCount);
     const afterClones = items.slice(0, cloneCount);
 
     return [...beforeClones, ...items, ...afterClones];
-  }, [items, infinite, maxSlides]);
+  }, [items, loop, cloneCount]);
 
   // JS slide width for translateX calculations — synced with CSS via matchMedia
   const slideWidth = useMemo(() => {
@@ -279,31 +337,40 @@ function CarouselComponent<T = unknown>({
   // ceil(N/2)-1: 1→0, 2→0, 3→1, 4→1
   const activeOffset = Math.ceil(currentSlides / 2) - 1;
 
-  // Mount: position track at clone offset so first real item is visible (no flash)
-  const mountedRef = useRef(false);
+  // Last logical index that still fills the view (no blank space after the last slide)
+  const maxIndex = Math.max(0, items.length - currentSlides);
+
+  /** Track position of a logical index: after the clones when looping, else clamped to a full view. */
+  const trackPosition = useCallback(
+    (index: number) =>
+      loop ? index + cloneCount : Math.max(0, Math.min(index, maxIndex)),
+    [loop, cloneCount, maxIndex]
+  );
+
+  // Mount and breakpoint change: place the track on the current slide (first real
+  // item when looping), re-clamped to a full view for the new slide count.
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
   useLayoutEffect(() => {
-    if (
-      mountedRef.current ||
-      !infinite ||
-      !trackRef.current ||
-      items.length <= maxSlides
-    )
-      return;
-    mountedRef.current = true;
-    const cloneCount = Math.max(maxSlides, 2);
-    trackRef.current.style.transform = `translateX(-${cloneCount * slideWidth}%)`;
-  }, [infinite, maxSlides, slideWidth, items.length]);
+    const track = trackRef.current;
+    if (!track) return;
+    const index = loop
+      ? currentIndexRef.current
+      : Math.min(currentIndexRef.current, maxIndex);
+    if (index !== currentIndexRef.current) setCurrentIndex(index);
+    track.style.transition = 'none';
+    track.style.transform = `translateX(-${trackPosition(index) * slideWidth}%)`;
+  }, [loop, maxIndex, trackPosition, slideWidth]);
 
   // Get the real index (accounting for clones)
   const getRealIndex = useCallback(
     (index: number) => {
-      if (!infinite) return index;
-      const cloneCount = Math.max(maxSlides, 2);
+      if (!loop) return index;
       return (
         (((index - cloneCount) % items.length) + items.length) % items.length
       );
     },
-    [infinite, items.length, maxSlides]
+    [loop, items.length, cloneCount]
   );
 
   // Spring-based momentum animation
@@ -422,16 +489,11 @@ function CarouselComponent<T = unknown>({
       const track = trackRef.current;
       if (!track) return;
 
-      let actualIndex = targetIndex;
-
-      if (infinite) {
-        const cloneCount = Math.max(maxSlides, 2);
-        // Offset into the real section — don't wrap, let it slide to clones
-        actualIndex = targetIndex + cloneCount;
-      } else {
-        // Non-infinite: clamp to valid range
-        actualIndex = Math.max(0, Math.min(targetIndex, items.length - 1));
-      }
+      // Looping: offset into the real section — don't wrap, let it slide to clones.
+      // Otherwise: clamped so the last view is full.
+      const actualIndex = trackPosition(targetIndex);
+      // Already there: nothing moves, so no transitionend would ever reset the state
+      if (!loop && actualIndex === currentIndex && !immediate) return;
 
       const translateX = -(actualIndex * slideWidth);
       const duration = immediate || prefersReducedMotion ? '0ms' : '300ms';
@@ -441,15 +503,14 @@ function CarouselComponent<T = unknown>({
       applyTransitionEffect(track, translateX, duration);
 
       // Update logical index (wrap to valid range)
-      const newIndex = infinite
+      const newIndex = loop
         ? ((targetIndex % items.length) + items.length) % items.length
         : actualIndex;
       setCurrentIndex(newIndex);
       onActiveChange?.(newIndex);
 
       // Schedule reset if we landed on a clone
-      if (infinite) {
-        const cloneCount = Math.max(maxSlides, 2);
+      if (loop) {
         const isOnBeforeClone = actualIndex < cloneCount;
         const isOnAfterClone = actualIndex >= items.length + cloneCount;
 
@@ -473,10 +534,11 @@ function CarouselComponent<T = unknown>({
       }
     },
     [
-      infinite,
+      loop,
+      trackPosition,
+      currentIndex,
       items.length,
       slideWidth,
-      maxSlides,
       onActiveChange,
       prefersReducedMotion,
       state,
@@ -503,7 +565,15 @@ function CarouselComponent<T = unknown>({
 
   // Autoplay functionality
   useEffect(() => {
-    if (!isPlaying || isPaused || !isVisible || items.length <= 1) return;
+    if (
+      !isPlaying ||
+      isPaused ||
+      hasFocus ||
+      prefersReducedMotion ||
+      !isVisible ||
+      items.length <= 1
+    )
+      return;
 
     autoplayRef.current = setTimeout(() => {
       goToNext();
@@ -517,6 +587,8 @@ function CarouselComponent<T = unknown>({
   }, [
     isPlaying,
     isPaused,
+    hasFocus,
+    prefersReducedMotion,
     isVisible,
     currentIndex,
     goToNext,
@@ -595,8 +667,7 @@ function CarouselComponent<T = unknown>({
 
       if (track && Math.abs(deltaX) > 10) {
         e.preventDefault();
-        const cloneOffset = infinite ? Math.max(maxSlides, 2) : 0;
-        const currentTranslate = -((currentIndex + cloneOffset) * slideWidth);
+        const currentTranslate = -(trackPosition(currentIndex) * slideWidth);
         const dragPercent =
           (deltaX / (containerRef.current?.clientWidth || 1)) * 100;
 
@@ -619,8 +690,7 @@ function CarouselComponent<T = unknown>({
       dragState.startTime,
       currentIndex,
       slideWidth,
-      infinite,
-      maxSlides,
+      trackPosition,
     ]
   );
 
@@ -635,7 +705,7 @@ function CarouselComponent<T = unknown>({
       const track = trackRef.current;
       if (track) {
         const targetIndex = velocity > 0 ? currentIndex - 1 : currentIndex + 1;
-        const targetTranslateX = -(targetIndex * slideWidth);
+        const targetTranslateX = -(trackPosition(targetIndex) * slideWidth);
         animateWithSpring(track, targetTranslateX, velocity * 100);
         goToSlide(targetIndex, true);
       }
@@ -648,7 +718,7 @@ function CarouselComponent<T = unknown>({
     } else {
       const track = trackRef.current;
       if (track && momentum) {
-        const targetTranslateX = -(currentIndex * slideWidth);
+        const targetTranslateX = -(trackPosition(currentIndex) * slideWidth);
         animateWithSpring(track, targetTranslateX, velocity * 100);
       } else {
         goToSlide(currentIndex, true);
@@ -671,6 +741,7 @@ function CarouselComponent<T = unknown>({
     currentIndex,
     animateWithSpring,
     slideWidth,
+    trackPosition,
   ]);
 
   // Transition Events (SSR safe, performant)
@@ -691,6 +762,8 @@ function CarouselComponent<T = unknown>({
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Keys typed in slide content (links, buttons, inputs) keep their own behaviour
+      if (e.target !== e.currentTarget) return;
       const isRTL = isRTLLanguage();
 
       switch (e.key) {
@@ -711,13 +784,27 @@ function CarouselComponent<T = unknown>({
           goToSlide(items.length - 1);
           break;
         case ' ':
+          if (!autoplay) return;
           e.preventDefault();
           isPlaying ? pause() : play();
           break;
       }
     },
-    [goToNext, goToPrevious, goToSlide, items.length, isPlaying, play, pause]
+    [
+      goToNext,
+      goToPrevious,
+      goToSlide,
+      items.length,
+      isPlaying,
+      play,
+      pause,
+      autoplay,
+    ]
   );
+
+  // Track position of the first visible slide (clones come first in infinite mode)
+  const firstVisible = trackPosition(currentIndex);
+  const autoplayRunning = isPlaying && !isPaused && !hasFocus;
 
   // Early return for empty items — placed after all hooks to satisfy Rules of Hooks
   if (!items || items.length === 0) {
@@ -728,7 +815,7 @@ function CarouselComponent<T = unknown>({
         className={cn('dndev-relative', className)}
       >
         <div style={{ color: 'var(--muted-foreground)' }}>
-          No items to display
+          {emptyLabel}
         </div>
       </Stack>
     );
@@ -747,11 +834,16 @@ function CarouselComponent<T = unknown>({
       })}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
+      onFocus={() => setHasFocus(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+          setHasFocus(false);
+      }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
+      aria-roledescription="carousel"
       aria-label={ariaLabel}
-      aria-live="polite"
     >
       {/* Main carousel track */}
       <div className="dndev-overflow-hidden">
@@ -772,6 +864,11 @@ function CarouselComponent<T = unknown>({
         >
           {circularItems.map((item, index) => {
             const realIndex = getRealIndex(index);
+            // Off-screen slides (and clones) are not focusable nor announced (WCAG 2.4.11)
+            const offscreen =
+              mounted &&
+              items.length > currentSlides &&
+              (index < firstVisible || index >= firstVisible + currentSlides);
             const isActive =
               realIndex === (currentIndex + activeOffset) % items.length;
             const shouldLoad = shouldLoadSlide(realIndex);
@@ -790,7 +887,8 @@ function CarouselComponent<T = unknown>({
                 }}
                 role="group"
                 aria-roledescription="slide"
-                aria-label={`Slide ${realIndex + 1} of ${items.length}`}
+                aria-label={slideLabel(realIndex + 1, items.length)}
+                inert={offscreen || undefined}
                 onClick={() => onSlideClick?.(item, realIndex)}
               >
                 {shouldLoad && renderItem(item, realIndex, isActive)}
@@ -827,9 +925,10 @@ function CarouselComponent<T = unknown>({
               e.currentTarget.style.backgroundColor =
                 'rgb(from var(--background) r g b / 0.8)';
             }}
+            onFocus={revealControl}
             onClick={goToPrevious}
-            aria-label="Previous slide"
-            tabIndex={-1}
+            type="button"
+            aria-label={previousLabel}
           >
             <ChevronLeft
               style={{
@@ -863,9 +962,10 @@ function CarouselComponent<T = unknown>({
               e.currentTarget.style.backgroundColor =
                 'rgb(from var(--background) r g b / 0.8)';
             }}
+            onFocus={revealControl}
             onClick={goToNext}
-            aria-label="Next slide"
-            tabIndex={-1}
+            type="button"
+            aria-label={nextLabel}
           >
             <ChevronRight
               style={{
@@ -894,7 +994,8 @@ function CarouselComponent<T = unknown>({
             border: '1px solid var(--border)',
             outline: 'none',
           }}
-          tabIndex={-1}
+          type="button"
+          onFocus={revealControl}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor =
               'rgb(from var(--background) r g b / 0.9)';
@@ -905,7 +1006,7 @@ function CarouselComponent<T = unknown>({
               'rgb(from var(--background) r g b / 0.8)';
           }}
           onClick={() => (isPlaying ? pause() : play())}
-          aria-label={isPlaying ? 'Pause carousel' : 'Play carousel'}
+          aria-label={isPlaying ? pauseLabel : playLabel}
         >
           {isPlaying ? (
             <Pause
@@ -940,7 +1041,8 @@ function CarouselComponent<T = unknown>({
           {items.map((_, index) => (
             <button
               key={index}
-              tabIndex={-1}
+              type="button"
+              aria-current={index === currentIndex || undefined}
               style={{
                 width: index === currentIndex ? '1.5rem' : '0.5rem',
                 height: '0.5rem',
@@ -965,7 +1067,7 @@ function CarouselComponent<T = unknown>({
                 }
               }}
               onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={goToSlideLabel(index + 1)}
             />
           ))}
         </div>
@@ -994,9 +1096,13 @@ function CarouselComponent<T = unknown>({
         </div>
       )}
 
-      {/* Screen reader announcements */}
-      <div className="dndev-sr-only" aria-live="polite" aria-atomic="true">
-        Slide {currentIndex + 1} of {items.length}
+      {/* Screen reader announcements: silent while autoplay rotates (WAI-ARIA carousel pattern) */}
+      <div
+        className="dndev-sr-only"
+        aria-live={autoplayRunning ? 'off' : 'polite'}
+        aria-atomic="true"
+      >
+        {slideLabel(currentIndex + 1, items.length)}
       </div>
     </div>
   );

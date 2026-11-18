@@ -59,7 +59,8 @@ export interface UseIntersectionObserverReturn<T extends Element = Element> {
  *
  * Lightweight hook for basic intersection observation with optimal performance.
  * Uses React 19's useSyncExternalStore pattern for automatic cleanup, proper
- * SSR handling, and tearing prevention in concurrent rendering.
+ * SSR handling, and tearing prevention in concurrent rendering. Each observer keeps
+ * a stable server snapshot, independent of subsequent client intersection updates.
  *
  * @param options - Configuration options for intersection observation
  * @returns Object containing ref, isIntersecting state, and entry
@@ -186,11 +187,13 @@ function createIntersectionObserver(options: {
 }) {
   const { threshold, root, rootMargin, once, fallbackIntersecting } = options;
 
-  let currentState = {
+  // Hydration reads this repeatedly: preserve its identity and initial values.
+  const serverSnapshot = {
     isIntersecting: fallbackIntersecting,
     hasTriggered: false,
     entry: null as IntersectionObserverEntry | null,
   };
+  let currentState = serverSnapshot;
   let listeners = new Set<() => void>();
   let intersectionObserver: IntersectionObserver | null = null;
   let currentElement: Element | null = null;
@@ -287,11 +290,7 @@ function createIntersectionObserver(options: {
   return {
     subscribe,
     getSnapshot,
-    getServerSnapshot: () => ({
-      isIntersecting: fallbackIntersecting,
-      hasTriggered: false,
-      entry: null,
-    }),
+    getServerSnapshot: () => serverSnapshot,
     setElement,
   };
 }

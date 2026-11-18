@@ -1,41 +1,136 @@
-/* packages/components/src/atomic/QuantityStepper/QuantityStepper.css */
-
-/* One outlined control (e-commerce standard, e.g. Shopify Dawn): borderless − / +
-   buttons around a centred, tabular quantity. Same height and radius as buttons. */
+/* Reserve the complete footprint, even when zero is presented as one large +. */
 .dndev-quantity-stepper {
-  display: inline-flex;
-  align-items: stretch;
-  min-height: var(--touch-target);
+  --quantity-target: max(var(--touch-target), 44px);
+  /* Include both icon states, padding and inherited text BEFORE placing items.
+     Auto rows otherwise grow for the larger collapsed icon, then shrink on expand. */
+  --quantity-cell: max(
+    var(--quantity-target),
+    calc(max(var(--icon-md), var(--quantity-target) * 0.6, 1lh) + 2 * var(--gap-sm))
+  );
+  display: inline-grid;
+  grid-template-columns: var(--quantity-cell) minmax(var(--quantity-cell), 1fr) var(--quantity-cell);
+  grid-template-rows: var(--quantity-cell);
+  inline-size: calc(3 * var(--quantity-cell));
+  min-inline-size: calc(3 * var(--quantity-cell));
   border: var(--border-hairline) solid var(--border);
   border-radius: var(--radius-interactive);
   background: var(--interactive);
   color: var(--foreground);
 
   &[data-full-width] {
-    display: flex;
-    width: 100%;
+    display: grid;
+    inline-size: 100%;
   }
 
   &[data-disabled] {
     opacity: 0.6;
   }
 
-  > .dndev-interactive {
-    flex: 0 0 auto;
-    aspect-ratio: 1;
-    min-height: 0;
+  > button,
+  > input {
+    min-inline-size: var(--quantity-target);
+    min-block-size: var(--quantity-target);
     border: none;
     border-radius: inherit;
     background: transparent;
+    color: inherit;
+    font: inherit;
+    touch-action: manipulation;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-focus);
+      z-index: 1;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    /* Press-and-hold repeats: no text selection or touch callout on long press. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    &:hover:not(:disabled) {
+      background: var(--muted);
+    }
+
+    > svg {
+      inline-size: var(--icon-md);
+      block-size: var(--icon-md);
+    }
+  }
+
+  > .dndev-quantity-stepper-decrement {
+    grid-area: 1 / 1;
+  }
+
+  > .dndev-quantity-stepper-value {
+    grid-area: 1 / 2;
+  }
+
+  > .dndev-quantity-stepper-increment {
+    grid-area: 1 / 3;
+  }
+
+  &[data-vertical] {
+    grid-template-columns: minmax(var(--quantity-cell), 1fr);
+    grid-template-rows: repeat(3, var(--quantity-cell));
+    inline-size: var(--quantity-cell);
+    min-inline-size: var(--quantity-cell);
+
+    &[data-full-width] {
+      inline-size: 100%;
+    }
+
+    > .dndev-quantity-stepper-increment {
+      grid-area: 1 / 1;
+    }
+
+    > .dndev-quantity-stepper-value {
+      grid-area: 2 / 1;
+    }
+
+    > .dndev-quantity-stepper-decrement {
+      grid-area: 3 / 1;
+    }
+  }
+
+  &[data-collapsed] {
+    > .dndev-quantity-stepper-decrement,
+    > .dndev-quantity-stepper-value {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    > .dndev-quantity-stepper-increment {
+      grid-area: 1 / 1 / -1 / -1;
+
+      > svg {
+        inline-size: calc(var(--quantity-target) * 0.6);
+        block-size: calc(var(--quantity-target) * 0.6);
+      }
+    }
   }
 }
 
 .dndev-quantity-stepper-value {
-  flex: 1 1 auto;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 3ch;
+  inline-size: 100%;
+  min-inline-size: 0;
   padding-inline: var(--gap-sm);
   border: none;
   background: none;
@@ -45,17 +140,10 @@
   font-variant-numeric: tabular-nums;
   text-align: center;
 
-  &:is(button) {
-    cursor: pointer;
-  }
+}
 
-  &:is(button):hover {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  &:is(button):focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
+@media (prefers-reduced-motion: reduce) {
+  .dndev-quantity-stepper > button {
+    transition: none;
   }
 }

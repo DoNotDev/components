@@ -79,3 +79,4 @@ const Label = ({
 
 export default Label;
 export { FloatingLabel, type FloatingLabelProps };
+export { FieldInfo, type FieldInfoProps } from './FieldInfo';

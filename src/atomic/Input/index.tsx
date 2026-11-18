@@ -29,6 +29,8 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   iconEnd?: boolean;
   /** Label for floating label - always shown small at top-left when provided */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /**
    * Bare mode - no border/shadow (for use inside FloatingLabel or custom wrappers).
    * Auto-enabled when `label` is provided.
@@ -62,6 +64,7 @@ const Input = ({
   icon,
   iconEnd = false,
   label,
+  info,
   bare,
   value,
   onFocus,
@@ -95,6 +98,8 @@ const Input = ({
       id={id}
       type={type}
       value={value}
+      onFocus={onFocus}
+      onBlur={onBlur}
       required={required}
       autoComplete="one-time-code"
       className={inputClasses}
@@ -135,6 +140,7 @@ const Input = ({
       <FloatingLabel
         htmlFor={id}
         label={label}
+        info={info}
         disabled={props.disabled}
         required={required}
         style={style}

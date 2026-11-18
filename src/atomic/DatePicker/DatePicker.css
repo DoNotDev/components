@@ -101,7 +101,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--gap-tight) 1px;
+  padding: var(--gap-sm) 1px;
   border-radius: 2px;
   font-variant-numeric: tabular-nums;
   caret-color: transparent;

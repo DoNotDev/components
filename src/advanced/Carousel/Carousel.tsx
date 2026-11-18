@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Carousel Component
- * @description Premium carousel component with lazy loading built-in. Features true infinite circular loop, hardware-accelerated animations, swipe/touch gestures, autoplay with pause-on-hover, and lazy loading by default.
+ * @description Premium carousel component with lazy loading built-in. Features opt-in infinite circular loop, hardware-accelerated animations, swipe/touch gestures, opt-in autoplay (pauses on hover/focus), translatable labels and the WAI-ARIA carousel pattern.
  *
  * @version 0.1.0
  * @since 0.0.1
@@ -26,19 +26,26 @@ const CarouselContent = lazy(() => import('./CarouselContent'));
  * Premium Carousel Component with lazy loading built-in
  *
  * Features:
- * - True infinite circular loop
+ * - Opt-in infinite circular loop (`infinite`)
  * - Hardware-accelerated animations
  * - Swipe/touch gestures
- * - Autoplay with pause-on-hover
+ * - Opt-in autoplay (pauses on hover/focus, off under reduced motion)
  * - Lazy loading by default
- * - Full accessibility support
+ * - WAI-ARIA carousel pattern: labelled region, focusable controls, off-screen
+ *   slides inert, polite announcements (silent while autoplay rotates)
+ * - Translatable labels (`previousLabel`, `nextLabel`, `slideLabel`, ...; English defaults)
  * - SSR/CSR compatible
  * - Responsive and RTL-aware
  *
  * Simply pass items and renderItem - everything else is handled automatically!
  */
-const Carousel = (props: CarouselProps) => {
-  const { showArrows = true, showDots = false, showProgress = true } = props;
+function Carousel<T = unknown>(props: CarouselProps<T>) {
+  const {
+    showArrows = true,
+    showDots = false,
+    showProgress = true,
+    loadingLabel,
+  } = props;
 
   return (
     <Suspense
@@ -47,12 +54,14 @@ const Carousel = (props: CarouselProps) => {
           showArrows={showArrows}
           showDots={showDots}
           showProgress={showProgress}
+          loadingLabel={loadingLabel}
         />
       }
     >
-      <CarouselContent {...props} />
+      {/* why: React.lazy erases the generic; the item type is checked at this call site */}
+      <CarouselContent {...(props as CarouselProps)} />
     </Suspense>
   );
-};
+}
 
 export default Carousel;

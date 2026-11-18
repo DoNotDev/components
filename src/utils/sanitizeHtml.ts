@@ -5,17 +5,17 @@
  * @description XSS-safe HTML sanitization for content rendered with
  * `dangerouslySetInnerHTML` or parsed into React.
  *
- * `isomorphic-dompurify` resolves by export condition: in the browser it is
- * DOMPurify on the real DOM; under Node (SSR, server components, tests) it is
- * DOMPurify on jsdom — the server setup DOMPurify recommends. happy-dom and
- * linkedom are not used: DOMPurify does not consider them safe.
+ * DOMPurify from `@donotdev/components/sanitize-dom`, resolved by export condition:
+ * in the browser it runs on the real DOM (`sanitizeDom.browser.ts`); everywhere else
+ * (SSR, server components, tests) on jsdom (`sanitizeDom.server.ts`), the server setup
+ * DOMPurify recommends.
  *
- * @version 0.2.0
+ * @version 0.3.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+import { getPurifier } from '@donotdev/components/sanitize-dom';
 
 /** Restricts what survives sanitization. Omitted = DOMPurify's safe defaults. */
 export interface SanitizeHtmlOptions {
@@ -41,6 +41,7 @@ export function sanitizeHtml(
   html: string,
   options: SanitizeHtmlOptions = {}
 ): string {
+  const DOMPurify = getPurifier();
   if (!DOMPurify.isSupported) {
     throw new Error(
       'sanitizeHtml: no DOM implementation available, refusing to return unsanitized HTML'

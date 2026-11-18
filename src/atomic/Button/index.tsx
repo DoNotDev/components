@@ -11,6 +11,7 @@
 
 import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
+import { Eye, EyeOff, Pencil, Plus, RefreshCw, Save, Trash, Trash2, Upload, X } from 'lucide-react';
 import type { LucideProps } from 'lucide-react';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ComponentType, ReactNode } from 'react';
@@ -65,6 +66,42 @@ const buttonVariants = cva('dndev-interactive', {
 export type ButtonVariant = VariantProps<typeof buttonVariants>['variant'];
 
 /**
+ * What a button does. Each intent brings its icon (and `delete` the destructive
+ * variant), so every form shows the same action the same way.
+ */
+export const BUTTON_INTENT = {
+  SAVE: 'save',
+  PUBLISH: 'publish',
+  UNPUBLISH: 'unpublish',
+  /** Logical delete (`remove`, status `deleted`) */
+  REMOVE: 'remove',
+  /** Hard delete (`delete`) */
+  DELETE: 'delete',
+  PREVIEW: 'preview',
+  RELOAD: 'reload',
+  ADD: 'add',
+  EDIT: 'edit',
+  CANCEL: 'cancel',
+} as const;
+
+/** One of {@link BUTTON_INTENT}. */
+export type ButtonIntent = (typeof BUTTON_INTENT)[keyof typeof BUTTON_INTENT];
+
+/** Icon of each intent. */
+const INTENT_ICON: Record<ButtonIntent, ComponentType<LucideProps>> = {
+  save: Save,
+  publish: Upload,
+  unpublish: EyeOff,
+  remove: Trash,
+  delete: Trash2,
+  preview: Eye,
+  reload: RefreshCw,
+  add: Plus,
+  edit: Pencil,
+  cancel: X,
+};
+
+/**
  * Button component props interface
  *
  * @version 0.1.0
@@ -116,6 +153,12 @@ export interface ButtonProps
    * @default 'auto'
    */
   display?: (typeof DISPLAY)[keyof typeof DISPLAY];
+  /**
+   * What the button does: sets its icon (save, publish, delete…) and, for `delete`, the
+   * destructive variant. An explicit `icon` or `variant` wins. With the default
+   * `display` (auto), phones show the icon only.
+   */
+  intent?: ButtonIntent;
   /** Icon - Lucide component, string name, or ReactNode */
   icon?: ComponentType<LucideProps> | string | ReactNode;
   /**
@@ -173,6 +216,9 @@ export interface ButtonProps
  * // Standard button
  * <Button variant="primary" icon={Mail}>Send Email</Button>
  *
+ * // Common action: icon (and variant for delete) from the intent
+ * <Button intent="save" variant="primary">Save</Button>
+ *
  * // With Link (render prop pattern - React 19 compatible)
  * <Button
  *   icon={Home}
@@ -191,10 +237,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       className,
-      variant,
+      variant: variantProp,
+      intent,
       render,
       display = DISPLAY.AUTO,
-      icon,
+      icon: iconProp,
       iconEnd = false,
       badge,
       children,
@@ -212,6 +259,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const icon = iconProp ?? (intent ? INTENT_ICON[intent] : undefined);
+    const variant =
+      variantProp ?? (intent === BUTTON_INTENT.DELETE ? THEME_VARIANT.DESTRUCTIVE : undefined);
     const buttonText = children;
     const hasIcon = !!icon;
     const hasText = !!buttonText;

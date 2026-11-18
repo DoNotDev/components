@@ -1,6 +1,6 @@
 {
   "name": "@donotdev/components",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "type": "module",
   "private": false,
   "description": "Styled UI components for DoNotDev",
@@ -10,6 +10,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./sanitize-dom": {
+      "types": "./src/utils/sanitizeDom.server.ts",
+      "browser": "./src/utils/sanitizeDom.browser.ts",
+      "default": "./src/utils/sanitizeDom.server.ts"
     },
     "./styles": "./src/styles/index.css"
   },
@@ -78,7 +83,8 @@
     "@radix-ui/react-visually-hidden": "^1.2.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "isomorphic-dompurify": "^4.7.0",
+    "dompurify": "^3.4.18",
+    "jsdom": "^26.1.0",
     "react-day-picker": "^9.14.0"
   },
   "peerDependencies": {

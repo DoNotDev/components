@@ -19,6 +19,8 @@ export type CarouselSkeletonProps = {
   showArrows?: boolean;
   showDots?: boolean;
   showProgress?: boolean;
+  /** Accessible name of the placeholder @default 'Loading carousel' */
+  loadingLabel?: string;
 };
 
 function CarouselSkeleton({
@@ -27,12 +29,13 @@ function CarouselSkeleton({
   showArrows = true,
   showDots = false,
   showProgress = false,
+  loadingLabel = 'Loading carousel',
 }: CarouselSkeletonProps) {
   return (
     <div
       className={cn('dndev-relative dndev-overflow-hidden', className)}
       role="status"
-      aria-label="Loading carousel"
+      aria-label={loadingLabel}
     >
       {/* Main carousel track skeleton */}
       <div className="dndev-overflow-hidden">

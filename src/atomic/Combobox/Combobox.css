@@ -11,7 +11,7 @@
   height: 100%;
   display: flex;
   align-items: center;
-  gap: var(--gap-tight, 4px);
+  gap: 4px; /* 4px: tighter than --gap-sm (8px), the smallest gap token; must match computeTrailingPad() in index.tsx */
   z-index: 1;
   pointer-events: none; /* pass clicks through to input by default */
 }
@@ -74,10 +74,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--gap-tight, 4px);
+  gap: 4px; /* 4px: tighter than --gap-sm (8px), the smallest gap token */
   border: var(--border-hairline) solid var(--line-2);
   border-radius: var(--radius-interactive);
-  padding: var(--gap-tight, 4px);
+  padding: 4px; /* 4px: tighter than --gap-sm (8px), the smallest gap token */
   padding-inline-end: var(--combobox-pad-end);
   min-height: var(--touch-target);
   cursor: text;
@@ -102,7 +102,7 @@
   flex: 1 1 80px;
   min-width: 80px;
   height: auto;
-  padding: var(--gap-tight, 4px) var(--gap-sm);
+  padding: 4px var(--gap-sm); /* 4px: tighter than --gap-sm (8px), the smallest gap token */
 }
 
 /* ──────────────────────────────────────────────────
@@ -149,7 +149,7 @@
 .dndev-combobox-option-content {
   display: flex;
   flex-direction: column;
-  gap: var(--gap-tight);
+  gap: var(--gap-sm);
   flex: 1;
 }
 
@@ -166,7 +166,7 @@
 .dndev-combobox-option-count {
   font-size: var(--font-size-xs);
   color: var(--muted-foreground);
-  margin-inline-start: var(--gap-tight);
+  margin-inline-start: var(--gap-sm);
   flex-shrink: 0;
 }
 

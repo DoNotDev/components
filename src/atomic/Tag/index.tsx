@@ -54,6 +54,8 @@ export interface TagProps
   onClick?: () => void;
   /** Callback when remove button is clicked */
   onRemove?: () => void;
+  /** Accessible label of the remove button (default: 'Remove') */
+  removeLabel?: string;
   /** Whether the tag is disabled */
   disabled?: boolean;
 }
@@ -77,6 +79,7 @@ const Tag = ({
   interactive,
   onClick,
   onRemove,
+  removeLabel = 'Remove',
   disabled,
   className,
   ...props
@@ -106,7 +109,7 @@ const Tag = ({
             e.stopPropagation();
             if (!disabled) onRemove();
           }}
-          aria-label="Remove"
+          aria-label={removeLabel}
           disabled={disabled}
         >
           <Icon icon={X} className="dndev-tag-remove-icon" />

@@ -27,7 +27,7 @@
 
 .dndev-table-filter-row .dndev-table-head {
   background-color: var(--muted);
-  padding: var(--gap-xs);
+  padding: var(--gap-sm);
   height: auto;
   min-height: auto;
 }
@@ -251,7 +251,7 @@
 }
 
 .dndev-table-bulk-bar {
-  padding: var(--gap-xs) var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-sm);
   border: 1px solid var(--border);
   background-color: var(--muted);
 }
@@ -265,7 +265,7 @@
   background-color: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  padding: var(--gap-xs);
+  padding: var(--gap-sm);
 }
 
 .dndev-table-cell-editor:hover {
@@ -294,9 +294,18 @@
   background-color: color-mix(in oklab, var(--primary) 12%, transparent);
 }
 
-/* Value that does not parse: the save will reject it */
+/* Value that does not parse, or breaks a rule (cellErrors): the save will reject it */
 .dndev-table-cell[data-invalid='true'] .dndev-table-cell-editor {
   border-color: var(--destructive);
+}
+
+/* Message of a rule the cell value breaks (cellErrors) */
+.dndev-table-cell-error {
+  display: block;
+  margin-block-start: var(--gap-sm);
+  color: var(--destructive);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
 }
 
 /* Open cell: icon link to the row's record (touch-sized hit area) */

@@ -29,6 +29,8 @@ export interface PasswordInputProps extends Omit<
   onVisibilityChange?: (visible: boolean) => void;
   /** Label for floating label - always shown small at top-left when provided */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
 }
@@ -67,6 +69,7 @@ const PasswordInput = ({
   visible: controlledVisible,
   onVisibilityChange,
   label,
+  info,
   value,
   onFocus,
   onBlur,
@@ -137,6 +140,7 @@ const PasswordInput = ({
     <FloatingLabel
       htmlFor={id}
       label={label}
+      info={info}
       disabled={props.disabled}
       required={required}
     >

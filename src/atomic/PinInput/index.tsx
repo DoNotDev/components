@@ -53,6 +53,8 @@ export interface PinInputProps extends Omit<
   numericOnly?: boolean;
   /** Floating label rendered above the group. */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
   /** Auto-focus the first box on mount. */
@@ -118,6 +120,7 @@ const PinInput = ({
   shake = false,
   numericOnly = true,
   label,
+  info,
   required,
   autoFocus,
   disabled,
@@ -288,6 +291,7 @@ const PinInput = ({
     <FloatingLabel
       htmlFor={id}
       label={label}
+      info={info}
       disabled={disabled}
       required={required}
     >

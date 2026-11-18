@@ -41,8 +41,8 @@ export { BLOCKQUOTE_VARIANT } from './Blockquote';
 export type { BlockquoteProps, BlockquoteVariant } from './Blockquote';
 
 export { default as Button } from './Button';
-export { buttonVariants, BUTTON_VARIANT } from './Button';
-export type { ButtonProps, ButtonVariant } from './Button';
+export { buttonVariants, BUTTON_INTENT, BUTTON_VARIANT } from './Button';
+export type { ButtonIntent, ButtonProps, ButtonVariant } from './Button';
 
 export { default as ButtonGroup } from './ButtonGroup';
 export type { ButtonGroupProps, ButtonGroupItem } from './ButtonGroup';
@@ -157,7 +157,8 @@ export type { InputProps } from './Input';
 
 export { default as Label, FloatingLabel } from './Label';
 export * from './Label/LabelPrimitive';
-export type { LabelProps, FloatingLabelProps } from './Label';
+export { FieldInfo } from './Label';
+export type { LabelProps, FloatingLabelProps, FieldInfoProps } from './Label';
 
 export { default as List } from './List';
 export type { ListProps, ListItem } from './List';
@@ -251,6 +252,9 @@ export type { StackProps, StackOwnProps, GapVariant } from './Stack';
 
 export { default as Stepper } from './Stepper';
 export type { StepperProps, StepperStep } from './Stepper';
+
+export { default as SwipeAction } from './SwipeAction';
+export type { SwipeActionProps } from './SwipeAction';
 
 export { default as Switch } from './Switch';
 export * from './Switch/SwitchPrimitive';

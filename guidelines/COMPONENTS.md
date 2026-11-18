@@ -36,22 +36,26 @@ These are the only ways one should handle layout to get to quick results functio
 
 - **Button** - Accessible button with variants, icons, tooltips, and render prop composition.
 - **ActionButton** - Button with async action handling and loading states.
+- **Button `intent`** (`Button`, `ActionButton`) - `intent="save" | "publish" | "unpublish" | "delete" | "preview" | "reload" | "add" | "edit" | "cancel"` (`BUTTON_INTENT`) sets the action's icon, and `delete` the destructive variant; an explicit `icon` or `variant` wins. With the default `display` (auto), phones show the icon only. Equal-width action bar: a `Grid` with one column per button and `fullWidth` buttons.
 - **FileButton** - Button that triggers file input selection.
 - **PortalButton** - Button that opens content in a portal overlay.
 - **ButtonGroup** - Visual grouping of buttons with joined borders. Supports horizontal/vertical orientation, variant propagation, and items-based API.
+- **SwipeAction** - Swipe-to-reveal trailing destructive action with a keyboard-accessible toggle; only explicit action-button activation invokes `onAction`. Exported with `SwipeActionProps` from `@donotdev/components`. Supply translated `actionLabel`, `revealLabel`, and `closeLabel`. See [SwipeAction](./SWIPE_ACTION.md).
 
 ---
 
 ## Form Components
 
 - **Input** - Accessible input with mobile-friendly touch targets and key state styling.
+- **QuantityStepper** - Controlled lot-aware quantity editor via `onChange`, or legacy increment/decrement callbacks. Supports zero, collapsed presentation, and vertical orientation. Editable mode requires safe-integer lot bounds and a valid controlled quantity; reconcile invalid persisted quantities before enabling it. See [QuantityStepper](./QUANTITY_STEPPER.md).
 - **PasswordInput** - Password field with show/hide toggle functionality.
 - **Textarea** - Multi-line text input component.
 - **Label** - Accessible label with icon support and various positions.
+- **Field help (`info`)** - Opt-in: `info="…"` on `Input`, `PasswordInput`, `Select`, `Combobox`, `DatePicker`, `DateTimePicker`, `RangeInput`, `PinInput` or `FloatingLabel` (needs `label`) adds an (i) after the label; hover or keyboard focus shows the text, a tap pins it on touch screens. Without `info`, nothing is rendered. For a label you render yourself, place `<FieldInfo text="…" />` next to it.
 - **Checkbox** - Accessible checkbox with custom styling.
 - **RadioGroup** - Accessible radio group with multiple visual variants.
 - **Select** - Accessible select dropdown with search and multi-select support.
-- **Combobox** - Searchable combobox with autocomplete functionality.
+- **Combobox** - Searchable combobox with autocomplete functionality. `multiple` without `chips` shows the selection: one value's label, `selectedLabel` (`{{count}}` = count, default `'{{count}} selected'`) for several. `clearLabel`: clear button label (default `'Clear'`).
 - **Switch** - Toggle switch component.
 - **Slider** - Range slider for numeric input.
 - **ColorPicker** - Color selection with preset swatch grid, native color input, and ARIA radiogroup pattern. Built-in palettes: basic, material, pastel.
@@ -96,11 +100,11 @@ These are the only ways one should handle layout to get to quick results functio
 ## Data Display Components
 
 - **Table** - Accessible table component with sorting and selection.
-- **DataTable** - High-level table with built-in sorting, filtering, search, and pagination. `editable` (+ `getRowId`, `pendingChanges`, `onPendingChange`) edits the columns that declare `edit: { type: 'text' | 'number' | 'select', options }` in place: checked rows take one value from the bulk bar, Excel blocks paste across cells, Enter / arrows move, Esc cancels, Ctrl+Z undoes. The table never saves; the consumer writes `pendingChanges`.
+- **DataTable** - High-level table with built-in sorting, filtering, search, and pagination. `editable` (+ `getRowId`, `pendingChanges`, `onPendingChange`) edits the columns that declare `edit: { type: 'text' | 'number' | 'select', options }` in place: checked rows take one value from the bulk bar, Excel blocks paste across cells, Enter / arrows move, Esc cancels, Ctrl+Z undoes. The table never saves; the consumer writes `pendingChanges`. `cellErrors={{ [rowId]: { [columnKey]: message } }}` (+ `getRowId`, translated messages) marks cells that break a rule, like a value that does not parse: `data-invalid`, editors `aria-invalid` + `aria-describedby` to the message shown under the value (read-only cells show the message too).
 - **Card / ImageGallery images** - Pass the `{ fullUrl, thumbUrl }` pair (CRUD `Picture`) as `cover` / `coverHover` / `images`: phones (below 768px) download the thumbnail, larger screens the full image (`<picture>`). No width props.
 - **Avatar** - Accessible avatar with image and fallback support.
 - **Badge** - Status indicator with semantic variants (polymorphic: div, span, mark).
-- **Tag** - Tag component for labels and categories.
+- **Tag** - Tag component for labels and categories. `removeLabel`: remove button label (default `'Remove'`).
 - **Calendar** - Accessible date picker built on react-day-picker.
 
 ---
@@ -157,7 +161,8 @@ import { Link } from '@donotdev/ui';
   />
 </Link>
 
-// Card with onClick only (no middle-click support)
+// Card with onClick only (no middle-click support).
+// Renders role="button", focusable; Enter/Space activate. Use href for navigation cards.
 <Card
   title="Action Card"
   onClick={() => handleAction()}

@@ -1,5 +1,12 @@
 # @donotdev/components
 
+## Unreleased
+
+### Patch Changes
+
+- Combobox: `multiple` without `chips` shows the selection (one value's label, `selectedLabel` for several; was empty with the placeholder). `clearLabel` labels the clear button (default 'Clear').
+- Tag: `removeLabel` labels the remove button (default 'Remove').
+
 ## 0.1.46
 
 ### Patch Changes

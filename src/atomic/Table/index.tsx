@@ -215,6 +215,14 @@ export interface DataTableProps<T = unknown> {
   onRowOpen?: (row: T) => void;
   /** Accessible label of the open cell (translated by the consumer). Required with `getRowHref` / `onRowOpen`. */
   openLabel?: string;
+  /**
+   * Invalid cells: `cellErrors[rowId][columnKey]` = message (translated by the
+   * consumer), e.g. the rules a pending value breaks. Marked like a value that
+   * does not parse (`data-invalid`), editors get `aria-invalid` and the message
+   * (shown under the value, linked with `aria-describedby`). Requires `getRowId`.
+   * @since 0.2.5
+   */
+  cellErrors?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -364,7 +372,11 @@ const DataTable = <T = unknown,>({
   getRowHref,
   onRowOpen,
   openLabel,
+  cellErrors,
 }: DataTableProps<T>): ReactNode => {
+  if (cellErrors && !getRowId) {
+    throw new Error('DataTable: `cellErrors` requires `getRowId`.');
+  }
   if (editable && (!getRowId || !pendingChanges || !onPendingChange)) {
     throw new Error(
       'DataTable: `editable` requires `getRowId`, `pendingChanges` and `onPendingChange`.'
@@ -485,17 +497,19 @@ const DataTable = <T = unknown,>({
     getRowId ? getRowId(a) === getRowId(b) : a === b;
 
   // Selection only holds rows still in the data (deleted or refetched-away rows drop out)
-  const presentIds = getRowId ? new Set(data.map(getRowId)) : null;
-  const selectedRows = checkedRows.filter((r) =>
-    presentIds ? presentIds.has(getRowId!(r)) : data.includes(r)
-  );
+  const presentIds = !loading && getRowId ? new Set(data.map(getRowId)) : null;
+  const selectedRows = loading || data.length === 0
+    ? []
+    : checkedRows.filter((r) =>
+        presentIds ? presentIds.has(getRowId!(r)) : data.includes(r)
+      );
   const selectedIds = getRowId ? new Set(selectedRows.map(getRowId)) : null;
   const isSelected = (row: T) =>
     selectedIds ? selectedIds.has(getRowId!(row)) : selectedRows.includes(row);
 
   // Header checkbox selects every row of the filtered / sorted result, across
   // client-side pages; with server pagination `data` is the loaded page.
-  const selectableRows = processedData;
+  const selectableRows = loading ? [] : processedData;
   const allSelected =
     selectableRows.length > 0 && selectableRows.every((row) => isSelected(row));
 
@@ -646,10 +660,11 @@ const DataTable = <T = unknown,>({
     URL.revokeObjectURL(url);
   };
 
-  // Industry standard pattern: When loading, pass empty rows to render actual structure
-  // Component will detect empty data and render skeleton bars in cells
-  const skeletonRows = Array.from({ length: 3 }, () => ({}) as T);
-  const finalDisplayData = loading ? skeletonRows : displayData;
+  // Loading slots carry no record and must never enter consumer data paths.
+  type RowSlot = { kind: 'loading' } | { kind: 'data'; row: T };
+  const rowSlots: RowSlot[] = loading
+    ? Array.from({ length: 3 }, () => ({ kind: 'loading' }))
+    : displayData.map((row) => ({ kind: 'data', row }));
 
   return (
     <Stack>
@@ -769,6 +784,7 @@ const DataTable = <T = unknown,>({
                 <TableHead className="dndev-w-touch">
                   <Checkbox
                     checked={allSelected}
+                    disabled={loading}
                     onCheckedChange={handleSelectAll}
                     aria-label="Select all rows"
                   />
@@ -824,45 +840,42 @@ const DataTable = <T = unknown,>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {finalDisplayData.map((row, index) => {
-              const isSkeletonRow =
-                loading &&
-                Object.keys(row as Record<string, unknown>).length === 0;
+            {rowSlots.map((slot, index) => {
               return (
                 <TableRow
                   key={index}
                   onClick={(e) => {
-                    if (rowClick && !isSkeletonRow) {
+                    if (rowClick && slot.kind === 'data') {
                       const target = e.target as HTMLElement;
                       // Prevent row click if clicking interactive elements
                       const isInteractive = target.closest(
                         'button, a, input, [role="button"], label'
                       );
                       if (!isInteractive) {
-                        rowClick(row);
+                        rowClick(slot.row);
                       }
                     }
                   }}
                   className={cn(
-                    isSkeletonRow && 'dndev-skeleton-row',
+                    slot.kind === 'loading' && 'dndev-skeleton-row',
                     rowClick &&
-                      !isSkeletonRow &&
+                      slot.kind === 'data' &&
                       'dndev-cursor-pointer dndev-hover-bg-muted'
                   )}
                 >
                   {showOpen && (
                     <TableCell className="dndev-table-open-cell">
-                      {isSkeletonRow ? null : onRowOpen ? (
+                      {slot.kind === 'loading' ? null : onRowOpen ? (
                         <Button
                           variant="ghost"
                           display="compact"
                           icon={ArrowUpRight}
-                          onClick={() => onRowOpen(row)}
+                          onClick={() => onRowOpen(slot.row)}
                           aria-label={openLabel}
                         />
                       ) : (
                         <LinkComponent
-                          href={getRowHref!(row)}
+                          href={getRowHref!(slot.row)}
                           className="dndev-table-open-link"
                           aria-label={openLabel}
                           title={openLabel}
@@ -877,7 +890,7 @@ const DataTable = <T = unknown,>({
                   )}
                   {showSelection && (
                     <TableCell>
-                      {isSkeletonRow ? (
+                      {slot.kind === 'loading' ? (
                         <div
                           className="dndev-skeleton dndev-skeleton-pulse"
                           style={{
@@ -889,9 +902,9 @@ const DataTable = <T = unknown,>({
                         />
                       ) : (
                         <Checkbox
-                          checked={isSelected(row)}
+                          checked={isSelected(slot.row)}
                           onCheckedChange={(checked: boolean) =>
-                            handleSelectRow(row, !!checked)
+                            handleSelectRow(slot.row, !!checked)
                           }
                           aria-label={`Select row ${index + 1}`}
                         />
@@ -899,39 +912,48 @@ const DataTable = <T = unknown,>({
                     </TableCell>
                   )}
                   {columns.map((column) => {
-                    const cellValue = column.dataIndex
-                      ? row[column.dataIndex]
-                      : null;
-                    const isEmpty =
-                      cellValue === null ||
-                      cellValue === undefined ||
-                      cellValue === '';
+                    let content: ReactNode;
+                    let isEditable = false;
+                    let dirty: 'true' | undefined;
+                    let invalid: 'true' | undefined;
+                    let cellError: string | undefined;
 
-                    const editCol = column.edit
-                      ? editColumns.indexOf(column)
-                      : -1;
-                    if (editCol >= 0 && !isSkeletonRow) {
-                      const value = currentValue(row, column);
-                      const pending = pendingChanges?.[getRowId!(row)];
-                      return (
-                        <TableCell
-                          key={column.key}
-                          data-align={column.align}
-                          data-editable="true"
-                          data-dirty={
-                            pending && column.key in pending
-                              ? 'true'
-                              : undefined
-                          }
-                          data-invalid={
-                            isCellValueValid(value, column.edit!)
-                              ? undefined
-                              : 'true'
-                          }
-                        >
+                    if (slot.kind === 'loading') {
+                      content = (
+                        <div
+                          className="dndev-skeleton dndev-skeleton-pulse"
+                          style={{
+                            height: 'var(--gap-md)',
+                            width: index % 2 === 0 ? '80%' : '60%',
+                            borderRadius: 'var(--radius)',
+                          }}
+                          aria-hidden="true"
+                        />
+                      );
+                    } else {
+                      const row = slot.row;
+                      const cellValue = column.dataIndex
+                        ? row[column.dataIndex]
+                        : null;
+                      cellError = cellErrors?.[getRowId!(row)]?.[column.key];
+                      const editCol = column.edit
+                        ? editColumns.indexOf(column)
+                        : -1;
+                      if (editCol >= 0) {
+                        const value = currentValue(row, column);
+                        const pending = pendingChanges?.[getRowId!(row)];
+                        isEditable = true;
+                        dirty =
+                          pending && column.key in pending ? 'true' : undefined;
+                        invalid =
+                          isCellValueValid(value, column.edit!) && !cellError
+                            ? undefined
+                            : 'true';
+                        content = (
                           <EditCell
                             edit={column.edit!}
                             value={value}
+                            error={cellError}
                             position={{ row: index, col: editCol }}
                             label={
                               typeof column.title === 'string'
@@ -947,38 +969,32 @@ const DataTable = <T = unknown,>({
                             }
                             undo={undo}
                           />
-                        </TableCell>
-                      );
+                        );
+                      } else if (column.render) {
+                        // Real empty values and action columns still reach render.
+                        content = column.render(cellValue, row, index);
+                      } else {
+                        const isEmpty =
+                          cellValue === null ||
+                          cellValue === undefined ||
+                          cellValue === '';
+                        content = isEmpty ? '' : String(cellValue || '');
+                      }
                     }
 
-                    // Always call render function if it exists (for action columns, etc.)
-                    // Let the render function decide what to show for empty/skeleton states
-                    if (column.render) {
-                      return (
-                        <TableCell key={column.key} data-align={column.align}>
-                          {column.render(cellValue, row, index)}
-                        </TableCell>
-                      );
-                    }
-
-                    // For data columns: show skeleton only when loading AND empty
-                    // When not loading but empty, show empty string (fallback)
                     return (
-                      <TableCell key={column.key} data-align={column.align}>
-                        {isSkeletonRow ? (
-                          <div
-                            className="dndev-skeleton dndev-skeleton-pulse"
-                            style={{
-                              height: 'var(--gap-md)',
-                              width: index % 2 === 0 ? '80%' : '60%',
-                              borderRadius: 'var(--radius)',
-                            }}
-                            aria-hidden="true"
-                          />
-                        ) : isEmpty ? (
-                          '' // Empty state - show nothing, not skeleton
-                        ) : (
-                          String(cellValue || '')
+                      <TableCell
+                        key={column.key}
+                        data-align={column.align}
+                        data-editable={isEditable ? 'true' : undefined}
+                        data-dirty={dirty}
+                        data-invalid={invalid ?? (cellError ? 'true' : undefined)}
+                      >
+                        {content}
+                        {cellError && !isEditable && (
+                          <span className="dndev-table-cell-error" role="alert">
+                            {cellError}
+                          </span>
                         )}
                       </TableCell>
                     );

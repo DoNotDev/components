@@ -10,7 +10,7 @@
  */
 
 import { CirclePlus, CircleMinus, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { Fragment, isValidElement, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import {
@@ -25,7 +25,13 @@ import './Collapsible.css';
 
 /** Props for the Collapsible component. */
 export interface CollapsibleProps {
-  /** Trigger element (button, text, etc.) */
+  /**
+   * Trigger content. Without `showIcon`, a single element (e.g. `<Button>`)
+   * becomes the trigger itself; anything else (string, number, fragment) is
+   * wrapped in the primitive's own `<button>`. With `showIcon`, the component
+   * renders the `<button>` and `trigger` is its label: pass text or inline
+   * content (`<Text as="span">`), never a `<Button>` or block element.
+   */
   trigger?: ReactNode;
   /** Collapsible content */
   children?: ReactNode;
@@ -100,11 +106,11 @@ function Collapsible({
       return (
         <CollapsibleTrigger asChild>
           <Stack
-            as="div"
+            as="button"
             direction="row"
             align="center"
             justify="between"
-            className="dndev-collapsible-trigger"
+            className="dndev-collapsible-trigger dndev-collapsible-trigger--button"
           >
             {trigger}
             {iconStyle === 'chevron' ? (
@@ -123,7 +129,17 @@ function Collapsible({
       );
     }
 
-    return <CollapsibleTrigger asChild>{trigger}</CollapsibleTrigger>;
+    // asChild needs one element to merge props into; a string or fragment
+    // has none, so it gets Radix's default <button> instead.
+    if (isValidElement(trigger) && trigger.type !== Fragment) {
+      return <CollapsibleTrigger asChild>{trigger}</CollapsibleTrigger>;
+    }
+
+    return (
+      <CollapsibleTrigger className="dndev-collapsible-trigger dndev-collapsible-trigger--button">
+        {trigger}
+      </CollapsibleTrigger>
+    );
   };
 
   return (

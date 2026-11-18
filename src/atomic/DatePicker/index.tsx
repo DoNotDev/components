@@ -50,6 +50,8 @@ export interface DatePickerProps {
   onChange?: (date: string | null) => void;
   /** FloatingLabel text */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /** Minimum selectable date (ISO string or Date) */
   min?: string | Date;
   /** Maximum selectable date (ISO string or Date) */
@@ -100,6 +102,7 @@ function DatePicker({
   value,
   onChange,
   label,
+  info,
   min,
   max,
   required = false,
@@ -607,6 +610,7 @@ function DatePicker({
       <FloatingLabel
         htmlFor={id}
         label={label}
+        info={info}
         disabled={disabled}
         required={required}
       >

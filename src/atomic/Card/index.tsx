@@ -10,7 +10,13 @@
  */
 
 import type { VariantProps } from 'class-variance-authority';
-import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
+import type {
+  CSSProperties,
+  HTMLAttributes,
+  KeyboardEvent,
+  ReactNode,
+  Ref,
+} from 'react';
 
 import type { IconType } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
@@ -177,7 +183,13 @@ export interface CardProps
   footer?: ReactNode;
   /** Tooltip text */
   tooltip?: string;
-  /** Click handler. Ignored when `href` is set (the link navigates). */
+  /**
+   * Click handler. Ignored when `href` is set (the link navigates).
+   * The card gets `role="button"` and `tabIndex={0}`, and Enter / Space activate
+   * it (keys pressed in a nested control do not). An `onClick` card should not
+   * contain other interactive controls (nested-interactive a11y rule): use
+   * `href` for navigation cards.
+   */
   onClick?: () => void;
   /**
    * Destination of the card: renders a real `<a href>` (the title; its hit area
@@ -345,6 +357,7 @@ const Card = ({
   children,
   tooltip,
   onClick,
+  onKeyDown,
   href,
   clickable,
   elevated,
@@ -369,6 +382,20 @@ const Card = ({
     clickable !== undefined ? clickable : !!onClick || !!href;
   const LinkComponent = useLinkRenderer();
   const hasLink = !!href && !asChild;
+  const isButtonCard = !!onClick && !hasLink;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || !onClick) return;
+    if (event.target !== event.currentTarget) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === ' ') event.preventDefault();
+      onClick();
+    }
+  };
+  const buttonAttrs = isButtonCard
+    ? { role: 'button', tabIndex: 0, onKeyDown: handleKeyDown }
+    : { onKeyDown };
 
   const header = renderCardHeader(
     icon,
@@ -426,6 +453,7 @@ const Card = ({
         style={rootStyle}
         {...cardAttrs}
         onClick={onClick}
+        {...buttonAttrs}
         title={tooltip}
         {...props}
       >
@@ -441,6 +469,7 @@ const Card = ({
       style={rootStyle}
       {...cardAttrs}
       onClick={hasLink ? undefined : onClick}
+      {...buttonAttrs}
       title={tooltip}
       {...props}
     >

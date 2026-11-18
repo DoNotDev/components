@@ -65,7 +65,7 @@ export interface ActionButtonProps<T = unknown> extends Omit<
  *   confirmText="Are you sure you want to delete this item?"
  *   confirmTitle="Delete Item"
  *   onSuccess={() => refetch()}
- *   variant="destructive"
+ *   intent="delete"
  * >
  *   Delete
  * </ActionButton>

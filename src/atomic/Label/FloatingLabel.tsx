@@ -15,6 +15,8 @@ import './Label.css';
 
 import type { ReactNode } from 'react';
 
+import { FieldInfo } from './FieldInfo';
+
 /** Props for the FloatingLabel component -- fieldset/legend wrapper for native border-cutting labels. */
 export interface FloatingLabelProps {
   /** HTML id to associate legend with input (for accessibility) */
@@ -27,6 +29,8 @@ export interface FloatingLabelProps {
   truncate?: boolean;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
+  /** Help text: an (i) after the label shows it on hover, focus or tap */
+  info?: string;
   /** Children (the input element) - REQUIRED */
   children: ReactNode;
   /** Additional className for the fieldset */
@@ -47,6 +51,9 @@ export interface FloatingLabelProps {
  * <FloatingLabel label="Email Address" htmlFor="email" required>
  *   <input id="email" type="email" />
  * </FloatingLabel>
+ * <FloatingLabel label="URL" htmlFor="slug" info="Address of the page: /routines/oily-skin">
+ *   <input id="slug" />
+ * </FloatingLabel>
  * ```
  */
 export function FloatingLabel({
@@ -55,6 +62,7 @@ export function FloatingLabel({
   disabled = false,
   truncate = true,
   required = false,
+  info,
   children,
   className,
   style,
@@ -69,11 +77,15 @@ export function FloatingLabel({
       <legend
         className="dndev-floating-legend"
         data-truncate={truncate ? undefined : 'false'}
+        data-info={info ? 'true' : undefined}
       >
         <label htmlFor={htmlFor}>
           {label}
           {required && ' *'}
         </label>
+        {/* In the legend, outside the label: not part of the input's name, and the
+            first legend of a disabled fieldset stays enabled */}
+        {info && <FieldInfo text={info} />}
       </legend>
       {children}
     </fieldset>

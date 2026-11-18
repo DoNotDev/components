@@ -69,6 +69,8 @@ export interface SelectProps extends Omit<
   isLoading?: boolean;
   /** Label for floating label - automatically floats when both label and placeholder are provided */
   label?: string;
+  /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
+  info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
 }
@@ -103,6 +105,7 @@ const Select = ({
   isLoading,
   defaultValue,
   label,
+  info,
   required,
   ...props
 }: SelectProps) => {
@@ -142,6 +145,7 @@ const Select = ({
     <FloatingLabel
       htmlFor={id}
       label={label}
+      info={info}
       disabled={disabled}
       required={required}
     >

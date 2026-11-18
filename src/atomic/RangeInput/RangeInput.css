@@ -16,6 +16,6 @@
 }
 
 .dndev-range-input-separator {
-  padding-inline: var(--gap-tight);
+  padding-inline: var(--gap-sm);
 }
 

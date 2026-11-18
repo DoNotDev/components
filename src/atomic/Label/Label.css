@@ -97,11 +97,54 @@
   cursor: default;
   display: inline-flex;
   align-items: center;
-  gap: var(--gap-tight);
+  gap: var(--gap-sm);
 }
 
 .dndev-floating-fieldset[data-disabled='true'] .dndev-floating-legend {
   color: var(--muted-foreground);
+}
+
+/* Help (i) after the label: the label truncates, the button never does */
+.dndev-floating-legend[data-info] {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--gap-sm) / 2);
+}
+
+.dndev-floating-legend[data-info] > label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dndev-field-info {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  /* Larger hit area than the icon, without growing the legend */
+  padding: calc(var(--gap-sm) / 2);
+  margin: calc(var(--gap-sm) / -2);
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--muted-foreground);
+  cursor: help;
+}
+
+.dndev-field-info:hover,
+.dndev-field-info:focus-visible {
+  color: var(--foreground);
+}
+
+.dndev-field-info:focus-visible {
+  outline: var(--border-hairline) solid var(--ring);
+}
+
+.dndev-field-info svg {
+  width: 1.25em;
+  height: 1.25em;
 }
 
 /* Disable truncation when explicitly set to false */
