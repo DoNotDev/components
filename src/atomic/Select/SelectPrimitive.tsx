@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Select/SelectPrimitive.tsx
 
 /**

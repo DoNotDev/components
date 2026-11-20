@@ -269,6 +269,8 @@ export function ImageGallery({
             const loading = isNearSlide(index, clampedIndex, count)
               ? 'eager'
               : 'lazy';
+            // First slide is the LCP candidate: fetch it first.
+            const fetchPriority = index === 0 ? 'high' : undefined;
             return (
               <div
                 key={index}
@@ -283,6 +285,7 @@ export function ImageGallery({
                     alt=""
                     className="image-gallery__slide-img image-gallery__slide-placeholder"
                     loading={loading}
+                    fetchPriority={fetchPriority}
                     decoding="async"
                     draggable={false}
                     onError={handleImageError}
@@ -296,6 +299,7 @@ export function ImageGallery({
                   className="image-gallery__slide-img"
                   data-fit={img.fit}
                   loading={loading}
+                  fetchPriority={fetchPriority}
                   decoding="async"
                   draggable={false}
                   onError={handleImageError}

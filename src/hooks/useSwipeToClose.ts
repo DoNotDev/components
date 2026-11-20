@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/hooks/useSwipeToClose.ts
 
 /**

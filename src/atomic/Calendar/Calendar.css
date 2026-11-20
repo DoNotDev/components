@@ -279,3 +279,20 @@
 .dndev-calendar-day-hidden {
   visibility: hidden;
 }
+
+/* LazyCalendar placeholder while the calendar chunk loads: the rendered calendar's
+   size (caption + weekday row + 6 weeks of day cells, 7 columns), borders outside as
+   on .dndev-calendar, so the popover neither resizes nor flips when it arrives */
+.dndev-calendar-fallback {
+  box-sizing: content-box;
+  width: calc(var(--touch-target) * 7);
+  height: calc(var(--touch-target) * 8);
+}
+
+/* LazyCalendar error (calendar chunk failed to load), in the popover */
+.dndev-calendar-error {
+  box-sizing: content-box;
+  width: calc(var(--touch-target) * 7);
+  padding: calc(var(--touch-target) / 4);
+  color: var(--destructive-foreground);
+}

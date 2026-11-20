@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Section/index.tsx
 
 /**
@@ -92,6 +93,13 @@ export interface SectionOwnProps {
 
   /** Section title (small, uppercase, accent color) */
   title?: string;
+
+  /**
+   * Heading element of the title. Visual size is unchanged: only the semantic
+   * level moves, so nested sections can keep a valid heading outline.
+   * @default 'h2'
+   */
+  titleAs?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
   /** Show separator above section @default false */
   separator?: boolean;
@@ -223,6 +231,7 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
       as = 'section',
       children,
       title,
+      titleAs = 'h2',
       separator = false,
       tone = TONE.GHOST,
       textAlign = 'center',
@@ -269,7 +278,7 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
             justify="between"
             className="dndev-section-title-trigger"
           >
-            <Text as="div" level="h2" className="dndev-section-title">
+            <Text as={titleAs} level="h2" className="dndev-section-title">
               {title}
             </Text>
             {isOpen ? (
@@ -280,7 +289,7 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
           </Stack>
         </CollapsibleTrigger>
       ) : (
-        <Text as="div" level="h2" className="dndev-section-title">
+        <Text as={titleAs} level="h2" className="dndev-section-title">
           {title}
         </Text>
       ));

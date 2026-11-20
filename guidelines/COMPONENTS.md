@@ -105,7 +105,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Avatar** - Accessible avatar with image and fallback support.
 - **Badge** - Status indicator with semantic variants (polymorphic: div, span, mark).
 - **Tag** - Tag component for labels and categories. `removeLabel`: remove button label (default `'Remove'`).
-- **Calendar** - Accessible date picker built on react-day-picker.
+- **Calendar** - Accessible date picker built on react-day-picker. `DatePicker` and `DateTimePicker` load it on demand (browser idle after a picker mounts, or when the calendar trigger is pointed at, focused or opened), so a page with a date field does not ship it up front. If it cannot load, the popover shows `calendarErrorLabel` (pass a translated string; crud fields pass `t('date.calendarLoadError')`).
 
 ---
 

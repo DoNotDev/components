@@ -73,12 +73,15 @@
 <Card title="Title">children</Card>
 <Card onClick={fn}>children</Card>
 ```
+Card title is a `div` unless `titleAs` (`'h2'`-`'h6'`) makes it a real heading (visual size unchanged); pass a plain string as `title`, not your own heading. Section title is an `h2` by default; use `titleAs` for nested sections.
 `onClick` card: `role="button"`, focusable, Enter/Space activate (keep other interactive controls out; use `href` for navigation).
+`href` card: a real `<a href>` through the app's router link (`@donotdev/ui` `Link`): `next/link` with route prefetch on Next.js, react-router on Vite.
 | Prop | Type | Default |
 |------|------|---------|
 | variant | `'default'` \| `'muted'` \| `'primary'` \| `'secondary'` \| `'accent'` | `'default'` |
 | title | `string` \| `ReactNode` | - |
 | subtitle | `string` \| `ReactNode` | - |
+| titleAs | `'div'` \| `'h2'`-`'h6'` | `'div'` |
 | icon | `LucideIcon` | - |
 | content | `string` \| `string[]` \| `ReactNode` | - |
 | footer | `ReactNode` | - |
@@ -117,6 +120,7 @@
 |------|------|---------|
 | as | `'section'` \| `'article'` \| `'aside'` \| `'div'` \| `'main'` | `'section'` |
 | title | `string` | - |
+| titleAs | `'h2'` \| `'h3'` \| `'h4'` \| `'h5'` \| `'h6'` | `'h2'` |
 | separator | `boolean` | `false` |
 | tone | `'base'` \| `'muted'` \| `'elevated'` \| `'contrast'` \| `'accent'` | `'base'` |
 | align | `'start'` \| `'center'` \| `'end'` | `'center'` |
@@ -126,6 +130,36 @@
 | defaultOpen | `boolean` | `false` |
 
 **NO: padding, margin, background**
+
+---
+
+## Accordion
+```tsx
+<Accordion items={[{ value: 'a', trigger: 'Question', content: 'Answer' }]} titleAs="h4" />
+```
+| Prop | Type | Default |
+|------|------|---------|
+| items | `{ value, trigger, content }[]` | required |
+| type | `'single'` \| `'multiple'` | `'single'` |
+| collapsible | `boolean` | `false` |
+| titleAs | `'h2'` \| `'h3'` \| `'h4'` \| `'h5'` \| `'h6'` | `'h3'` |
+
+Each trigger sits in a heading of level `titleAs`; pick the level that keeps the page outline sequential.
+
+---
+
+## Slider
+```tsx
+<Slider defaultValue={[50]} max={100} aria-label="Volume" />
+```
+| Prop | Type | Default |
+|------|------|---------|
+| aria-label | `string` | - |
+| aria-labelledby | `string` | - |
+| variant | `'default'` \| `'primary'` \| `'secondary'` \| `'accent'` \| `'success'` \| `'warning'` \| `'destructive'` \| `'muted'` | `'default'` |
+| showValue | `boolean` | `false` |
+
+Give every Slider an accessible name (`aria-label` or `aria-labelledby`): it is applied to the thumb (`role="slider"`), not the root.
 
 ---
 

@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Card/index.tsx
 
 /**
@@ -100,6 +101,7 @@ export function renderCardContent(content: CardContent | undefined): ReactNode {
  * @param icon - Optional icon to display inline with title
  * @param title - Optional title (string or ReactNode for Trans)
  * @param subtitle - Optional subtitle (string or ReactNode for Trans)
+ * @param titleAs - Element of the title (default 'div'; 'h2'-'h6' for a real heading)
  * @returns ReactNode ready for rendering
  *
  * @example
@@ -116,7 +118,8 @@ export function renderCardContent(content: CardContent | undefined): ReactNode {
 export function renderCardHeader(
   icon?: IconType,
   title?: string | ReactNode,
-  subtitle?: string | ReactNode
+  subtitle?: string | ReactNode,
+  titleAs: CardTitleAs = 'div'
 ): ReactNode {
   if (!icon && !title && !subtitle) return null;
 
@@ -125,12 +128,12 @@ export function renderCardHeader(
       {icon && title ? (
         <Stack direction="row" align="center" gap="tight">
           <Icon icon={icon} ariaHidden />
-          <Text as="div" level="h3" className="dndev-card-title">
+          <Text as={titleAs} level="h3" className="dndev-card-title">
             {title}
           </Text>
         </Stack>
       ) : title ? (
-        <Text as="div" level="h3" className="dndev-card-title">
+        <Text as={titleAs} level="h3" className="dndev-card-title">
           {title}
         </Text>
       ) : icon ? (
@@ -157,6 +160,9 @@ export const CARD_VARIANT = SURFACE_VARIANT;
 export type CardVariant = VariantProps<typeof surfaceVariants>['variant'];
 
 /** Props for the Card component. */
+/** Element a {@link CardProps.title} renders as. */
+export type CardTitleAs = 'div' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 export interface CardProps
   extends
     Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'content'>,
@@ -172,6 +178,13 @@ export interface CardProps
   title?: string | ReactNode;
   /** Subtitle displayed below the title (string or ReactNode for Trans) */
   subtitle?: string | ReactNode;
+  /**
+   * Element the title renders as. Use `'h2'`-`'h6'` so the title is a real
+   * heading in the page outline (visual size stays `h3`); don't wrap the title
+   * in your own heading. With `href`, the heading wraps the link.
+   * @default 'div'
+   */
+  titleAs?: CardTitleAs;
   /**
    * Main content - string, string[], or ReactNode.
    * - string → renders as Text
@@ -361,6 +374,7 @@ const Card = ({
   icon,
   title,
   subtitle,
+  titleAs,
   content,
   footer,
   children,
@@ -416,7 +430,8 @@ const Card = ({
     ) : (
       title
     ),
-    subtitle
+    subtitle,
+    titleAs
   );
   const contentNode = renderCardContent(content);
   const hasContent = Boolean(contentNode || children);

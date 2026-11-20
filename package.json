@@ -1,6 +1,6 @@
 {
   "name": "@donotdev/components",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "private": false,
   "description": "Styled UI components for DoNotDev",
@@ -10,6 +10,10 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./rsc": {
+      "types": "./src/rsc.ts",
+      "react-server": "./src/rsc.ts"
     },
     "./sanitize-dom": {
       "types": "./src/utils/sanitizeDom.server.ts",

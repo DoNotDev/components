@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Combobox/index.tsx
 
 import { Check, ChevronDown, Plus, X } from 'lucide-react';

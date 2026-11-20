@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Calendar/index.tsx
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';

@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/hooks/useToast.tsx
 
 /**
@@ -463,7 +464,7 @@ const normalizeToastProps = (
     };
   }
 
-  // Object: toast({ title: '...', type: 'success' })
+  // Object: toast({ title: '...', toastType: 'success' })
   return input as ToastPrimitiveProps & ToastOptions;
 };
 
@@ -531,7 +532,7 @@ const createToast = (
  * toast({
  *   title: 'Success',
  *   description: 'Your changes have been saved',
- *   type: 'success',
+ *   toastType: 'success',
  *   duration: 5000
  * });
  *

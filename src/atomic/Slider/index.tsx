@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Slider/index.tsx
 
 /**
@@ -26,6 +27,15 @@ export interface SliderProps extends ComponentProps<typeof SliderRadix.Root> {
   variant?: ControlVariant;
   /** Show current value */
   showValue?: boolean;
+  /**
+   * Accessible name of the slider. Applied to each thumb (the focusable
+   * `role="slider"` element), not to the root. Required unless
+   * `aria-labelledby` is set. With several thumbs (range), every thumb gets the
+   * same name: prefer a single-thumb slider or label via `aria-labelledby`.
+   */
+  'aria-label'?: string;
+  /** Id of the element labelling the slider. Applied to each thumb. */
+  'aria-labelledby'?: string;
 }
 
 const sliderVariants = cva('dndev-slider', {
@@ -54,7 +64,7 @@ const sliderVariants = cva('dndev-slider', {
  * @example
  * ```tsx
  * <Slider defaultValue={[50]} max={100} step={1} variant="success" />
- * <Slider value={value} onValueChange={setValue} min={0} max={5} step={1} showValue />
+ * <Slider value={value} onValueChange={setValue} min={0} max={5} step={1} showValue aria-label="Quantity" />
  * ```
  * @param {SliderProps} props - The props for the slider
  * @returns {JSX.Element} The rendered slider
@@ -65,6 +75,8 @@ const Slider = ({
   showValue,
   value,
   defaultValue,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: SliderProps) => {
   const variantAttrs = getVariantDataAttrs({ variant });
@@ -89,7 +101,12 @@ const Slider = ({
           <SliderRadix.Range className={cn('dndev-slider-range')} />
         </SliderRadix.Track>
         {values.map((val, index) => (
-          <SliderRadix.Thumb key={index} className={cn('dndev-slider-thumb')}>
+          <SliderRadix.Thumb
+            key={index}
+            className={cn('dndev-slider-thumb')}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
+          >
             {showValue && val !== undefined && (
               <span className="dndev-slider-value">{val}</span>
             )}

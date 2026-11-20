@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/DateTimePicker/index.tsx
 
 /**
@@ -27,7 +28,10 @@ import {
 } from '../../utils/date';
 import type { DateSegmentType, DateSegmentValues } from '../../utils/date';
 import { cn } from '../../utils/helpers';
-import Calendar from '../Calendar';
+import LazyCalendar, {
+  preloadCalendar,
+  useIdlePreloadCalendar,
+} from '../Calendar/LazyCalendar';
 import Icon from '../Icons/Icon';
 import { FloatingLabel } from '../Label';
 import {
@@ -84,6 +88,8 @@ export interface DateTimePickerProps {
   id?: string;
   /** HTML name attribute for form submission */
   name?: string;
+  /** Shown in the calendar popover when the calendar cannot be loaded (translate it) */
+  calendarErrorLabel?: string;
   /** React 19 native ref */
   ref?: Ref<HTMLDivElement>;
   /** ARIA describedby for error/helper association */
@@ -164,11 +170,14 @@ function DateTimePicker({
   className,
   id: idProp,
   name,
+  calendarErrorLabel = 'The calendar could not load. Please type the date in the field.',
   ref,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
   'data-variant': dataVariant,
 }: DateTimePickerProps) {
+  // Calendar chunk: when the browser is idle (touch visitors get no hover)
+  useIdlePreloadCalendar();
   const generatedId = useId();
   const id = idProp ?? generatedId;
 
@@ -674,6 +683,8 @@ function DateTimePicker({
           <PopoverTrigger asChild>
             <button
               type="button"
+              onPointerEnter={preloadCalendar}
+              onFocus={preloadCalendar}
               className="dndev-datepicker-calendar-btn dndev-inline-action-btn"
               disabled={disabled}
               aria-label="Ouvrir le calendrier"
@@ -693,7 +704,8 @@ function DateTimePicker({
             segmentRefs.current[0]?.focus();
           }}
         >
-          <Calendar
+          <LazyCalendar
+            errorLabel={calendarErrorLabel}
             {...{
               mode: 'single' as const,
               selected: dateValue,

@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Accordion/AccordionPrimitive.tsx
 
 /**
@@ -16,6 +17,9 @@ import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
 
+/** Heading element of an accordion item trigger. */
+export type AccordionTitleAs = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 const AccordionPrimitive = RadixAccordion.Root;
 
 const AccordionItemPrimitive = ({
@@ -33,16 +37,26 @@ const AccordionTriggerPrimitive = ({
   className,
   children,
   asChild = false,
+  titleAs = 'h3',
   ...props
 }: ComponentProps<typeof RadixAccordion.Trigger> & {
   asChild?: boolean;
+  /** Heading element wrapping the trigger. @default 'h3' */
+  titleAs?: AccordionTitleAs;
 }) => {
   const Comp = asChild ? Slot : RadixAccordion.Trigger;
+  const Heading = titleAs;
   return (
-    <RadixAccordion.Header>
-      <Comp className={cn(className)} data-role="accordion-trigger" {...props}>
-        {children}
-      </Comp>
+    <RadixAccordion.Header asChild>
+      <Heading>
+        <Comp
+          className={cn(className)}
+          data-role="accordion-trigger"
+          {...props}
+        >
+          {children}
+        </Comp>
+      </Heading>
     </RadixAccordion.Header>
   );
 };

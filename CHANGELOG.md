@@ -4,6 +4,8 @@
 
 ### Patch Changes
 
+- Slider: `aria-label` / `aria-labelledby` are applied to the thumb (the `role="slider"` element) so the slider has an accessible name; previously they landed on the root span.
+- Accordion: `titleAs` (`'h2'`-`'h6'`, default `'h3'`) sets the heading level wrapping each trigger. Default unchanged.
 - Combobox: `multiple` without `chips` shows the selection (one value's label, `selectedLabel` for several; was empty with the placeholder). `clearLabel` labels the clear button (default 'Clear').
 - Tag: `removeLabel` labels the remove button (default 'Remove').
 

@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/advanced/Crawl/CrawlContent.tsx
 
 /**

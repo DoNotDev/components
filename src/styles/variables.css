@@ -156,13 +156,17 @@
   /* DRY: Default font for everything */
   --font-family: var(--font-sans);
 
-  /* Sans-serif: Inter (2026 standard) */
+  /* Sans-serif: Inter (2026 standard). '<Family> Fallback': size-matched local face
+     shown until the web font loads, so the swap shifts no layout (Next: defined in
+     public/dndev-fonts.css, see @donotdev/core config/fonts/fontFallback.js) */
   --font-sans:
-    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
-    Arial, sans-serif;
+    Inter, 'Inter Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
 
   /* Serif: Playfair Display (headlines) */
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-serif:
+    'Playfair Display', 'Playfair Display Fallback', Georgia, 'Times New Roman',
+    serif;
 
   /* Headlines use sans by default (serif available for opt-in) */
   --font-headline: var(--font-sans);

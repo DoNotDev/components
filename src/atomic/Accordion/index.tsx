@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/atomic/Accordion/index.tsx
 
 /**
@@ -18,6 +19,7 @@ import {
   AccordionTriggerPrimitive,
   AccordionContentPrimitive,
 } from './AccordionPrimitive';
+import type { AccordionTitleAs } from './AccordionPrimitive';
 import { cn } from '../../utils/helpers';
 
 /** Single item within an Accordion. */
@@ -50,6 +52,12 @@ export interface AccordionProps {
   onValueChange?: (value: string | string[]) => void;
   /** The list of items to render */
   items: AccordionItemType[];
+  /**
+   * Heading element wrapping each item trigger. Pick the level that fits the
+   * page outline (e.g. `'h4'` under an `h3` section).
+   * @default 'h3'
+   */
+  titleAs?: AccordionTitleAs;
   /** Additional CSS classes */
   className?: string;
 }
@@ -78,6 +86,7 @@ const Accordion = ({
   value,
   onValueChange,
   items,
+  titleAs = 'h3',
   className,
 }: AccordionProps) => {
   // Handle type narrowing for Radix's union types
@@ -96,7 +105,9 @@ const Accordion = ({
             value={item.value}
             className="dndev-accordion-item"
           >
-            <AccordionTriggerPrimitive className="dndev-interactive dndev-accordion-header">
+            <AccordionTriggerPrimitive
+              titleAs={titleAs}
+              className="dndev-interactive dndev-accordion-header">
               {item.trigger}
               <ChevronDown className="dndev-accordion-trigger-icon" />
             </AccordionTriggerPrimitive>
@@ -126,7 +137,9 @@ const Accordion = ({
           value={item.value}
           className="dndev-accordion-item"
         >
-          <AccordionTriggerPrimitive className="dndev-interactive dndev-accordion-header">
+          <AccordionTriggerPrimitive
+              titleAs={titleAs}
+              className="dndev-interactive dndev-accordion-header">
             {item.trigger}
             <ChevronDown className="dndev-accordion-trigger-icon" />
           </AccordionTriggerPrimitive>
@@ -140,3 +153,4 @@ const Accordion = ({
 };
 
 export default Accordion;
+export type { AccordionTitleAs };
