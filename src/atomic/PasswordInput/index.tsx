@@ -34,6 +34,12 @@ export interface PasswordInputProps extends Omit<
   info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
+  /**
+   * Accessible names of the show / hide toggle; pass translated strings
+   * (framework keys: `t('auth:passwordToggle.show')` / `t('auth:passwordToggle.hide')`).
+   * @default { show: 'Show password', hide: 'Hide password' }
+   */
+  revealAriaLabel?: { show: string; hide: string };
 }
 
 /**
@@ -76,6 +82,7 @@ const PasswordInput = ({
   onBlur,
   required,
   id: idProp,
+  revealAriaLabel,
   ...props
 }: PasswordInputProps) => {
   // A passed id must reach both the input and its label
@@ -120,7 +127,11 @@ const PasswordInput = ({
         type="button"
         className="dndev-password-toggle-button"
         onClick={toggleVisibility}
-        aria-label={isVisible ? 'Hide password' : 'Show password'}
+        aria-label={
+          isVisible
+            ? (revealAriaLabel?.hide ?? 'Hide password')
+            : (revealAriaLabel?.show ?? 'Show password')
+        }
         aria-describedby={props['aria-describedby']}
         tabIndex={-1}
       >

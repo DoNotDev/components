@@ -56,6 +56,12 @@ export interface SheetProps extends Omit<
    * @default 'default'
    */
   size?: 'default' | 'narrow';
+  /**
+   * Accessible name of the close button; pass a translated string
+   * (framework key: `t('dndev:sheet.close')`).
+   * @default 'Close sheet'
+   */
+  closeLabel?: string;
 }
 
 /**
@@ -91,6 +97,7 @@ const Sheet = ({
   className = '',
   noSwipe = false,
   size = 'default',
+  closeLabel = 'Close sheet',
   ...contentProps
 }: SheetProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -162,7 +169,7 @@ const Sheet = ({
                   display="full"
                   icon={X}
                   className="dndev-sheet-close"
-                  aria-label="Close sheet"
+                  aria-label={closeLabel}
                 />
               </DialogPrimitive.Close>
             </div>
@@ -181,7 +188,7 @@ const Sheet = ({
                     display="full"
                     icon={X}
                     className="dndev-sheet-close"
-                    aria-label="Close sheet"
+                    aria-label={closeLabel}
                   />
                 </DialogPrimitive.Close>
               </div>

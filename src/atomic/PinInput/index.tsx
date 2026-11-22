@@ -3,21 +3,19 @@
 
 /**
  * @fileoverview PinInput component
- * @description N-digit PIN / OTP input — N separate single-character
- *              boxes with auto-advance, backspace focus retreat, paste
- *              handling, and an optional onComplete callback.
+ * @description N-character PIN / OTP input: one real input under N visual slots.
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.1.3
  * @author AMBROISE PARK Consulting
  */
 
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, Ref } from 'react';
 
 import { cn } from '../../utils/helpers';
-import { FloatingLabel } from '../Label';
+import Label, { FieldInfo } from '../Label';
 
 import './PinInput.css';
 
@@ -30,7 +28,7 @@ export interface PinInputProps extends Omit<
   value: string;
   /** Called on every change. Receives the full current PIN (may be shorter than length). */
   onChange: (next: string) => void;
-  /** Called once when the user has entered the final digit. */
+  /** Called when the PIN reaches `length` characters (once per distinct complete PIN). */
   onComplete?: (value: string) => void;
   /**
    * Number of digits. Typical values: 4 (PIN), 6 (OTP), 8 (recovery code).
@@ -52,17 +50,17 @@ export interface PinInputProps extends Omit<
   shake?: boolean;
   /** Restrict input to digits only. Set false for alphanumeric OTPs. @default true */
   numericOnly?: boolean;
-  /** Floating label rendered above the group. */
+  /** Label rendered above the slots (names the input). */
   label?: string;
   /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
   info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
-  /** Auto-focus the first box on mount. */
+  /** Focus the input on mount, and again when it is re-enabled. */
   autoFocus?: boolean;
   /**
-   * Template for per-digit ARIA label. Receives 1-based index + length.
-   * Default: `Digit {n} of {length}` — override to localize.
+   * No effect, kept for compatibility: the PIN is one input, announced as a
+   * whole through `label` / `aria-label`; the slots are visual only.
    */
   digitAriaLabel?: (index: number, length: number) => string;
   /**
@@ -70,23 +68,31 @@ export interface PinInputProps extends Omit<
    * `hideMaskToggle` is false). Default: `{ show: 'Show PIN', hide: 'Hide PIN' }`.
    */
   revealAriaLabel?: { show: string; hide: string };
+  /** The underlying input (React 19 ref prop), e.g. to focus it again after an action */
+  ref?: Ref<HTMLInputElement>;
 }
 
 /**
  * PinInput Component
  *
- * N-digit PIN / OTP input. Renders `length` single-character boxes with
- * auto-advance on entry, backspace focus retreat, SMS paste handling,
- * and an optional `onComplete` callback that fires when the user
- * enters the final digit.
+ * N-character PIN / OTP input, built like `input-otp`: ONE real `<input>`
+ * stretched transparently over `length` visual slots. Typing, paste anywhere,
+ * Backspace / Delete, selection, arrows, Home / End, IME and OS one-time-code
+ * autofill are the browser's own input behaviour; the component only filters
+ * the value to valid characters, clamps it to `length`, draws the slots
+ * (character, `•` when masked, a caret on the active slot) and calls
+ * `onComplete` when the PIN is full. A paste holding `length` or more valid
+ * characters replaces the whole PIN; a shorter one is inserted at the caret.
+ * Clicking a filled slot selects that character so the next keystroke replaces
+ * it; the active slot follows the input's selection (click, select, keyup, focus).
  *
- * Opinionated: numeric by default (set `numericOnly={false}` for
- * alphanumeric OTPs), uses `autoComplete="one-time-code"` for iOS/Android
- * SMS autofill, respects RTL via logical CSS properties, and ships a
- * shake animation hook via `data-shake` on the container.
+ * Numeric by default (`numericOnly={false}` for alphanumeric codes),
+ * `autoComplete="one-time-code"`, slots shrink to fit narrow containers,
+ * SSR-safe (no browser access during render). When the parent clears `value`,
+ * the input is refocused at the start. Rest props go to the input.
  *
  * @component
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.1.3
  * @author AMBROISE PARK Consulting
  * @example Basic 4-digit PIN
@@ -98,13 +104,13 @@ export interface PinInputProps extends Omit<
  *   autoFocus
  * />
  * ```
- * @example 6-digit OTP with mask
+ * @example 6-digit OTP, visible
  * ```tsx
  * <PinInput
  *   value={code}
  *   onChange={setCode}
  *   length={6}
- *   mask
+ *   mask={false}
  *   label="Verification code"
  * />
  * ```
@@ -126,148 +132,140 @@ const PinInput = ({
   autoFocus,
   disabled,
   className,
-  digitAriaLabel,
+  digitAriaLabel: _digitAriaLabel,
   revealAriaLabel,
   'aria-label': ariaLabel,
+  onClick,
+  onPaste,
+  onSelect,
+  onKeyUp,
+  onFocus,
+  ref: externalRef,
   ...rest
 }: PinInputProps) => {
   const id = useId();
-  const refs = useRef<Array<HTMLInputElement | null>>([]);
+  const ref = useRef<HTMLInputElement>(null);
+  const prevValue = useRef(value);
+  const [caret, setCaret] = useState(0);
   const [revealed, setRevealed] = useState(false);
-  const effectiveMask = mask && !revealed;
 
-  // Keep the refs array in sync with `length` changes
-  if (refs.current.length !== length) {
-    refs.current = Array.from({ length }, (_, i) => refs.current[i] ?? null);
-  }
-
-  // Auto-focus first box on mount if requested.
   useEffect(() => {
-    if (autoFocus && !disabled) {
-      refs.current[0]?.focus();
-    }
-  }, []);
+    if (autoFocus && !disabled) ref.current?.focus();
+  }, [autoFocus, disabled]);
 
-  // When the parent clears the value (e.g. after a bad PIN) refocus box 0.
+  // The parent cleared the PIN (e.g. wrong code): back to the first slot.
   useEffect(() => {
-    if (value.length === 0 && !disabled) {
-      refs.current[0]?.focus();
+    if (value === '' && prevValue.current !== '' && !disabled) {
+      ref.current?.focus();
+      ref.current?.setSelectionRange(0, 0);
+      setCaret(0);
     }
+    prevValue.current = value;
   }, [value, disabled]);
 
-  const isValidChar = (ch: string): boolean => {
-    if (!ch) return false;
-    return numericOnly ? /^\d$/.test(ch) : /^[A-Za-z0-9]$/.test(ch);
+  const invalid = numericOnly ? /\D/g : /[^A-Za-z0-9]/g;
+
+  const commit = (raw: string): void => {
+    const next = raw.replace(invalid, '').slice(0, length);
+    if (next === value) return;
+    onChange(next);
+    if (next.length === length) onComplete?.(next);
   };
 
-  const commit = (next: string): void => {
-    const clamped = next.slice(0, length);
-    onChange(clamped);
-    if (clamped.length === length && onComplete) {
-      onComplete(clamped);
-    }
+  const setRefs = (el: HTMLInputElement | null): void => {
+    ref.current = el;
+    if (typeof externalRef === 'function') externalRef(el);
+    else if (externalRef) externalRef.current = el;
   };
 
-  const setDigit = (index: number, raw: string): void => {
-    // Handle SMS paste / autofill of the whole code in one box.
-    if (raw.length > 1) {
-      const filtered = Array.from(raw)
-        .filter(isValidChar)
-        .join('')
-        .slice(0, length);
-      if (filtered.length) {
-        commit(filtered);
-        const nextIdx = Math.min(filtered.length, length - 1);
-        refs.current[nextIdx]?.focus();
-      }
-      return;
-    }
+  /** The active slot follows the input's real selection. */
+  const syncCaret = (el: HTMLInputElement): void =>
+    setCaret(el.selectionStart ?? 0);
 
-    if (raw && !isValidChar(raw)) return;
-
-    const chars = value.padEnd(length, ' ').split('');
-    chars[index] = raw || ' ';
-    const next = chars.join('').replace(/ /g, '').slice(0, length);
-    commit(next);
-
-    if (raw && index < length - 1) {
-      refs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (
-    index: number,
-    event: React.KeyboardEvent<HTMLInputElement>
-  ): void => {
-    if (event.key === 'Backspace') {
-      const chars = value.split('');
-      if (!chars[index] && index > 0) {
-        event.preventDefault();
-        refs.current[index - 1]?.focus();
-        onChange(value.slice(0, index - 1));
-      } else if (chars[index]) {
-        event.preventDefault();
-        onChange(value.slice(0, index));
-      }
-    } else if (event.key === 'ArrowLeft' && index > 0) {
-      event.preventDefault();
-      refs.current[index - 1]?.focus();
-    } else if (event.key === 'ArrowRight' && index < length - 1) {
-      event.preventDefault();
-      refs.current[index + 1]?.focus();
-    }
-  };
-
+  const active = Math.min(caret, length - 1);
   const showToggle = mask && !hideMaskToggle;
-  const toggleRevealed = (): void => setRevealed((r) => !r);
 
   const group = (
     <div
       className={cn('dndev-pin-input', className)}
       data-shake={shake ? 'true' : undefined}
-      role="group"
-      aria-label={ariaLabel ?? label ?? 'PIN input'}
     >
-      {Array.from({ length }).map((_, index) => {
-        const raw = value[index] ?? '';
-        return (
-          <input
+      <div className="dndev-pin-input__slots">
+        {Array.from({ length }, (_, index) => (
+          <div
             key={index}
-            id={index === 0 ? id : undefined}
-            ref={(el) => {
-              refs.current[index] = el;
-            }}
-            type="text"
-            inputMode={numericOnly ? 'numeric' : 'text'}
-            pattern={numericOnly ? '[0-9]*' : undefined}
-            maxLength={index === 0 ? length : 1}
-            autoComplete={index === 0 ? 'one-time-code' : 'off'}
-            value={raw}
-            disabled={disabled}
-            required={required && index === 0}
-            aria-label={
-              digitAriaLabel
-                ? digitAriaLabel(index + 1, length)
-                : `Digit ${index + 1} of ${length}`
+            aria-hidden="true"
+            className="dndev-pin-input__slot"
+            data-active={index === active ? 'true' : undefined}
+            data-caret={
+              index === active && index === value.length ? 'true' : undefined
             }
-            className={cn(
-              'dndev-input dndev-pin-input__box',
-              effectiveMask && 'dndev-pin-input__box--masked'
-            )}
-            onChange={(event) => setDigit(index, event.target.value)}
-            onKeyDown={(event) => handleKeyDown(index, event)}
-            onFocus={(event) => {
-              if (event.currentTarget.value) event.currentTarget.select();
-            }}
-            {...rest}
-          />
-        );
-      })}
+          >
+            {value[index] && (mask && !revealed ? '•' : value[index])}
+          </div>
+        ))}
+        <input
+          {...rest}
+          ref={setRefs}
+          id={id}
+          type="text"
+          inputMode={numericOnly ? 'numeric' : 'text'}
+          pattern={numericOnly ? '\\d*' : '[A-Za-z0-9]*'}
+          maxLength={length}
+          autoComplete="one-time-code"
+          spellCheck={false}
+          value={value}
+          disabled={disabled}
+          required={required}
+          aria-label={ariaLabel ?? (label ? undefined : 'PIN input')}
+          className="dndev-pin-input__field"
+          onChange={(event) => commit(event.target.value)}
+          onPaste={(event) => {
+            onPaste?.(event);
+            if (event.defaultPrevented) return;
+            event.preventDefault();
+            const el = event.currentTarget;
+            const text = event.clipboardData.getData('text');
+            // A whole code replaces the PIN, wherever the caret is.
+            if (text.replace(invalid, '').length >= length) {
+              commit(text);
+              return;
+            }
+            const start = el.selectionStart ?? value.length;
+            const end = el.selectionEnd ?? start;
+            commit(value.slice(0, start) + text + value.slice(end));
+          }}
+          onSelect={(event) => {
+            onSelect?.(event);
+            syncCaret(event.currentTarget);
+          }}
+          onKeyUp={(event) => {
+            onKeyUp?.(event);
+            syncCaret(event.currentTarget);
+          }}
+          onFocus={(event) => {
+            onFocus?.(event);
+            syncCaret(event.currentTarget);
+          }}
+          onClick={(event) => {
+            onClick?.(event);
+            // Caret to the clicked slot; a filled slot is selected (typing replaces it).
+            const el = event.currentTarget;
+            const box = el.getBoundingClientRect();
+            if (box.width) {
+              const slot = Math.floor(((event.clientX - box.left) / box.width) * length);
+              const at = Math.max(0, Math.min(slot, value.length));
+              el.setSelectionRange(at, at < value.length ? at + 1 : at);
+            }
+            syncCaret(el);
+          }}
+        />
+      </div>
       {showToggle ? (
         <button
           type="button"
           className="dndev-pin-input__reveal"
-          onClick={toggleRevealed}
+          onClick={() => setRevealed((r) => !r)}
           aria-label={
             revealed
               ? (revealAriaLabel?.hide ?? 'Hide PIN')
@@ -289,15 +287,15 @@ const PinInput = ({
   if (!label) return group;
 
   return (
-    <FloatingLabel
-      htmlFor={id}
-      label={label}
-      info={info}
-      disabled={disabled}
-      required={required}
-    >
+    <div className="dndev-pin-input-field" data-disabled={disabled ? 'true' : undefined}>
+      <div className="dndev-pin-input-field__label">
+        <Label htmlFor={id} required={required}>
+          {label}
+        </Label>
+        {info && <FieldInfo text={info} />}
+      </div>
       {group}
-    </FloatingLabel>
+    </div>
   );
 };
 

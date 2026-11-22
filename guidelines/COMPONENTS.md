@@ -48,7 +48,7 @@ These are the only ways one should handle layout to get to quick results functio
 
 - **Input** - Accessible input with mobile-friendly touch targets and key state styling.
 - **QuantityStepper** - Controlled lot-aware quantity editor via `onChange`, or legacy increment/decrement callbacks. Supports zero, collapsed presentation, and vertical orientation. Editable mode requires safe-integer lot bounds and a valid controlled quantity; reconcile invalid persisted quantities before enabling it. See [QuantityStepper](./QUANTITY_STEPPER.md).
-- **PasswordInput** - Password field with show/hide toggle functionality.
+- **PasswordInput** - Password field with show/hide toggle functionality. `revealAriaLabel={{ show, hide }}` names the toggle (pass translated strings; framework keys `auth:passwordToggle.show` / `.hide`; default English).
 - **Textarea** - Multi-line text input component.
 - **Label** - Accessible label with icon support and various positions.
 - **Field help (`info`)** - Opt-in: `info="…"` on `Input`, `PasswordInput`, `Select`, `Combobox`, `DatePicker`, `DateTimePicker`, `RangeInput`, `PinInput` or `FloatingLabel` (needs `label`) adds an (i) after the label; hover or keyboard focus shows the text, a tap pins it on touch screens. Without `info`, nothing is rendered. For a label you render yourself, place `<FieldInfo text="…" />` next to it.
@@ -91,7 +91,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Popover** - Accessible popover displaying rich content in a portal.
 - **Tooltip** - Tooltip component with positioning and delay controls.
 - **HoverCard** - Card that appears on hover with rich content.
-- **Sheet** - Slide-out panel for sidebars, mobile navigation, or editing panels.
+- **Sheet** - Slide-out panel for sidebars, mobile navigation, or editing panels. `closeLabel` names the close button (pass a translated string, framework key `dndev:sheet.close`; default `Close sheet`).
 - **ContextMenu** - Right-click context menu with nested submenus.
 - **DropdownMenu** - Professional dropdown menu with props-based API.
 

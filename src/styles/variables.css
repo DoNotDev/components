@@ -157,8 +157,10 @@
   --font-family: var(--font-sans);
 
   /* Sans-serif: Inter (2026 standard). '<Family> Fallback': size-matched local face
-     shown until the web font loads, so the swap shifts no layout (Next: defined in
-     public/dndev-fonts.css, see @donotdev/core config/fonts/fontFallback.js) */
+     rendered while the web font is not available (font-display: optional), so text
+     keeps its box. Defined by the framework font plan on both bundlers
+     (@donotdev/core config/fonts/buildFontPlan.js); a stack leading with a web font
+     must list it right after the family (the build fails otherwise). */
   --font-sans:
     Inter, 'Inter Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'Helvetica Neue', Arial, sans-serif;
