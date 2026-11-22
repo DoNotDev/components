@@ -3,7 +3,7 @@
 /**
  * @fileoverview Hero Section Component
  * @description Punchy hero section with gradient title, subtitle, and optional children.
- * Title always renders as h1 with maximum impact. Users who need different sizing make their own.
+ * Title renders as a div styled at h1 level (not an h1 element) with maximum impact; the page provides its own h1 if it needs one. Users who need different sizing make their own.
  *
  * **Polymorphic Component**: Can render as `section`, `header`, or `div` based on semantic needs.
  *
@@ -80,7 +80,7 @@ export interface HeroSectionOwnProps extends VariantProps<
   as?: 'section' | 'header' | 'div';
   /** Badge text */
   badge?: string;
-  /** Hero title (renders as h1 with gradient) - string or ReactNode for Trans */
+  /** Hero title (div styled at h1 level, with gradient) - string or ReactNode for Trans */
   title?: string | ReactNode;
   /** Hero subtitle - string or ReactNode for Trans */
   subtitle?: string | ReactNode;
@@ -147,7 +147,7 @@ export type HeroSectionProps<T extends ElementType = 'section'> =
     Omit<ComponentPropsWithRef<T>, keyof HeroSectionOwnProps>;
 
 /**
- * Hero section: h1 title, subtitle, optional badge and children (actions).
+ * Hero section: title (div styled at h1 level, not an h1 element), subtitle, optional badge and children (actions).
  * `bleed` spans the viewport width; `backgroundImage` fills it with a cover photo
  * under a readability scrim (text turns white).
  *

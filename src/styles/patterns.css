@@ -488,7 +488,9 @@
     var(--floating-glow-start) 100%
   );
 
-  background: var(--floating-glow-gradient);
+  /* --floating-background: optional theme token, set on :root / theme class
+     (e.g. var(--popover)) to flatten every floating surface. Unset = glow gradient. */
+  background: var(--floating-background, var(--floating-glow-gradient));
   color: var(--popover-foreground);
   border: var(--border-hairline) solid var(--line-2);
   border-radius: var(--radius-floating);
@@ -521,11 +523,14 @@
   }
 
   &:dir(rtl) {
-    background: linear-gradient(
-      135deg,
-      var(--floating-glow-start) 0%,
-      var(--floating-glow-mid) 50%,
-      var(--floating-glow-end) 100%
+    background: var(
+      --floating-background,
+      linear-gradient(
+        135deg,
+        var(--floating-glow-start) 0%,
+        var(--floating-glow-mid) 50%,
+        var(--floating-glow-end) 100%
+      )
     );
   }
 
@@ -1092,7 +1097,7 @@
     font-size: var(--font-size-input);
     color: var(--foreground);
     cursor: pointer;
-    transition: color var(--transition-fast);
+    transition: color var(--dur-fast) var(--ease-in-out);
 
     /* Subtle hover on label text */
     &:hover {

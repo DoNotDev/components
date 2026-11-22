@@ -10,13 +10,14 @@
  */
 
 import { Suspense, lazy } from 'react';
-import type { ComponentProps } from 'react';
 
 import MarqueeSkeleton from './MarqueeSkeleton';
 import { GAP_VARIANT } from '../../styles/componentConstants';
 
+import type { MarqueeProps } from './MarqueeContent';
+
 // Re-export props from MarqueeContent
-export type { MarqueeProps } from './MarqueeContent';
+export type { MarqueeProps };
 
 // Lazy load the actual marquee implementation
 const MarqueeContent = lazy(() => import('./MarqueeContent'));
@@ -32,10 +33,10 @@ const MarqueeContent = lazy(() => import('./MarqueeContent'));
  * - Responsive gap spacing
  * - Lazy loading by default
  *
- * Perfect for showcasing partner logos, testimonials, or any repeating content
+ * Perfect for showcasing partner logos, testimonials, or any repeating content.
+ * Generic over the item type: `renderItem` receives the type of `items`.
  */
-
-const Marquee = (props: ComponentProps<typeof MarqueeContent>) => {
+function Marquee<T = unknown>(props: MarqueeProps<T>) {
   const { gap = GAP_VARIANT.MEDIUM, direction = 'auto', ...otherProps } = props;
 
   // Determine if vertical for skeleton
@@ -51,9 +52,14 @@ const Marquee = (props: ComponentProps<typeof MarqueeContent>) => {
         />
       }
     >
-      <MarqueeContent gap={gap} direction={direction} {...otherProps} />
+      {/* why: React.lazy erases the generic; the item type is checked at this call site */}
+      <MarqueeContent
+        gap={gap}
+        direction={direction}
+        {...(otherProps as Omit<MarqueeProps, 'gap' | 'direction'>)}
+      />
     </Suspense>
   );
-};
+}
 
 export default Marquee;

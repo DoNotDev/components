@@ -105,8 +105,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: var(--touch-target);
+  height: var(--touch-target);
   border: none;
   border-radius: var(--radius-full);
   /* --card not --background: surface must be opaque */

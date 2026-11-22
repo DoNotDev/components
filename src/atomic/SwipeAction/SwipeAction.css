@@ -28,7 +28,7 @@
 .dndev-swipe-action-content {
   flex: 0 0 100%;
   min-inline-size: 0;
-  min-block-size: 44px;
+  min-block-size: var(--touch-target);
   scroll-snap-align: start;
   background: var(--background);
 }
@@ -51,8 +51,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-inline-size: 44px;
-  min-block-size: 44px;
+  min-inline-size: var(--touch-target);
+  min-block-size: var(--touch-target);
   border: 0;
   font: inherit;
   cursor: pointer;

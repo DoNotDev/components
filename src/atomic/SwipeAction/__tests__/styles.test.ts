@@ -30,8 +30,8 @@ describe('SwipeAction native styling contract', () => {
   it('uses destructive tokens, touch targets and logical layout for RTL', () => {
     expect(css).toContain('var(--destructive)');
     expect(css).toContain('var(--destructive-foreground)');
-    expect(css).toContain('min-inline-size: 44px');
-    expect(css).toContain('min-block-size: 44px');
+    expect(css).toContain('min-inline-size: var(--touch-target)');
+    expect(css).toContain('min-block-size: var(--touch-target)');
     expect(css).toContain('scroll-snap-align: start');
     expect(css).toContain('scroll-snap-align: end');
     expect(css).toContain('outline: 2px solid var(--ring)');

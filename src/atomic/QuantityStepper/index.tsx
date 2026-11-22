@@ -37,7 +37,7 @@ export interface QuantityStepperProps extends Omit<HTMLAttributes<HTMLDivElement
   max?: number;
   /** Allows committing zero, in addition to positive lots. @default false */
   allowZero?: boolean;
-  /** Shows only a large + at zero, reserving the expanded footprint. @default false */
+  /** Shows only a square + at zero (inline end), reserving the block size; expanding animates the inline size. @default false */
   collapseWhenZero?: boolean;
   /** Stack the controls: plus, quantity, minus (also DOM and tab order). @default false */
   vertical?: boolean;

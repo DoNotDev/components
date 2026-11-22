@@ -36,6 +36,12 @@ interface NavigationMenuItem {
   description?: string;
   /** Optional icon */
   icon?: ReactNode;
+  /**
+   * Whether this item is the current page. Renders `aria-current="page"` and
+   * `data-active="true"` on its link (and `data-active` on a trigger when a
+   * child is current). The caller decides, e.g. from the current route.
+   */
+  active?: boolean;
   /** Nested children items */
   children?: NavigationMenuItem[];
   /** Layout for children content */
@@ -128,6 +134,10 @@ const NavigationMenu = ({
         ? `${item?.label || ''} - ${path}`
         : undefined;
 
+    const activeProps = item?.active
+      ? { 'aria-current': 'page' as const, 'data-active': 'true' }
+      : undefined;
+
     const linkElement =
       Link === 'a' ? (
         <a
@@ -136,6 +146,7 @@ const NavigationMenu = ({
           style={style}
           data-role={dataRole}
           aria-label={ariaLabel}
+          {...activeProps}
         >
           {children}
         </a>
@@ -147,6 +158,7 @@ const NavigationMenu = ({
           style={style}
           data-role={dataRole}
           aria-label={ariaLabel}
+          {...activeProps}
         >
           {children}
         </Link>
@@ -187,7 +199,10 @@ const NavigationMenu = ({
           if (item.children && item.children.length > 0) {
             return (
               <NavigationMenuItemPrimitive key={item.label || index}>
-                <NavigationMenuTriggerPrimitive className="dndev-interactive">
+                <NavigationMenuTriggerPrimitive
+                  className="dndev-interactive"
+                  data-active={item.active ? 'true' : undefined}
+                >
                   {item.icon && (
                     <span className="dndev-flex-shrink-0">{item.icon}</span>
                   )}

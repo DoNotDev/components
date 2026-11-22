@@ -290,16 +290,28 @@ describe('QuantityStepper DOM', () => {
     }
   });
 
-  it('reserves grid tracks, enforces touch size and respects reduced motion in CSS', async () => {
+  it('sizes cells at the touch target, reserves rows and animates only the inline size in CSS', async () => {
     const css = readFileSync(resolve(__dirname, '../QuantityStepper.css'), 'utf-8');
-    expect(css).toContain('max(var(--touch-target), 44px)');
-    // State-independent tracks account for the larger collapsed icon AND enlarged
-    // inherited text. Auto rows let spanning plus content change the footprint.
-    expect(css).toContain('calc(max(var(--icon-md), var(--quantity-target) * 0.6, 1lh) + 2 * var(--gap-sm))');
-    expect(css).toContain('grid-template-columns: var(--quantity-cell) minmax(var(--quantity-cell), 1fr) var(--quantity-cell)');
+    expect(css).toContain('--quantity-target: var(--touch-target);');
+    // The cell is the target; only enlarged text grows it (padding fits inside).
+    expect(css).toContain('--quantity-cell: max(var(--quantity-target), calc(1lh + 2 * var(--gap-sm)));');
+    expect(css).toContain('--quantity-field: calc(3ch + var(--gap-sm));');
+    expect(css).not.toMatch(/\d+px/);
+    // − and the quantity shrink to nothing while collapsed; + is always one cell.
+    expect(css).toContain('grid-template-columns: minmax(0, var(--quantity-cell)) minmax(0, var(--quantity-field)) var(--quantity-cell)');
+    expect(css).toContain('grid-template-columns: minmax(0, var(--quantity-cell)) minmax(0, 1fr) var(--quantity-cell)');
+    // State-independent rows: the larger collapsed icon or enlarged inherited text never
+    // changes the block size between states. Auto rows would let content change it.
     expect(css).toContain('grid-template-rows: var(--quantity-cell)');
     expect(css).toContain('grid-template-rows: repeat(3, var(--quantity-cell))');
     expect(css).not.toMatch(/grid-template-rows:[^;]*auto/);
+    // Collapsed: one square at the inline end; only inline size (and fades) transition.
+    expect(css).toContain('inline-size: var(--quantity-square)');
+    expect(css).toContain('margin-inline-start: auto');
+    expect(css).toContain('inline-size var(--dur-normal) var(--ease-in-out)');
+    expect(css).toContain('background-color var(--dur-fast) var(--ease-in-out)');
+    expect(css).not.toMatch(/transition:[^;]*\ball\b/);
+    expect(css).not.toMatch(/\b(left|right)\b/);
     expect(css).toContain('&:focus-visible');
     expect(css).toContain('box-shadow: var(--shadow-focus)');
     expect(css).toContain('&:hover:not(:disabled)');

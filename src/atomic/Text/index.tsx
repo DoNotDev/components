@@ -201,8 +201,12 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
   // Only h1-h6 can map to level (p, span, div, etc. default to 'body')
   const effectiveLevel = level ?? (isHeadingTag(as) ? as : 'body');
 
+  // data-level="body" is emitted only for an explicit level (needed to beat the
+  // base.css h1-h6 element rules); the implicit body default keeps the DOM unchanged.
   const levelAttrs =
-    effectiveLevel !== 'body' ? { 'data-level': effectiveLevel } : {};
+    effectiveLevel !== 'body' || level !== undefined
+      ? { 'data-level': effectiveLevel }
+      : {};
 
   // Handle newlines in string children (split and insert <br />)
   const processedChildren =

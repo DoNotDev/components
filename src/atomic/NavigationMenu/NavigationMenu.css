@@ -59,6 +59,11 @@
   }
 }
 
+/* Sub-menu lists: base.css gives every ul list-style disc */
+.dndev-nav-menu-grid-container {
+  list-style: none;
+}
+
 /* Navigation trigger - NavigationMenu-specific styles only */
 .dndev-interactive[data-role='nav-trigger'] {
   height: var(--touch-target);
@@ -71,6 +76,12 @@
   &[data-state='open'] {
     background-color: rgb(from var(--accent) r g b / 0.5);
   }
+}
+
+/* Active page: top-level links, overflow dropdown links, sub-menu links */
+.dndev-interactive[data-role='menu-item'][data-active='true'],
+.dndev-nav-menu-item-container[data-active='true'] {
+  background-color: rgb(from var(--accent) r g b / 0.5);
 }
 
 .dndev-nav-menu-trigger-icon {

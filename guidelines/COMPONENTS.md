@@ -14,7 +14,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Section** - Layout section with title, grid, tone system, and `bleed` prop for full-viewport-width content (images, maps, galleries).
 - **Grid** - CSS Grid layout primitive with responsive column control.
 - **Stack** - Flexbox layout for arranging items in rows or columns.
-- **HeroSection** - Hero banner with title, subtitle, gradient backgrounds, `bleed` for full-width, and `backgroundImage` for cover images with overlay.
+- **HeroSection** - Hero banner with title (a div styled at h1 level, not an h1 element: the page provides its own h1 if it needs one), subtitle, gradient backgrounds, `bleed` for full-width, and `backgroundImage` for cover images with overlay.
 - **CallToAction** - Conversion-focused section with actions, `bleed` for full-width, and `backgroundImage` for cover images with overlay.
 
 ---
@@ -24,7 +24,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Card** - Premium card component with title, content, footer, and elevation variants.
   - **Navigation with middle-click support:** Wrap Card in Link component for navigation that supports middle-click (opens in new tab). See navigation section below.
 - **DualCard** - Side-by-side card layout for comparison or feature showcases.
-- **Text** - Typography component with semantic text variants.
+- **Text** - Typography component with semantic text variants. `<Text as="h2" level="body">` keeps the h2 element but renders body-sized (an explicit `level` always emits `data-level`).
 - **Blockquote** - Styled blockquote for citations and testimonials.
 - **List** - Bullet points, numbered lists, and feature lists with zero CSS. Use `icon` prop for custom icons, `icon={null}` for plain bullets.
 - **DescriptionList** - Key-value pairs and metadata using semantic HTML (dl, dt, dd).
@@ -78,7 +78,7 @@ These are the only ways one should handle layout to get to quick results functio
 
 - **Tabs** - Tabbed interface with props-based API and full keyboard navigation.
 - **Accordion** - Vertically stacked headings that reveal content sections.
-- **NavigationMenu** - Props-based navigation menu with nested menus and rich content.
+- **NavigationMenu** - Props-based navigation menu with nested menus and rich content. Item `active: true` marks the current page (`aria-current="page"` + `data-active="true"` on its link, accent background). Sub-menu lists have no bullets.
 - **Pagination** - Accessible pagination with page number generation and ellipsis.
 - **Command** - Command palette component for keyboard navigation and search.
 - **CommandDialog** - Command palette dialog optimized for Cmd+K navigation.
@@ -105,7 +105,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Avatar** - Accessible avatar with image and fallback support.
 - **Badge** - Status indicator with semantic variants (polymorphic: div, span, mark).
 - **Tag** - Tag component for labels and categories. `removeLabel`: remove button label (default `'Remove'`).
-- **Calendar** - Accessible date picker built on react-day-picker. `DatePicker` and `DateTimePicker` load it on demand (browser idle after a picker mounts, or when the calendar trigger is pointed at, focused or opened), so a page with a date field does not ship it up front. If it cannot load, the popover shows `calendarErrorLabel` (pass a translated string; crud fields pass `t('date.calendarLoadError')`).
+- **Calendar** - Accessible date picker built on react-day-picker. `DatePicker` and `DateTimePicker` load it on demand (browser idle after a picker mounts, or when the calendar trigger is pointed at, focused or opened), so a page with a date field does not ship it up front. If it cannot load, the popover shows `calendarErrorLabel` (pass a translated string; crud fields pass `t('date.calendarLoadError')`). Pickers outside DatePicker use `LazyCalendar` (`errorLabel` required) with `preloadCalendar` on trigger pointer-enter / focus and `useIdlePreloadCalendar()`; crud `DateFilter` does, so it no longer ships react-day-picker up front.
 
 ---
 

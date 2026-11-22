@@ -52,6 +52,12 @@ export type { CallToActionProps, CallToActionOwnProps } from './CallToAction';
 
 export { default as Calendar } from './Calendar';
 export type { CalendarProps } from './Calendar';
+export {
+  default as LazyCalendar,
+  preloadCalendar,
+  useIdlePreloadCalendar,
+} from './Calendar/LazyCalendar';
+export type { LazyCalendarProps } from './Calendar/LazyCalendar';
 export * from './Calendar/CalendarPrimitive';
 
 export { default as DatePicker } from './DatePicker';
