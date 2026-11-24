@@ -7,21 +7,27 @@
   pointer-events: none;
 }
 
-/* Disabled / loading Button (a loading Button is disabled): muted, never faded.
-   Filled variants take the --muted background; ghost, link, outline and destructive
-   (drawn outlined) keep a transparent one. Label and spinner (currentColor, below) take
-   --muted-foreground, readable in every theme since both derive from fg/bg.
-   Scoped to Button (.dndev-button): other .dndev-interactive controls (tabs, toggles,
-   menu items) keep the generic fade of patterns.css. The extra class and the
-   [data-variant] / :hover / accent-surface forms outrank every variant, hover and
-   surface rule of patterns.css whatever the load order: a button disabled under the
-   pointer (the click that starts loading) must not keep its hover colour. */
-.dndev-interactive.dndev-button:disabled,
-.dndev-interactive.dndev-button[data-variant]:disabled,
-.dndev-interactive.dndev-button[data-variant]:disabled:hover,
-.dndev-surface[data-variant='accent'] .dndev-interactive.dndev-button:disabled,
-.dndev-floating[data-variant='accent'] .dndev-interactive.dndev-button:disabled {
+/* Disabled and loading Buttons (a loading Button is disabled) are never faded:
+   opacity stays 1 against the generic fade of patterns.css. Scoped to Button
+   (.dndev-button): other .dndev-interactive controls (tabs, toggles, menu items) keep
+   that fade. */
+.dndev-interactive.dndev-button:disabled {
   opacity: 1;
+}
+
+/* Disabled Button (not loading): muted. Filled variants take the --muted background;
+   ghost, link, outline and destructive (drawn outlined) keep a transparent one. The
+   label takes --muted-foreground, readable in every theme since both derive from fg/bg.
+   A loading Button keeps its variant colours (spinner in the label colour, below): the
+   click that starts loading changes nothing but the spinner, no colour change under it.
+   The extra class and the [data-variant] / :hover / accent-surface forms outrank every
+   variant, hover and surface rule of patterns.css whatever the load order: a button
+   disabled under the pointer must not keep its hover colour. */
+.dndev-interactive.dndev-button:disabled:not([data-loading]),
+.dndev-interactive.dndev-button[data-variant]:disabled:not([data-loading]),
+.dndev-interactive.dndev-button[data-variant]:disabled:not([data-loading]):hover,
+.dndev-surface[data-variant='accent'] .dndev-interactive.dndev-button:disabled:not([data-loading]),
+.dndev-floating[data-variant='accent'] .dndev-interactive.dndev-button:disabled:not([data-loading]) {
   background: var(--muted);
   color: var(--muted-foreground);
 }
@@ -31,33 +37,33 @@
     [data-variant='link'],
     [data-variant='outline'],
     [data-variant='destructive']
-  ):disabled,
+  ):disabled:not([data-loading]),
 .dndev-interactive.dndev-button:is(
     [data-variant='ghost'],
     [data-variant='link'],
     [data-variant='outline'],
     [data-variant='destructive']
-  ):disabled:hover,
+  ):disabled:not([data-loading]):hover,
 .dndev-surface[data-variant='accent']
   .dndev-interactive.dndev-button:is(
       [data-variant='ghost'],
       [data-variant='link'],
       [data-variant='outline'],
       [data-variant='destructive']
-    ):disabled,
+    ):disabled:not([data-loading]),
 .dndev-floating[data-variant='accent']
   .dndev-interactive.dndev-button:is(
       [data-variant='ghost'],
       [data-variant='link'],
       [data-variant='outline'],
       [data-variant='destructive']
-    ):disabled {
+    ):disabled:not([data-loading]) {
   background: transparent;
   color: var(--muted-foreground);
 }
 
 /* Outlined variants keep their shape, in the neutral border colour */
-.dndev-interactive.dndev-button:is([data-variant='outline'], [data-variant='destructive']):disabled {
+.dndev-interactive.dndev-button:is([data-variant='outline'], [data-variant='destructive']):disabled:not([data-loading]) {
   border-color: var(--border);
 }
 
@@ -66,8 +72,8 @@
   flex-shrink: 0;
 }
 
-/* The spinner replaces the icon and takes the label colour: --muted-foreground while
-   the button is loading (see the disabled rules above).
+/* The spinner replaces the icon and takes the label colour: the variant's foreground
+   (a loading Button keeps its variant colours, see the disabled rules above).
    Three classes outrank `.dndev-spinner[data-variant]`. */
 .dndev-interactive .dndev-spinner.dndev-button-spinner {
   border-top-color: currentColor;

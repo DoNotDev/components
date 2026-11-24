@@ -189,9 +189,9 @@ export interface ButtonProps
   fullWidth?: boolean;
   /**
    * Whether the button is in a loading state.
-   * The spinner replaces the icon and the button is disabled, with the disabled look:
-   * muted background (filled variants) or transparent (ghost, link, outline,
-   * destructive), label and spinner in `--muted-foreground`, no fade.
+   * The spinner replaces the icon and the button is disabled, but keeps its variant
+   * colours (spinner in the label colour, no fade, no colour change): only the spinner
+   * shows the loading. A disabled Button that is not loading takes the muted look.
    * @default false
    */
   loading?: boolean;

@@ -1666,10 +1666,12 @@
 /* Step change of a multi-step flow (e.g. the auth EmailSignUpFlow): the entering step
    fades in, sliding from the end side (forward) or the start side (back), mirrored in
    RTL. `backwards`: no transform is left once it ends (no containing block for fixed
-   descendants). Reduced motion: no slide (base.css). */
+   descendants). `--ease-heavy` (fast start): the previous step is hidden at once, so a
+   slow start would leave the container blank for the first frames. Reduced motion: no
+   slide (base.css). */
 .dndev-animate-step-forward,
 .dndev-animate-step-back {
-  animation: universal-slide var(--dur-normal) var(--ease-in-out) backwards;
+  animation: universal-slide var(--dur-normal) var(--ease-heavy) backwards;
   --transform-end: translateX(0);
 }
 

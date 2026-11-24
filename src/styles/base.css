@@ -63,6 +63,15 @@ body {
   }
 }
 
+/* Sheet and dialog bodies grow with their content: the scrollbar's width is reserved, so the
+   content does not shift when the scrollbar appears or goes (classic scrollbars, laptops).
+   Overlay scrollbars (phones) take no width: no effect there. Not on `*`: `stable` also
+   reserves the gutter on `overflow: hidden` elements. */
+.dndev-sheet-body,
+.dndev-modal-body {
+  scrollbar-gutter: stable;
+}
+
 /* ===========================
     GLOBAL TRANSITIONS
     =========================== */
