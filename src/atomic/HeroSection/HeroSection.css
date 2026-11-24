@@ -9,13 +9,9 @@
   /* Content constraint + centered */
   max-width: var(--content-width);
   margin-inline: auto;
-  /* Padding with hero background - responsive to match PageContainer */
-  padding-inline: var(--gap-md);
+  /* Padding with hero background; inline: the Section content gutter (lines up with the page content) */
+  padding-inline: var(--section-gutter);
   padding-block: var(--gap-lg);
-
-  @media (width >= 1024px) {
-    padding-inline: var(--gap-lg);
-  }
 
   display: flex;
   flex-direction: column;

@@ -11,9 +11,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { HTMLAttributes, MouseEvent, PointerEvent } from 'react';
+import type { HTMLAttributes, MouseEvent, PointerEvent, RefObject } from 'react';
 import { Minus, Plus } from 'lucide-react';
 
+import { flyTo as flyToTarget } from '../../utils/flyTo';
 import { cn } from '../../utils/helpers';
 import { moveQuantity, normalizeQuantity, quantityRules } from './quantity';
 
@@ -27,8 +28,36 @@ const HOLD_REPEAT_MS = 150;
 export interface QuantityStepperProps extends Omit<HTMLAttributes<HTMLDivElement>, 'role' | 'onChange'> {
   /** Controlled quantity. Zero may be used as the initial, not-yet-added value. */
   value: number;
-  /** Enables native text editing; receives validated quantities on commit, not on each keystroke. Takes precedence over legacy callbacks. */
-  onChange?: (value: number) => void;
+  /**
+   * Enables native text editing; receives validated quantities on commit, not on each
+   * keystroke. Takes precedence over legacy callbacks. Return the write's promise to cancel
+   * the add's flight (`flyFrom` / `flyTo`) when it rejects. Handle the error in the caller:
+   * the stepper only uses the rejection to cancel the flight (it attaches a handler, so a
+   * returned promise never reports an unhandled rejection).
+   */
+  onChange?: (value: number) => void | Promise<unknown>;
+  /**
+   * Element flown onto `flyTo` on an add (card packshot, gallery image). Read at commit
+   * time, so a fresh ref per render works. Flight only with `flyTo` too, in editable
+   * (`onChange`) mode.
+   */
+  flyFrom?: RefObject<Element | null>;
+  /**
+   * Landing target of the add's flight: a `flyTarget()` name (e.g. `'cart'`) or an element.
+   * Flight only with `flyFrom` too, and only in editable (`onChange`) mode: legacy callbacks
+   * write on every press-and-hold tick, so the count (and a target Button `badge`) would
+   * move during the hold; they never fly. The flight starts when the add is committed (a
+   * click, the release of a hold, a typed or keyed higher value), before `onChange`, so a
+   * Button `badge` inside the target holds the new count until the image lands, then pops.
+   * Uses `flyTo` (no flight under reduced motion, or with an unrendered source or an
+   * off-screen target).
+   */
+  flyTo?: string | Element;
+  /**
+   * Fly on every committed increase. Off: only on the first add (0 → first lot). Decreases
+   * never fly. @default false
+   */
+  flyEveryAdd?: boolean;
   /** First positive quantity (safe integer). @default 1 */
   min?: number;
   /** Lot size (positive safe integer); valid quantities are min + k * step. @default 1 */
@@ -39,6 +68,14 @@ export interface QuantityStepperProps extends Omit<HTMLAttributes<HTMLDivElement
   allowZero?: boolean;
   /** Shows only a square + at zero (inline end), reserving the block size; expanding animates the inline size. @default false */
   collapseWhenZero?: boolean;
+  /**
+   * Visible text of the collapsed control (with `collapseWhenZero`), e.g. "Add". At zero the
+   * control is then one "+ label" button over the expanded footprint (fullWidth: the full
+   * width) instead of the square +; the first + crossfades it into [ − qty + ] with no size
+   * change. Keep it one short word (it ellipsizes); `incrementLabel` stays the accessible
+   * name, so include this text in it (WCAG 2.5.3). Ignored with `vertical`.
+   */
+  addLabel?: string;
   /** Stack the controls: plus, quantity, minus (also DOM and tab order). @default false */
   vertical?: boolean;
   /** Called by −. Omit to disable − (at the minimum). */
@@ -80,6 +117,8 @@ function restoreEditor(input: HTMLInputElement | null, value: number) {
  * the value. Legacy mode uses direction callbacks; additive onChange mode owns lot
  * normalization and offers an uncontrolled text spinbutton committed on blur/Enter.
  * onChange takes precedence over the legacy direction and value-click callbacks.
+ * In onChange mode, `flyFrom` + `flyTo` fly an image onto the cart on a committed add (one
+ * flight per commit: a hold of any length flies once, on release).
  *
  * @component
  * @example
@@ -100,11 +139,15 @@ const QuantityStepper = ({
   onIncrement,
   onValueClick,
   onChange,
+  flyFrom,
+  flyTo,
+  flyEveryAdd = false,
   min = 1,
   step = 1,
   max,
   allowZero = false,
   collapseWhenZero = false,
+  addLabel,
   vertical = false,
   disabled = false,
   fullWidth = false,
@@ -120,6 +163,8 @@ const QuantityStepper = ({
   const groupRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
   const collapsed = collapseWhenZero && value === 0;
+  // Rendered in both states so it can fade out on expansion; CSS shows it only collapsed.
+  const labelled = collapseWhenZero && addLabel !== undefined && !vertical;
   const rules = onChange ? quantityRules(min, step, max, allowZero) : undefined;
 
   if (rules && (!Number.isSafeInteger(value) || value < 0 || (value !== 0 && (value < rules.min || value > rules.max || (value - rules.min) % rules.step !== 0)))) {
@@ -155,9 +200,17 @@ const QuantityStepper = ({
     if (hold.current) clearTimeout(hold.current.timer);
   }, []);
 
+  // Every editable commit lands here (click, hold release, Enter / blur, keys). The flight
+  // starts before onChange, so it is registered when the optimistic count re-renders the badge.
   const change = (next: number) => {
     restoreEditor(inputRef.current, value);
-    if (!disabled && next !== value) onChange?.(next);
+    if (disabled || next === value || !onChange) return;
+    const source = flyFrom?.current;
+    const flight = source && flyTo !== undefined && next > value && (flyEveryAdd || value === 0)
+      ? flyToTarget(source, flyTo)
+      : null;
+    const result = onChange(next);
+    if (result instanceof Promise) result.catch(() => flight?.cancel());
   };
   const commit = (input: HTMLInputElement) => {
     if (!rules || disabled || collapsed || input.value === String(value)) return;
@@ -182,6 +235,9 @@ const QuantityStepper = ({
     prepareStep(event);
     if (event.button !== 0 || event.currentTarget.disabled || disabled) return;
     if (hold.current) clearTimeout(hold.current.timer);
+    // The labelled collapsed + spans the control and shrinks to its cell on the first
+    // repeat: keep the pointer on it, or the shrink would end the hold (pointerleave).
+    if (labelled && collapsed) event.currentTarget.setPointerCapture?.(event.pointerId);
     suppressClick.current = false;
     const tick = () => {
       const state = hold.current;
@@ -263,6 +319,12 @@ const QuantityStepper = ({
       }}
     >
       <Plus aria-hidden="true" focusable="false" />
+      {labelled && (
+        <span className="dndev-quantity-stepper-add" aria-hidden="true">
+          <Plus aria-hidden="true" focusable="false" />
+          <span className="dndev-quantity-stepper-add-text">{addLabel}</span>
+        </span>
+      )}
     </button>
   );
   const quantity = onChange ? (
@@ -350,6 +412,7 @@ const QuantityStepper = ({
       data-full-width={fullWidth || undefined}
       data-disabled={disabled || undefined}
       data-collapsed={collapsed || undefined}
+      data-add-label={labelled || undefined}
       data-vertical={vertical || undefined}
     >
       {vertical ? [increment, quantity, decrement] : [decrement, quantity, increment]}

@@ -28,19 +28,49 @@ describe('ResponsiveImg', () => {
   });
 });
 
+const RENDITIONS = { thumbWidth: 960, fullWidth: 2400, sizes: '3.75rem' };
+
+describe('ResponsiveImg with renditions', () => {
+  it('renders one img with a width-descriptor srcset and sizes, no picture', () => {
+    const html = renderToStaticMarkup(
+      <ResponsiveImg image={PICTURE} renditions={RENDITIONS} alt="" loading="lazy" />
+    );
+    expect(html).toBe(
+      '<img alt="" loading="lazy" src="/p-full.webp" srcSet="/p-thumb.webp 960w, /p-full.webp 2400w" sizes="3.75rem"/>'
+    );
+    expect(html).not.toContain('<picture>');
+  });
+
+  it('renders a plain img for a single rendition', () => {
+    const html = renderToStaticMarkup(
+      <ResponsiveImg
+        image={{ fullUrl: '/a.webp' }}
+        renditions={RENDITIONS}
+        alt=""
+        loading="lazy"
+      />
+    );
+    expect(html).toBe('<img src="/a.webp" alt="" loading="lazy"/>');
+  });
+});
+
 describe('Card picture cover', () => {
-  it('renders the cover and hover pairs as <picture>', () => {
+  it('uses srcset + sizes on the cover and hover images with coverRenditions', () => {
     const html = renderToStaticMarkup(
       <Card
         title="P"
         cover={PICTURE}
         coverHover={{ fullUrl: '/h-full.webp', thumbUrl: '/h-thumb.webp' }}
+        coverRenditions={{ ...RENDITIONS, sizes: '50vw' }}
       />
     );
-    expect(html).toContain('srcSet="/p-thumb.webp"');
-    expect(html).toContain('src="/p-full.webp"');
-    expect(html).toContain('srcSet="/h-thumb.webp"');
-    expect(html).toContain('src="/h-full.webp" class="dndev-card-cover-hover"');
+    expect(html).not.toContain('<picture>');
+    expect(html).toContain(
+      'srcSet="/p-thumb.webp 960w, /p-full.webp 2400w" sizes="50vw"'
+    );
+    expect(html).toContain(
+      'srcSet="/h-thumb.webp 960w, /h-full.webp 2400w" sizes="50vw"'
+    );
   });
 
   it('keeps a string cover a plain img', () => {

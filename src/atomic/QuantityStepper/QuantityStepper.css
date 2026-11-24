@@ -1,6 +1,8 @@
-/* Collapsed: one square + at the inline end. Expanded: [ − qty + ].
+/* Collapsed: one square + at the inline end (or, with `addLabel`, one "+ label" button
+   over the expanded footprint). Expanded: [ − qty + ].
    Rows are fixed in both states (no vertical shift); only the inline size animates,
-   growing from the inline end toward the inline start. */
+   growing from the inline end toward the inline start (labelled: nothing resizes, the
+   content crossfades). */
 .dndev-quantity-stepper {
   --quantity-target: var(--touch-target);
   /* The cell IS the touch target: padding and icons fit inside it. State-independent,
@@ -66,6 +68,12 @@
       cursor: not-allowed;
       opacity: 0.6;
     }
+  }
+
+  /* Typed quantity: same input size token as every framework input (no iOS focus zoom).
+     The cell is fixed (--quantity-cell), so the font-size change shifts nothing. */
+  > input {
+    font-size: var(--font-size-input);
   }
 
   > button {
@@ -158,6 +166,72 @@
   &[data-vertical][data-collapsed] > .dndev-quantity-stepper-increment {
     grid-area: 1 / 1 / -1 / -1;
   }
+
+  /* Labelled add (`addLabel`, never vertical): collapsed, one "+ label" button over the
+     expanded footprint, so nothing changes size. Expanding crossfades the label out and
+     − / quantity / the + icon in (opacity only); the + snaps back to its cell underneath. */
+  &[data-add-label] {
+    position: relative;
+
+    > .dndev-quantity-stepper-increment > svg {
+      transition: opacity var(--dur-normal) var(--ease-in-out);
+    }
+  }
+
+  &[data-add-label][data-collapsed] {
+    inline-size: var(--quantity-expanded);
+    min-inline-size: var(--quantity-expanded);
+
+    &[data-full-width] {
+      inline-size: 100%;
+    }
+
+    > .dndev-quantity-stepper-increment {
+      grid-area: 1 / 1 / -1 / -1;
+
+      > svg {
+        opacity: 0;
+      }
+
+      > .dndev-quantity-stepper-add {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* The label of a labelled add, laid over the whole group (not the + cell) so it can fade out
+   while the + returns to its cell. Decorative: the + keeps `incrementLabel` as its name. */
+.dndev-quantity-stepper-add {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  padding-inline: var(--gap-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  /* Out faster than − / quantity come in, so the two never read as one jumble. */
+  transition:
+    opacity var(--dur-fast) var(--ease-in-out),
+    visibility var(--dur-fast) var(--ease-in-out);
+
+  > svg {
+    flex-shrink: 0;
+    inline-size: var(--icon-md);
+    block-size: var(--icon-md);
+  }
+}
+
+.dndev-quantity-stepper-add-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dndev-quantity-stepper-value {
@@ -181,7 +255,9 @@
   .dndev-quantity-stepper,
   .dndev-quantity-stepper > button,
   .dndev-quantity-stepper > .dndev-quantity-stepper-decrement,
-  .dndev-quantity-stepper > .dndev-quantity-stepper-value {
+  .dndev-quantity-stepper > .dndev-quantity-stepper-value,
+  .dndev-quantity-stepper > .dndev-quantity-stepper-increment > svg,
+  .dndev-quantity-stepper-add {
     transition: none;
   }
 }

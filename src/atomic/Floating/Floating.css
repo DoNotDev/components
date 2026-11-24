@@ -1,0 +1,71 @@
+/* packages/components/src/atomic/Floating/Floating.css */
+
+/* One small control at a corner of the page content area, on the header layer; as wide as
+   its content. --floating-control-gutter is the Section content gutter (--section-gutter:
+   --gap-md, --gap-lg from 1024px). */
+.dndev-floating-control {
+  --floating-control-gutter: var(--section-gutter);
+  z-index: var(--z-header);
+}
+
+/* Top placements: in the page flow (first in the page), sticky. At rest: --gap-md, the
+   control, --gap-md, then the page content (a ghost Section right after it drops its own
+   top padding: Section.css). While scrolling: --gap-md below the top of the scroll
+   container (the layout <main>, under the header). Inline: the Section gutter, at the start
+   or end of the content area; fit-content so it never stretches (block or flex parent). */
+.dndev-floating-control[data-placement^='top'] {
+  --floating-control-inline-offset: var(--floating-control-gutter);
+  position: sticky;
+  inset-block-start: var(--gap-md);
+  inline-size: fit-content;
+  margin-block: var(--gap-md);
+}
+
+/* PageContainer already pads its content --gap-md inline: add only the rest of the gutter
+   (0 below 1024px), so the control lines up with the Sections' content edge. */
+.dndev-container > .dndev-floating-control[data-placement^='top'] {
+  --floating-control-inline-offset: calc(
+    var(--floating-control-gutter) - var(--gap-md)
+  );
+}
+
+.dndev-floating-control[data-placement='top-start'] {
+  margin-inline: var(--floating-control-inline-offset) auto;
+}
+
+.dndev-floating-control[data-placement='top-end'] {
+  margin-inline: auto var(--floating-control-inline-offset);
+}
+
+/* Bottom placements: fixed (portalled to <body>), over the page, taking no space. The
+   offsets read the layout tokens declared on <html> (@donotdev/ui layout-variables.css),
+   with fallbacks for a page outside DnDevLayout:
+   - block: --gap-md above the shown ActionBar (--action-bar-height, its safe-area padding
+     included) or above the bottom safe area, whichever is taller;
+   - inline: the Section gutter, after the sidebar on the start side (--sidebar-width),
+     never inside the side safe areas. */
+.dndev-floating-control[data-placement^='bottom'] {
+  --floating-control-fixed-gutter: max(
+    var(--floating-control-gutter),
+    env(safe-area-inset-left, 0px),
+    env(safe-area-inset-right, 0px)
+  );
+  position: fixed;
+  inset-block-end: calc(
+    var(--gap-md) +
+      max(var(--action-bar-height, 0px), env(safe-area-inset-bottom, 0px))
+  );
+  max-inline-size: calc(
+    100% - var(--sidebar-width, 0px) - 2 * var(--floating-control-fixed-gutter)
+  );
+}
+
+.dndev-floating-control[data-placement='bottom-start'] {
+  inset-inline-start: calc(
+    var(--sidebar-width, 0px) + var(--floating-control-fixed-gutter)
+  );
+}
+
+.dndev-floating-control[data-placement='bottom-end'] {
+  inset-inline-end: var(--floating-control-fixed-gutter);
+}

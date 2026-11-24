@@ -43,6 +43,7 @@ export interface TextOwnProps {
    * @example 'li' | 'ul' | 'ol' - List elements
    * @example 'label' - Form label
    * @example 'code' - Inline code element
+   * @example 's' - No longer accurate, struck through (a former price next to the new one)
    */
   as?:
     | 'h1'
@@ -60,9 +61,10 @@ export interface TextOwnProps {
     | 'label'
     | 'code'
     | 'strong'
-    | 'em';
+    | 'em'
+    | 's';
 
-  /** Content to render */
+  /** Content to render. A link (`a`) inside text-level Text (`body` / `small` / `caption`, the default) is underlined, unless it is a framework control (`.dndev-interactive`); a link inside a heading level (`h1`-`h6`) is not. */
   children: ReactNode;
 
   /** Visual style variant - color based on theme values + code */
@@ -101,6 +103,20 @@ export interface TextOwnProps {
 
   /** Italic text */
   italic?: boolean;
+
+  /**
+   * Underlined text, for non-link text that must read as a link cue (a link
+   * inside text-level Text is already underlined).
+   * @example <Text underline>See details</Text>
+   */
+  underline?: boolean;
+
+  /**
+   * Clamp the text to this many lines, with an ellipsis. A positive integer;
+   * anything else is ignored. Clamps only: no space is reserved. The element must be block-level.
+   * @example <Text lines={2}>A long product name</Text>
+   */
+  lines?: number;
 }
 
 /**
@@ -189,7 +205,10 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
     textAlign,
     weight,
     italic,
+    underline,
+    lines,
     className,
+    style,
     ...props
   },
   ref
@@ -207,6 +226,16 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
     effectiveLevel !== 'body' || level !== undefined
       ? { 'data-level': effectiveLevel }
       : {};
+
+  // Clamp: positive integers only; the CSS reads --text-lines from data-lines.
+  const clampLines =
+    typeof lines === 'number' && Number.isInteger(lines) && lines > 0
+      ? lines
+      : undefined;
+  const clampStyle =
+    clampLines !== undefined || style
+      ? { ...style, ...(clampLines !== undefined && { '--text-lines': clampLines }) }
+      : undefined;
 
   // Handle newlines in string children (split and insert <br />)
   const processedChildren =
@@ -227,6 +256,9 @@ const Text = forwardRef<HTMLElement, TextProps>(function Text(
       'data-text-align': textAlign,
       'data-font-weight': weight || undefined,
       'data-italic': italic || undefined,
+      'data-underline': underline || undefined,
+      'data-lines': clampLines,
+      style: clampStyle,
       ...variantAttrs,
       ...levelAttrs,
       ...props,

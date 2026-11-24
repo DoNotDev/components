@@ -22,13 +22,60 @@
   margin-inline: auto;
   min-width: 0; /* Allow shrinking so max-width wins when content would force wider */
   /* Padding with section background - responsive to match PageContainer */
-  padding-inline: var(--gap-md);
+  padding-inline: var(--section-gutter);
   padding-top: var(--gap-lg);
   padding-bottom: var(--gap-lg);
+}
 
-  @media (width >= 1024px) {
-    padding-inline: var(--gap-lg);
-  }
+/*
+ * Nested Section (inside another Section's content): flush. The outer Section
+ * already owns the page band (width, centring, side padding, block padding), so
+ * the inner one takes its container's edge and width; spacing to siblings comes
+ * from the parent layout (Stack / Grid gap). A nested Section with a tone
+ * (base, muted, ...) keeps its padding: its background would otherwise sit on
+ * the text edge. No :has() (Safari 14.1): the default tone is data-tone='ghost'.
+ */
+.dndev-section-content .dndev-section-full-width {
+  width: 100%;
+  margin-inline: 0;
+}
+
+.dndev-section-content
+  .dndev-section-full-width[data-tone='ghost']
+  > .dndev-section-content {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+  padding-block: 0;
+}
+
+/*
+ * Consecutive Sections share one gap. Each page Section pads its content
+ * `--gap-lg` top and bottom, so two in a row were 2 x `--gap-lg` apart. A
+ * ghost Section that directly follows a ghost Section drops its top padding:
+ * the previous one's bottom padding is the only gap. A toned Section (a
+ * background band) on either side of the pair keeps its padding: the band edge
+ * must not touch text. Nested ghost Sections are already flush (above). No
+ * :has() (Safari 14.1): the rule keys on the following Section, and the default
+ * tone is data-tone='ghost'.
+ */
+.dndev-section-full-width[data-tone='ghost']
+  + .dndev-section-full-width[data-tone='ghost']
+  > .dndev-section-content {
+  padding-top: 0;
+}
+
+/*
+ * A ghost Section right after a top Floating (back link, first in the page)
+ * drops its top padding: the Floating's own --gap-md bottom margin is the only
+ * gap, so the control sits --gap-md from the header and --gap-md from the
+ * Section's first line, at every width. A toned Section keeps its padding (its
+ * band starts --gap-md below the control). No :has() (Safari 14.1).
+ */
+.dndev-floating-control[data-placement^='top']
+  + .dndev-section-full-width[data-tone='ghost']
+  > .dndev-section-content {
+  padding-top: 0;
 }
 
 /* Content width constraints — background stays full, only inner content narrows */
@@ -110,16 +157,23 @@
   text-align: end;
 }
 
-/* Collapsible title trigger */
+/*
+ * Collapsible title: heading > <button> trigger. The heading keeps the title
+ * styles and spacing; the button strips UA chrome and inherits them.
+ */
 .dndev-section-title-trigger {
   width: 100%;
   cursor: pointer;
   transition: opacity var(--dur-fast) var(--ease-in-out);
-  margin-block-end: var(--gap-md);
-}
-
-.dndev-section-title-trigger .dndev-section-title {
-  margin-block-end: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
 }
 
 .dndev-section-title-trigger:hover {
@@ -152,4 +206,42 @@
 
 .dndev-section-full-width[data-text-align='end'] .dndev-section-title-trigger {
   justify-content: flex-end;
+}
+
+/*
+ * Title row with actions (only rendered when `actions` is set): heading at the
+ * start, actions at the end, centred on the heading. `space-between` puts a
+ * lone item (actions wrapped under the heading) at the start; with no heading
+ * the actions are the only child and go to the end. The heading keeps its
+ * styles; the row owns the block spacing below.
+ */
+.dndev-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm) var(--gap-md);
+  margin-block-end: var(--gap-md);
+}
+
+.dndev-section-header > .dndev-section-title {
+  margin-block-end: 0;
+  min-width: 0;
+}
+
+/* Collapsible: the trigger spans the heading, which takes the free space */
+.dndev-section-header[data-collapsible] > .dndev-section-title {
+  flex: 1 1 auto;
+}
+
+.dndev-section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-sm);
+  min-width: 0;
+}
+
+.dndev-section-actions:only-child {
+  margin-inline-start: auto;
 }

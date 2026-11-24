@@ -104,8 +104,11 @@
   color: var(--muted-foreground);
 }
 
-/* Help (i) after the label: the label truncates, the button never does */
+/* Help (i) after the label: the label truncates, the button never does. Overflow stays
+   visible so the button's hit area (negative margin) is not clipped by the legend; the
+   label child does the truncation. */
 .dndev-floating-legend[data-info] {
+  overflow: visible;
   display: flex;
   align-items: center;
   gap: calc(var(--gap-sm) / 2);
@@ -123,7 +126,13 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  /* Larger hit area than the icon, without growing the legend */
+  /* Larger hit area than the icon, without growing the legend. The area spills past the
+     legend onto its neighbours (the block above, the field's input): its own layer keeps
+     it on top, so the whole area stays clickable (WCAG 2.5.8, 24×24 px minimum). */
+  position: relative;
+  z-index: 1;
+  min-inline-size: 24px;
+  min-block-size: 24px;
   padding: calc(var(--gap-sm) / 2);
   margin: calc(var(--gap-sm) / -2);
   border: none;

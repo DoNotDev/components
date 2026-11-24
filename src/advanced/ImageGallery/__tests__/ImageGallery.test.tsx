@@ -310,4 +310,32 @@ describe('ImageGallery', () => {
     expect(thumbs.length).toBeGreaterThan(0);
     for (const t of thumbs) expect(t.getAttribute('data-background')).toBe('accent');
   });
+  it('hands aspectRatio to the CSS viewport bound and flags the thumbnail row', () => {
+    const { container, rerender } = render(
+      <ImageGallery images={IMAGES} aspectRatio="1/1" />
+    );
+    const root = container.querySelector<HTMLElement>('.image-gallery')!;
+    expect(root.style.getPropertyValue('--image-gallery-ratio')).toBe('1/1');
+    expect(root.classList.contains('image-gallery--thumbnails')).toBe(true);
+    rerender(<ImageGallery images={IMAGES.slice(0, 1)} aspectRatio="1/1" />);
+    expect(root.classList.contains('image-gallery--thumbnails')).toBe(false);
+  });
+
+  it('scrolls only the thumbnail row to keep the selected thumbnail in view', () => {
+    const { container } = render(<ImageGallery images={IMAGES} />);
+    const row = container.querySelector<HTMLElement>('.image-gallery__thumbnails')!;
+    const rect = (left: number, width: number) =>
+      ({ left, right: left + width, top: 0, bottom: 60, width, height: 60 }) as DOMRect;
+    // Row 0-200 px; thumbnails 80 px wide, 12 px apart: the third ends past the row.
+    vi.spyOn(row, 'getBoundingClientRect').mockReturnValue(rect(0, 200));
+    [...row.children].forEach((thumb, index) =>
+      vi.spyOn(thumb, 'getBoundingClientRect').mockReturnValue(rect(index * 92, 80))
+    );
+    const scrollBy = vi.fn();
+    row.scrollBy = scrollBy as typeof row.scrollBy;
+    fireEvent.click(screen.getByRole('tab', { name: 'View image 2' }));
+    expect(scrollBy).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('tab', { name: 'View image 3' }));
+    expect(scrollBy).toHaveBeenCalledWith({ left: 64, behavior: 'auto' });
+  });
 });

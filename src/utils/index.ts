@@ -12,6 +12,7 @@
 export * from './constants';
 export * from './date';
 export * from './eventListener';
+export * from './flyTo';
 export * from './initRipple';
 export * from './intersectionObserver';
 export * from './isDark';

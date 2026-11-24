@@ -1,0 +1,61 @@
+/* packages/components/src/atomic/ActionBar/ActionBar.css */
+
+/* Fixed to the bottom of the viewport (portalled to <body>), over the page. While shown, the
+   component sets its height as --action-bar-height on <html>, and the layout reserves it at
+   the bottom (layout-variables.css, @donotdev/ui), so the end of the page scrolls above it.
+   Hidden: slid below the viewport, and visibility hidden once the slide ends (not focusable,
+   not in the accessibility tree). */
+.dndev-action-bar {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-header);
+  background: var(--background);
+  color: var(--foreground);
+  border-block-start: var(--border-hairline) solid var(--border);
+  padding-block: var(--gap-sm) max(var(--gap-sm), env(safe-area-inset-bottom));
+  padding-inline: max(
+    var(--gap-md),
+    env(safe-area-inset-left),
+    env(safe-area-inset-right)
+  );
+  transform: translateY(100%);
+  visibility: hidden;
+  transition:
+    transform var(--dur-normal) var(--ease-in-out),
+    visibility 0s linear var(--dur-normal);
+}
+
+.dndev-action-bar[data-open] {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform var(--dur-normal) var(--ease-in-out),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dndev-action-bar,
+  .dndev-action-bar[data-open] {
+    transition: none;
+  }
+}
+
+/* hideFrom: same thresholds as Grid / BREAKPOINT_THRESHOLDS */
+@media (min-width: 768px) {
+  .dndev-action-bar[data-hide-from='tablet'] {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dndev-action-bar[data-hide-from='laptop'] {
+    display: none;
+  }
+}
+
+@media (min-width: 1440px) {
+  .dndev-action-bar[data-hide-from='desktop'] {
+    display: none;
+  }
+}

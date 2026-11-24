@@ -1,10 +1,46 @@
 /* packages/components/src/advanced/ImageGallery/ImageGallery.css */
 
 .image-gallery {
+  /* Height one thumbnail row takes (the strip never wraps: the bound below is exact). */
+  --image-gallery-thumbnail-block: 60px;
+  /* Viewport height the gallery may fill: below the app header, minus the page spacing
+     above and below it. Bounded like the other framework media (VideoPlayer, Crawl). */
+  --image-gallery-viewport: calc(
+    100vh - var(--header-height, 0px) - 2 * var(--gap-lg)
+  );
   display: flex;
   flex-direction: column;
   gap: var(--gap-md);
   outline: none;
+  /* Never taller than the viewport: at its ratio (--image-gallery-ratio, the
+     aspectRatio prop) the gallery narrows and centres instead of growing taller. */
+  inline-size: 100%;
+  /* A grid / flex item would otherwise grow to the thumbnail row's full length */
+  min-inline-size: 0;
+  max-inline-size: calc(
+    var(--image-gallery-viewport) * (var(--image-gallery-ratio))
+  );
+  margin-inline: auto;
+}
+
+/* svh: the small viewport (mobile browser bars shown), so the bound never jumps on scroll */
+@supports (height: 100svh) {
+  .image-gallery {
+    --image-gallery-viewport: calc(
+      100svh - var(--header-height, 0px) - 2 * var(--gap-lg)
+    );
+  }
+}
+
+/* With thumbnails: the main image gives up one thumbnail row and the gap above it */
+.image-gallery--thumbnails {
+  max-inline-size: calc(
+    (
+        var(--image-gallery-viewport) - var(--image-gallery-thumbnail-block) -
+          var(--gap-md)
+      ) *
+      (var(--image-gallery-ratio))
+  );
 }
 
 /* Gallery pictures are always protected (with blockContextMenu + draggable=false):
@@ -40,6 +76,7 @@
 .image-gallery__main {
   position: relative;
   width: 100%;
+  aspect-ratio: var(--image-gallery-ratio);
   overflow: hidden;
   border-radius: var(--radius-surface);
 }
@@ -67,7 +104,8 @@
 
 /* Arrow / thumbnail / key navigation glides to a neighbour (never a touch swipe) */
 @media (prefers-reduced-motion: no-preference) {
-  .image-gallery__strip {
+  .image-gallery__strip,
+  .image-gallery__thumbnails {
     scroll-behavior: smooth;
   }
 }
@@ -145,17 +183,25 @@
   inset-inline-end: var(--gap-md);
 }
 
-/* Thumbnails */
+/* Thumbnails: one row, native horizontal scroll when it overflows (swipe, trackpad);
+   the selected thumbnail is scrolled into view (revealInStrip). */
 .image-gallery__thumbnails {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--gap-sm);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.image-gallery__thumbnails::-webkit-scrollbar {
+  display: none;
 }
 
 .image-gallery__thumbnail {
   flex: 0 0 auto;
-  width: 80px;
-  height: 60px;
+  width: calc(var(--image-gallery-thumbnail-block) * 4 / 3);
+  height: var(--image-gallery-thumbnail-block);
   padding: 0;
   border: 2px solid transparent;
   border-radius: var(--radius-surface);
@@ -171,9 +217,10 @@
   border-color: var(--muted-foreground);
 }
 
+/* Inset: the scrolling row clips anything drawn outside a thumbnail */
 .image-gallery__thumbnail:focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .image-gallery__thumbnail--selected {
@@ -214,9 +261,8 @@
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .image-gallery__thumbnail {
-    width: 60px;
-    height: 45px;
+  .image-gallery {
+    --image-gallery-thumbnail-block: 45px;
   }
 
   .image-gallery__nav {

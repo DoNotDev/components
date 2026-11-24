@@ -672,6 +672,10 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   text-transform: var(--text-transform-button, none);
+  /* A control rendered as <a> (Button `render`): base.css resets the underline only
+     for a:not(.dndev-interactive), so the UA underline would show. Only
+     variant="link" underlines (its own rule below). */
+  text-decoration: none;
   transition:
     background var(--dur-fast) var(--ease-in-out),
     color var(--dur-fast) var(--ease-in-out),
@@ -1657,6 +1661,33 @@
 
 .dndev-animate-fade-in-up {
   animation: universal-slide var(--dur-heavy) ease-out forwards;
+}
+
+/* Step change of a multi-step flow (e.g. the auth EmailSignUpFlow): the entering step
+   fades in, sliding from the end side (forward) or the start side (back), mirrored in
+   RTL. `backwards`: no transform is left once it ends (no containing block for fixed
+   descendants). Reduced motion: no slide (base.css). */
+.dndev-animate-step-forward,
+.dndev-animate-step-back {
+  animation: universal-slide var(--dur-normal) var(--ease-in-out) backwards;
+  --transform-end: translateX(0);
+}
+
+/* Separate rules: a browser without :dir() drops only the RTL ones. */
+.dndev-animate-step-forward {
+  --transform-start: translateX(1.5rem);
+}
+
+.dndev-animate-step-back {
+  --transform-start: translateX(-1.5rem);
+}
+
+.dndev-animate-step-forward:dir(rtl) {
+  --transform-start: translateX(-1.5rem);
+}
+
+.dndev-animate-step-back:dir(rtl) {
+  --transform-start: translateX(1.5rem);
 }
 
 .animation-delay-100 {

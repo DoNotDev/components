@@ -17,7 +17,6 @@
 | iconEnd | `boolean` | `false` |
 | display | `'auto'` \| `'compact'` \| `'full'` | `'auto'` |
 | tooltip | `string` | - |
-| floating | `boolean` | `false` |
 | fullWidth | `boolean` | `false` |
 | loading | `boolean` | `false` |
 | loadingText | `string` | - |
@@ -42,6 +41,8 @@
 | variant | `'default'` \| `'muted'` \| `'primary'` \| `'secondary'` \| `'accent'` \| `'success'` \| `'warning'` \| `'destructive'` \| `'code'` | `'default'` |
 | align | `'start'` \| `'center'` \| `'end'` | `'start'` |
 | weight | `'normal'` \| `'medium'` \| `'semibold'` \| `'bold'` | - |
+| underline | `boolean` | `false` |
+| lines | `number` (positive integer) | - |
 
 **NO: size, tone, color**
 
@@ -121,6 +122,7 @@ Card title is a `div` unless `titleAs` (`'h2'`-`'h6'`) makes it a real heading (
 | as | `'section'` \| `'article'` \| `'aside'` \| `'div'` \| `'main'` | `'section'` |
 | title | `string` | - |
 | titleAs | `'h2'` \| `'h3'` \| `'h4'` \| `'h5'` \| `'h6'` | `'h2'` |
+| actions | `ReactNode` | - |
 | separator | `boolean` | `false` |
 | tone | `'base'` \| `'muted'` \| `'elevated'` \| `'contrast'` \| `'accent'` | `'base'` |
 | align | `'start'` \| `'center'` \| `'end'` | `'center'` |
@@ -143,8 +145,9 @@ Card title is a `div` unless `titleAs` (`'h2'`-`'h6'`) makes it a real heading (
 | type | `'single'` \| `'multiple'` | `'single'` |
 | collapsible | `boolean` | `false` |
 | titleAs | `'h2'` \| `'h3'` \| `'h4'` \| `'h5'` \| `'h6'` | `'h3'` |
+| gridCols | `GridCols` (as `Section`) | - (one column) |
 
-Each trigger sits in a heading of level `titleAs`; pick the level that keeps the page outline sequential.
+Each trigger sits in a heading of level `titleAs`; pick the level that keeps the page outline sequential. `gridCols={[1, 1, 2, 2]}` lays the items in a grid (1 column mobile/tablet, 2 laptop/desktop), cells aligned to the start.
 
 ---
 

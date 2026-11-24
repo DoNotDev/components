@@ -22,6 +22,7 @@ import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import Icon from '../Icons/Icon';
 import Spinner from '../Spinner';
 import Tooltip from '../Tooltip';
+import IconBadge from './IconBadge';
 import './Button.css';
 
 /**
@@ -35,7 +36,7 @@ export const BUTTON_VARIANT = {
   LINK: 'link',
 } as const;
 
-const buttonVariants = cva('dndev-interactive', {
+const buttonVariants = cva('dndev-interactive dndev-button', {
   variants: {
     variant: {
       [THEME_VARIANT.DEFAULT]: '',
@@ -116,7 +117,6 @@ export interface ButtonRenderProps {
   'aria-describedby'?: string;
   'data-variant'?: string;
   'data-display'?: string;
-  'data-floating'?: string;
   'data-full-width'?: string;
   role?: string;
   tabIndex?: number;
@@ -169,6 +169,13 @@ export interface ButtonProps
   /**
    * Count bubble on the icon's corner (cart items, notifications). Rendered only with an
    * icon; `0`, empty or undefined hides it. Decorative: put the count in `aria-label`.
+   * When a numeric value increases after mount (including 0 → 1), the bubble plays a short
+   * pop (scale, Web Animations API, compositor-only, no layout shift); never on the first
+   * render or hydration, on a decrease or a non-numeric value ("99+"), nor under
+   * `prefers-reduced-motion: reduce`. While a `flyTo` flight heads to this button (e.g.
+   * `ref={flyTarget('cart')}`), an increase waits for it: the previous value stays shown
+   * until the image lands, then the new value shows and pops; a cancelled flight shows it
+   * without a pop.
    */
   badge?: number | string;
   /** Tooltip text to show on hover */
@@ -176,18 +183,15 @@ export interface ButtonProps
   /** Force tooltip to stay open (e.g., after copy action) */
   tooltipForceOpen?: boolean;
   /**
-   * Whether the button floats (e.g., FAB).
-   * @default false
-   */
-  floating?: boolean;
-  /**
    * Whether the button takes full width of container.
    * @default false
    */
   fullWidth?: boolean;
   /**
    * Whether the button is in a loading state.
-   * Shows spinner and disables interaction.
+   * The spinner replaces the icon and the button is disabled, with the disabled look:
+   * muted background (filled variants) or transparent (ghost, link, outline,
+   * destructive), label and spinner in `--muted-foreground`, no fade.
    * @default false
    */
   loading?: boolean;
@@ -247,7 +251,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       tooltip,
       tooltipForceOpen,
-      floating = false,
       fullWidth = false,
       loading = false,
       loadingText,
@@ -274,18 +277,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const showProgress = loading && progress !== undefined && progress < 100;
     const displayText = loading ? (loadingText ?? buttonText) : buttonText;
 
-    // Icon, with the count bubble on its corner when `badge` is set
-    const showBadge = badge !== undefined && badge !== 0 && badge !== '';
-    const iconWithBadge = showBadge ? (
-      <span className="dndev-interactive-icon-anchor">
-        <Icon icon={icon} />
-        <span className="dndev-interactive-badge" aria-hidden="true">
-          {badge}
-        </span>
-      </span>
-    ) : (
-      <Icon icon={icon} />
-    );
+    // Icon, with the count bubble on its corner when `badge` is set. The bubble is a
+    // client island (it remembers the last count to pop on increases); the rest of the
+    // button stays server-renderable.
+    const iconWithBadge =
+      badge !== undefined ? <IconBadge icon={icon} badge={badge} /> : <Icon icon={icon} />;
 
     // Build button content - Icon handles all types automatically
     const buttonContent = loading ? (
@@ -370,7 +366,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       'aria-label': getAriaLabel(),
       'aria-describedby': ariaDescribedBy,
       ...variantAttrs,
-      ...(floating && { 'data-floating': 'true' }),
       ...(fullWidth && { 'data-full-width': 'true' }),
       ...(effectiveDisplay && { 'data-display': effectiveDisplay }),
       ...(loading && { 'data-loading': 'true', 'aria-busy': 'true' }),

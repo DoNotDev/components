@@ -21,6 +21,9 @@ export { default as AlertDialog } from './AlertDialog';
 export * from './AlertDialog/AlertDialogPrimitive';
 export type { AlertDialogProps } from './AlertDialog';
 
+export { default as ActionBar } from './ActionBar';
+export type { ActionBarProps, ActionBarBreakpoint } from './ActionBar';
+
 export { default as ActionButton, useAction } from './ActionButton';
 export type {
   ActionButtonProps,
@@ -135,6 +138,9 @@ export {
 export { default as FileButton } from './FileButton';
 export type { FileButtonProps } from './FileButton';
 
+export { default as Floating } from './Floating';
+export type { FloatingProps, FloatingPlacement } from './Floating';
+
 export { default as Grid, GridArea } from './Grid';
 export type {
   GridProps,
@@ -190,9 +196,6 @@ export type { PopoverProps } from './Popover';
 export { default as Portal } from './Portal';
 export * from './Portal/PortalPrimitive';
 export type { PortalProps } from './Portal';
-
-export { default as PortalButton } from './PortalButton';
-export type { PortalButtonProps } from './PortalButton';
 
 export { default as Progress } from './Progress';
 export * from './Progress/ProgressPrimitive';

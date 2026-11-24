@@ -26,6 +26,20 @@
     font-style: italic;
   }
 
+  &:is(s) {
+    text-decoration-line: line-through;
+  }
+
+  /* A link in running text must be told apart by more than colour (WCAG 1.4.1).
+     base.css strips the underline from every anchor; framework controls
+     (.dndev-interactive) keep their own look. Same values as Button variant="link".
+     Text levels only (body / small / caption; no data-level = body): a link in a
+     heading (h1-h6, e.g. a card title) is a title, not running text. */
+  &:not([data-level^='h']) a:not(.dndev-interactive) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
   &[data-variant='default'] {
     color: inherit;
   }
@@ -121,6 +135,18 @@
     font-size: var(--font-size-sm);
   }
 
+  /* A heading element set at a text level (`<Text as="h2" level="body">`) is text in
+     every respect, not only size: drop base.css's headline font and heading case/tracking. */
+  &:is(h1, h2, h3, h4, h5, h6):is(
+      [data-level='body'],
+      [data-level='small'],
+      [data-level='caption']
+    ) {
+    font-family: var(--font-family, var(--font-sans));
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
   /* Font weight overrides (after level rules, so weight prop overrides level defaults) */
   &[data-font-weight='normal'] {
     font-weight: var(--font-weight-normal);
@@ -140,5 +166,18 @@
 
   &[data-italic] {
     font-style: italic;
+  }
+
+  &[data-underline] {
+    text-decoration-line: underline;
+  }
+
+  /* lines: clamp to N lines (--text-lines, set by the component) */
+  &[data-lines] {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--text-lines);
+    line-clamp: var(--text-lines);
+    overflow: hidden;
   }
 }

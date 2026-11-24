@@ -3,8 +3,8 @@
 
 /**
  * @fileoverview ImageGallery component
- * @description Image gallery: swipeable main view, arrows, keyboard navigation, wrapping
- * thumbnails and a full-screen zoomable lightbox.
+ * @description Image gallery: swipeable main view, arrows, keyboard navigation, a
+ * one-row thumbnail strip and a full-screen zoomable lightbox. Bounded by the viewport.
  *
  * @version 0.2.0
  * @since 0.0.1
@@ -12,11 +12,12 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactElement, Ref } from 'react';
 import { flushSync } from 'react-dom';
 
 import Dialog from '../../atomic/Dialog';
 import type { MediaBackground } from '../../types';
+import { withCssVars } from '../../utils/cssVars';
 import { handleImageError } from '../../utils/imageRetry';
 import { ResponsiveImg } from '../../utils/responsiveImage';
 import { GalleryArrows } from './GalleryArrows';
@@ -25,6 +26,7 @@ import { blockContextMenu } from './protectImages';
 import {
   arrowStep,
   isNearSlide,
+  revealInStrip,
   scrollToSlide,
   useCurrentSlide,
 } from './snapStrip';
@@ -45,7 +47,11 @@ export type ImageFit = 'cover' | 'contain';
 export interface ImageGalleryProps {
   /** Array of images - can be objects with fullUrl/thumbUrl or plain strings */
   images: Array<ImageData | string>;
-  /** Aspect ratio for main image (default: '16/9') */
+  /**
+   * Aspect ratio of the main image, as a CSS ratio (`'16/9'`, `'1/1'`). Kept when the
+   * viewport bounds the gallery: it then narrows (centred) instead of growing taller.
+   * @default '16/9'
+   */
   aspectRatio?: string;
   /** Alt text prefix for images */
   altPrefix?: string;
@@ -70,6 +76,11 @@ export interface ImageGalleryProps {
    * @default 'transparent'
    */
   background?: MediaBackground;
+  /**
+   * Ref to the `<img>` of the image in view in the main frame (it moves with the current
+   * slide), e.g. the source of a fly-to-cart ({@link flyTo}).
+   */
+  imageRef?: Ref<HTMLImageElement>;
 }
 
 /** `view-transition-name` of the image morphing between the gallery and the lightbox. */
@@ -113,7 +124,10 @@ function normalizeImage(
  * Features:
  * - Main view swipes natively (CSS scroll-snap, browser-driven scrolling)
  * - Previous/Next buttons, keyboard navigation (← → Home End)
- * - Wrapping thumbnail grid
+ * - One-row thumbnail strip (swipe / scroll when it overflows; the selected one stays in view)
+ * - Viewport-bounded: main image + thumbnail row never exceed the viewport height below the
+ *   app header (`--header-height`) minus the page spacing (`--gap-lg` above and below); the
+ *   gallery narrows and centres, keeping `aspectRatio`
  * - Lightbox on main image click (opt out with `nobox`): the image morphs into it and
  *   back (view transition); swipe to page, swipe up/down to close, pinch / double-tap /
  *   ctrl+wheel to zoom, drag to pan with momentum and elastic edges
@@ -138,6 +152,7 @@ export function ImageGallery({
   nobox,
   fit = 'cover',
   background = 'transparent',
+  imageRef,
 }: ImageGalleryProps): ReactElement {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -217,6 +232,11 @@ export function ImageGallery({
     if (count === 0) setLightboxOpen(false);
   }, [count]);
 
+  // The one-row thumbnail strip follows the selection (arrows, swipes, keys, lightbox).
+  useEffect(() => {
+    if (thumbnailsRef.current) revealInStrip(thumbnailsRef.current, clampedIndex);
+  }, [clampedIndex]);
+
   useEffect(() => {
     if (nobox) setLightboxOpen(false);
   }, [nobox]);
@@ -248,7 +268,8 @@ export function ImageGallery({
 
   return (
     <div
-      className="image-gallery"
+      className={`image-gallery${hasMultiple ? ' image-gallery--thumbnails' : ''}`}
+      style={withCssVars({ '--image-gallery-ratio': aspectRatio })}
       onKeyDown={handleKeyDown}
       onContextMenu={blockContextMenu}
       tabIndex={0}
@@ -259,7 +280,6 @@ export function ImageGallery({
       {/* Main view */}
       <div
         className={`image-gallery__main${nobox ? '' : ' image-gallery__main--lightbox'}`}
-        style={{ aspectRatio }}
         data-background={background}
         onClick={handleMainAreaClick}
       >
@@ -294,6 +314,7 @@ export function ImageGallery({
                 {/* Phones get the thumbnail, larger screens the full image;
                     the lightbox always shows the full image. */}
                 <ResponsiveImg
+                  ref={index === clampedIndex ? imageRef : undefined}
                   image={{ fullUrl: img.full, thumbUrl: img.thumb }}
                   alt={`${altPrefix} ${index + 1} of ${count}`}
                   className="image-gallery__slide-img"

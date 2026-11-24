@@ -29,12 +29,16 @@ For vertical controls, add `vertical`: **plus above quantity above minus**, incl
 | Prop | Default | Behavior |
 | --- | --- | --- |
 | `value: number` | required | Controlled committed quantity. |
-| `onChange?: (value: number) => void` | absent | Enables editable mode. Takes precedence over `onIncrement`, `onDecrement`, and `onValueClick`. |
+| `onChange?: (value: number) => void \| Promise<unknown>` | absent | Enables editable mode. Takes precedence over `onIncrement`, `onDecrement`, and `onValueClick`. Return the write's promise: a rejection cancels the add's flight. Handle the error in the caller; the stepper only uses the rejection to cancel the flight (it attaches a handler, so no unhandled rejection). |
+| `flyFrom?: RefObject<Element \| null>` | absent | Element flown on an add (card packshot, gallery image). Read at commit time (a fresh ref per render works). |
+| `flyTo?: string \| Element` | absent | Landing target: a `flyTarget()` name (e.g. `'cart'`) or an element. Flight only with `flyFrom` too, editable mode only. |
+| `flyEveryAdd?: boolean` | `false` | Off: flies on the first add only (0 → first lot). On: every committed increase. Decreases never fly. |
 | `min?: number` | `1` | First positive lot. Positive safe integer. |
 | `step?: number` | `1` | Positive safe-integer lot size. |
 | `max?: number` | `Number.MAX_SAFE_INTEGER` | Safe integer at least `min`; effective maximum rounds down to a complete lot. |
 | `allowZero?: boolean` | `false` | Allows committing zero, separate from positive lots. |
 | `collapseWhenZero?: boolean` | `false` | At zero, shows only a square accessible plus at the inline end, reserving the block size only; the first + grows the control toward the inline start. |
+| `addLabel?: string` | absent | With `collapseWhenZero`: at zero, one "+ label" button over the expanded footprint (`fullWidth`: the full width) instead of the square; the first + crossfades it into [ − qty + ] with no size change. One short word (ellipsized); decorative, `incrementLabel` stays the name (include the label text in it, WCAG 2.5.3). Ignored with `vertical`. |
 | `vertical?: boolean` | `false` | Plus, quantity, minus stacked; changes visual and keyboard traversal order. |
 | `disabled?: boolean` | `false` | Disables all controls. |
 | `fullWidth?: boolean` | `false` | Fills available inline width, horizontal or vertical. |
@@ -43,6 +47,24 @@ For vertical controls, add `vertical`: **plus above quantity above minus**, incl
 | `incrementLabel: string` | required | Accessible plus name, including collapsed state. |
 | `valueLabel?: string` | absent | Accessible editor or legacy clickable-value name. |
 | `className` / div attributes | absent | Applied to the group. Component owns group role and state attributes. |
+
+### Fly to cart
+
+```tsx
+<QuantityStepper
+  value={quantity}
+  onChange={(next) => cart.setQuantity(productId, next)} // returns the write's promise
+  flyFrom={coverRef}
+  flyTo="cart" // Button ref={flyTarget('cart')} badge={count}
+  flyEveryAdd
+  …
+/>
+```
+
+- One flight per commit: a click on +, the release of a press-and-hold (a hold of 1000 lots flies once, on release), a typed or keyed higher value. The stepper calls `flyTo(flyFrom.current, flyTo)` **before** `onChange`, so the flight is in the air when the optimistic count re-renders the header.
+- A Button `badge` inside the target holds the new count while the image flies; it shows the latest count and pops when the image lands. A rejected `onChange` promise cancels the flight: the badge shows the (rolled-back) count without a pop.
+- A source scrolled off screen still flies, entering from the screen edge on its side. No flight (the badge updates and pops at once) under reduced motion, with an unrendered source, or an off-screen target.
+- Editable mode only: legacy `onIncrement` writes on every hold tick, so the count would move during the hold; fly props are ignored there.
 
 ### Validation and commits
 
@@ -65,14 +87,14 @@ Without `onChange`, `onIncrement?: () => void` and `onDecrement?: () => void` dr
 
 Supply localized labels. All enabled visible buttons and the editor are keyboard reachable; boundary buttons are natively disabled outside an editing session. While editing, directions stay reachable to apply a step to a replacement draft, even when the controlled value is at a bound. Hidden collapsed controls leave the accessibility tree and tab order. The same plus DOM node survives expansion/collapse; collapsing while the editor/minus has focus transfers focus to plus, without stealing focus from outside the group.
 
-Touch targets use `var(--touch-target)`: each cell is exactly the token (padding and icons fit inside, so a larger `--gap-sm` never inflates it) and grows only with enlarged text (`max(target, 1lh + 2 × --gap-sm)`, WCAG 1.4.4 / 1.4.12). − and + are one cell square; the quantity field is content-sized for three tabular digits (`3ch + --gap-sm`), one cell high, and stays at the touch target when it is a clickable `onValueClick` button. Expanded minimum footprint: two cells + field + border. `fullWidth` fills the container but shrinks to that minimum, never further. Collapsed, the horizontal control is a single cell-sized square (+) aligned to the inline end with `fullWidth` (otherwise placed by its parent); rows are fixed in both states so expanding never shifts layout vertically, and the inline size is not reserved. Expansion animates only the inline size, from the inline end toward the inline start (logical properties, RTL-correct): − and the field reveal from zero-width tracks and fade in (`--dur-normal`, `--ease-in-out`); they clip their own content, so focus rings are never clipped. Vertical keeps its stacked footprint: the collapsed + spans all three cells, not animated. Density/theme tokens drive size, spacing, icons, borders, and focus. The same sizing applies on mobile, tablet, and desktop. Reduced-motion users receive no transition. Native buttons are `type="button"`; the only timers are the press-and-hold repeat, cleared on release, disable and unmount; no browser globals during render or SSR-only branches.
+Touch targets use `var(--touch-target)`: each cell is exactly the token (padding and icons fit inside, so a larger `--gap-sm` never inflates it) and grows only with enlarged text (`max(target, 1lh + 2 × --gap-sm)`, WCAG 1.4.4 / 1.4.12). − and + are one cell square; the quantity field is content-sized for three tabular digits (`3ch + --gap-sm`), one cell high, and stays at the touch target when it is a clickable `onValueClick` button. Expanded minimum footprint: two cells + field + border. `fullWidth` fills the container but shrinks to that minimum, never further. Collapsed, the horizontal control is a single cell-sized square (+) aligned to the inline end with `fullWidth` (otherwise placed by its parent); rows are fixed in both states so expanding never shifts layout vertically, and the inline size is not reserved. Expansion animates only the inline size, from the inline end toward the inline start (logical properties, RTL-correct): − and the field reveal from zero-width tracks and fade in (`--dur-normal`, `--ease-in-out`); they clip their own content, so focus rings are never clipped. Vertical keeps its stacked footprint: the collapsed + spans all three cells, not animated. With `addLabel` (horizontal only) the collapsed control keeps the expanded footprint instead of the square: the + spans the three cells and shows "+ label" (a decorative overlay of the whole group); expansion resizes nothing, the label fades out while − / quantity / the + icon fade in, and the + returns to its cell (a press-and-hold started there keeps the pointer captured, so the hold continues). Density/theme tokens drive size, spacing, icons, borders, and focus. The same sizing applies on mobile, tablet, and desktop. Reduced-motion users receive no transition. Native buttons are `type="button"`; the only timers are the press-and-hold repeat, cleared on release, disable and unmount; no browser globals during render or SSR-only branches.
 
 CSS is loaded by the existing component stylesheet import and framework styles index; no new export or style-index entries are required.
 
 ## Regression tests
 
 ```sh
-bun test packages/components/src/atomic/QuantityStepper/__tests__/quantity.test.ts packages/components/src/atomic/QuantityStepper/__tests__/QuantityStepper.dom.test.tsx
+bun test packages/components/src/atomic/QuantityStepper/__tests__/quantity.test.ts packages/components/src/atomic/QuantityStepper/__tests__/QuantityStepper.dom.test.tsx packages/components/src/atomic/QuantityStepper/__tests__/QuantityStepper.fly.dom.test.tsx
 ```
 
 DOM tests use `bun:test`, Happy DOM, and React `act`, exercising the actual component rather than a mock. They cover legacy value-button focus across collapse/expansion, horizontal and vertical, and guard the shared sizing, focus-visible, and enabled-only hover CSS. Happy DOM does not measure layout; browser regressions (`tests/quantity-cart/run.ts`) verify equal collapsed/expanded block size, the collapsed square, fullWidth, enlarged text, and target sizes across mobile/tablet/desktop.

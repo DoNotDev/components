@@ -12,34 +12,19 @@
 }
 
 .dndev-collapsible-content[data-state='open'] {
-  animation: slideDown var(--dur-normal) var(--ease-in-out);
+  /* Fade only (shared fade-in keyframes, animations.css): no height slide, no
+     measured height needed; base.css shortens it under prefers-reduced-motion */
+  animation: fade-in var(--dur-normal) var(--ease-in-out);
   overflow: visible; /* Allow dropdowns/overlays to escape when open */
 }
 
+/*
+ * Closed content stays mounted (forceMount: in the server HTML for crawlers)
+ * and is hidden here: display:none = not visible, focusable or announced.
+ * Opening fades in; closing is instant. Same as Tabs inactive panels.
+ */
 .dndev-collapsible-content[data-state='closed'] {
-  animation: slideUp var(--dur-normal) var(--ease-in-out);
-}
-
-@keyframes slideDown {
-  from {
-    height: 0;
-    opacity: 0;
-  }
-  to {
-    height: var(--radix-collapsible-content-height);
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    height: var(--radix-collapsible-content-height);
-    opacity: 1;
-  }
-  to {
-    height: 0;
-    opacity: 0;
-  }
+  display: none;
 }
 
 .dndev-collapsible-trigger {

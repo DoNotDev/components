@@ -25,13 +25,42 @@
     gap: var(--gap-lg);
   }
 
-  /* Modern ::marker approach - only when list-style is not 'none' */
-  &[data-ordered='true'] {
+  /* Numbers: items are flex (icon alignment) and a flex item gets no ::marker,
+     so an ordered list draws its numbers with a counter (BUGS #31). */
+  &[data-ordered='true']:not([data-marker='none']) {
     list-style-type: decimal;
+    counter-reset: dndev-list-item;
+
+    & > .dndev-list-item {
+      counter-increment: dndev-list-item;
+
+      &::before {
+        content: counter(dndev-list-item) '.';
+        flex-shrink: 0;
+        min-inline-size: 2ch;
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+      }
+    }
   }
 
-  &:not([data-ordered='true']):not([style*='list-style: none']) {
+  &:not([data-ordered='true']):not([data-marker='none']):not([style*='list-style: none']) {
     list-style-type: disc;
+
+    /* Bullets: same reason as the numbers, an icon-less item (data-plain) draws
+       its own bullet; items with an icon keep the icon as their marker (BUGS #31). */
+    & > .dndev-list-item[data-plain='true']::before {
+      content: '\2022';
+      flex-shrink: 0;
+      min-inline-size: 1ch;
+      text-align: end;
+    }
+  }
+
+  /* marker="none": the two rules above are excluded by their :not(), so no counter,
+     bullet or native marker is drawn; items keep their flex alignment and gap. */
+  &[data-marker='none'] {
+    list-style-type: none;
   }
 
   /* Density variants */

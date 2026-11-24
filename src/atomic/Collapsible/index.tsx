@@ -60,7 +60,9 @@ export interface CollapsibleProps {
 
 /**
  * Accessible collapsible component.
- * Expands and collapses content with smooth animations.
+ * Fades in on open (no height slide); collapses instantly. Closed content stays
+ * mounted (in the server HTML, crawlable) and is hidden with `display: none`
+ * (not visible, focusable or announced); its effects run while closed.
  *
  * @component
  * @example
@@ -152,9 +154,7 @@ function Collapsible({
       className={cn('dndev-collapsible', className)}
     >
       {renderTrigger()}
-      <CollapsibleContent
-        className={cn('dndev-collapsible-content', className)}
-      >
+      <CollapsibleContent className={className}>
         {children}
       </CollapsibleContent>
     </CollapsiblePrimitive>

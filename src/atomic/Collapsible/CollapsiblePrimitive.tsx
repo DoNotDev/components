@@ -21,6 +21,12 @@ const CollapsibleTrigger = RadixCollapsible.CollapsibleTrigger;
 /**
  * The content wrapper for Collapsible.
  *
+ * Always mounted (`forceMount`): closed content stays in the server HTML
+ * (crawlable). The wrapper always sets the `dndev-collapsible-content` class,
+ * whose CSS hides closed content (`[data-state='closed'] { display: none }`),
+ * so it is not visible, focusable or announced. Children mount (and run their
+ * effects) while closed. Opening fades in (no height slide); closing is instant.
+ *
  * @component
  * @param {ComponentProps<typeof RadixCollapsible.CollapsibleContent>} props
  * @returns {JSX.Element}
@@ -31,7 +37,11 @@ const CollapsibleContent = ({
   ...props
 }: ComponentProps<typeof RadixCollapsible.CollapsibleContent>) => {
   return (
-    <RadixCollapsible.CollapsibleContent className={cn(className)} {...props} />
+    <RadixCollapsible.CollapsibleContent
+      className={cn('dndev-collapsible-content', className)}
+      {...props}
+      forceMount
+    />
   );
 };
 

@@ -23,6 +23,7 @@ import type { IconType, MediaBackground } from '../../types';
 import { SURFACE_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 import { useLinkRenderer } from '../../utils/linkComponent';
+import type { ImageRenditions } from '../../utils/responsiveImage';
 import { surfaceVariants } from '../../utils/variants';
 import Icon from '../Icons/Icon';
 import List from '../List';
@@ -268,11 +269,25 @@ export interface CardProps
    */
   coverHover?: CardCoverImage;
   /**
+   * Pick the rendition of a {@link CardCoverImage} pair cover by displayed size
+   * x pixel ratio (`srcset` + `sizes`) instead of by viewport. Takes the frame
+   * widths of the image field's upload config and the `sizes` string (see
+   * {@link ImageRenditions}; declared, not measured). Applies to the cover and
+   * `coverHover`. Absent: unchanged (thumbnail on phones, full above).
+   */
+  coverRenditions?: ImageRenditions;
+  /**
    * Load a string `cover` eagerly with high fetch priority. Set on above-the-fold
    * cards only (hero tiles, first row); others stay lazy.
    * @default false
    */
   coverEager?: boolean;
+  /**
+   * Ref to the `<img>` of an image `cover` (string or {@link CardCoverImage} pair; not the
+   * `coverHover` view, not a ReactNode cover), e.g. the source of a fly-to-cart
+   * ({@link flyTo}) fired from a control in the card's footer.
+   */
+  coverRef?: Ref<HTMLImageElement>;
   /**
    * Optional content absolutely positioned on top of the cover.
    * Anchored by `overlayPosition` with theme-token inset. Overlay sits above
@@ -391,6 +406,8 @@ const Card = ({
   coverAlt,
   coverHover,
   coverEager,
+  coverRef,
+  coverRenditions,
   overlay,
   overlayPosition = 'top-left',
   fullOverlay,
@@ -442,6 +459,8 @@ const Card = ({
     alt: coverAlt,
     hover: coverHover,
     eager: coverEager,
+    imageRef: coverRef,
+    renditions: coverRenditions,
   });
 
   const cardAttrs = {

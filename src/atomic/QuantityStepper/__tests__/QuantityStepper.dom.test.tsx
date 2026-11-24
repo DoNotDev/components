@@ -402,3 +402,78 @@ describe('QuantityStepper press and hold', () => {
     expect(onIncrement.mock.calls.length).toBeGreaterThan(1);
   });
 });
+
+describe('QuantityStepper addLabel', () => {
+  const group = (container: Element) => element(container, '[role="group"]');
+  const label = (container: Element) => container.querySelector('.dndev-quantity-stepper-add');
+
+  it('shows the label inside the one collapsed + button; the + keeps its accessible name', () => {
+    const onChange = vi.fn((_: number) => {});
+    const { container } = mount({ value: 0, onChange, allowZero: true, collapseWhenZero: true, fullWidth: true, addLabel: 'Add' });
+    expect(group(container).getAttribute('data-add-label')).toBe('true');
+    expect(group(container).getAttribute('data-collapsed')).toBe('true');
+    const plus = plusOf(container);
+    expect(label(container)?.parentElement).toBe(plus);
+    expect(label(container)?.getAttribute('aria-hidden')).toBe('true');
+    expect(label(container)?.textContent).toBe('Add');
+    expect(plus.getAttribute('aria-label')).toBe('Add a lot');
+    // Only + is reachable while collapsed.
+    expect(inputOf(container).tabIndex).toBe(-1);
+    expect(minusOf(container).tabIndex).toBe(-1);
+    act(() => { plus.focus(); plus.click(); });
+    expect(onChange).toHaveBeenLastCalledWith(1);
+  });
+
+  it('keeps the label node and focus through expansion, so CSS can fade it out', () => {
+    const { container, render } = mount({ value: 0, onChange: () => {}, allowZero: true, collapseWhenZero: true, addLabel: 'Add' });
+    const plus = plusOf(container);
+    const node = label(container);
+    act(() => plus.focus());
+    render({ value: 1 });
+    expect(group(container).hasAttribute('data-collapsed')).toBe(false);
+    expect(group(container).getAttribute('data-add-label')).toBe('true');
+    expect(label(container)).toBe(node);
+    expect(plusOf(container)).toBe(plus);
+    expect(document.activeElement).toBe(plus);
+  });
+
+  it('is ignored when vertical or without collapseWhenZero', () => {
+    for (const props of [{ vertical: true, collapseWhenZero: true }, { collapseWhenZero: false }]) {
+      const { container } = mount({ value: 0, onChange: () => {}, allowZero: true, addLabel: 'Add', ...props });
+      expect(group(container).hasAttribute('data-add-label')).toBe(false);
+      expect(label(container)).toBeNull();
+    }
+  });
+
+  it('holds from the labelled collapsed state: captures the pointer and commits once', async () => {
+    const onChange = vi.fn((_: number) => {});
+    const { container } = mount({ value: 0, onChange, allowZero: true, collapseWhenZero: true, max: 99, addLabel: 'Add' });
+    const plus = plusOf(container);
+    const capture = vi.fn();
+    Object.assign(plus, { setPointerCapture: capture });
+    act(() => { plus.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 7 })); });
+    expect(capture).toHaveBeenCalledWith(7);
+    await act(() => new Promise<void>((resolve) => setTimeout(resolve, 800)));
+    expect(group(container).hasAttribute('data-collapsed')).toBe(false);
+    act(() => { plus.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 7 })); });
+    act(() => plus.click());
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0]).toBeGreaterThan(1);
+  });
+
+  it('reserves the expanded footprint while collapsed and only fades (CSS)', () => {
+    const css = readFileSync(resolve(__dirname, '../QuantityStepper.css'), 'utf-8');
+    const block = css.slice(css.indexOf('&[data-add-label][data-collapsed] {'));
+    expect(block).toContain('inline-size: var(--quantity-expanded);');
+    expect(block).toContain('min-inline-size: var(--quantity-expanded);');
+    expect(block).toContain('inline-size: 100%;');
+    expect(block).toContain('grid-area: 1 / 1 / -1 / -1;');
+    const add = css.slice(css.indexOf('.dndev-quantity-stepper-add {'));
+    expect(add).toContain('position: absolute;');
+    expect(add).toContain('pointer-events: none;');
+    expect(add).toMatch(/transition:\s*opacity var\(--dur-fast\)/);
+    const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
+    expect(reduced).toContain('.dndev-quantity-stepper-add');
+    expect(reduced).toContain('.dndev-quantity-stepper > .dndev-quantity-stepper-increment > svg');
+  });
+});

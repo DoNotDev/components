@@ -460,3 +460,16 @@
 [data-density]:where(:not(.dndev-layout)) {
   --font-size-input: max(16px, var(--font-size-base));
 }
+
+/* Section content gutter: --gap-md, --gap-lg from 1024px. Section pads its content with
+   it, Floating aligns its controls on it; an app element that must line up with the page
+   content (a custom header's logo) reads it too. Declared on nested [data-density] too,
+   so it resolves their own gaps. */
+:where(:root),
+[data-density]:where(:not(.dndev-layout)) {
+  --section-gutter: var(--gap-md);
+
+  @media (width >= 1024px) {
+    --section-gutter: var(--gap-lg);
+  }
+}

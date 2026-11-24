@@ -26,6 +26,9 @@ export interface ListItem {
   className?: string;
 }
 
+/** Marker style of a List. `'none'` hides every drawn marker (numbers, bullets) and keeps the list semantics. */
+export type ListMarker = 'none';
+
 /** Props for the List component -- bullet, numbered, or feature lists. */
 export interface ListProps extends HTMLAttributes<
   HTMLUListElement | HTMLOListElement
@@ -34,6 +37,13 @@ export interface ListProps extends HTMLAttributes<
   items?: (string | ReactNode | ListItem)[];
   /** Whether to render as ordered list (numbers) */
   ordered?: boolean;
+  /**
+   * Hide the markers. `'none'` draws no number or bullet (e.g. steps already numbered by
+   * a caption) and sets `role="list"`, since Safari/VoiceOver drops list semantics when
+   * markers are hidden (https://webkit.org/b/170179). Absent: numbers when `ordered`, bullets otherwise.
+   * @example <List ordered marker="none" items={steps} />
+   */
+  marker?: ListMarker;
   /**
    * Default icon for all string items.
    * Individual ListItem.icon takes precedence.
@@ -82,6 +92,7 @@ export interface ListProps extends HTMLAttributes<
 const List = ({
   items = [],
   ordered = false,
+  marker,
   icon,
   gap = GAP_VARIANT.TIGHT,
   density = 'default',
@@ -94,6 +105,8 @@ const List = ({
     <Component
       className={cn('dndev-list', className)}
       data-ordered={ordered ? 'true' : undefined}
+      data-marker={marker}
+      role={marker === 'none' ? 'list' : undefined}
       data-gap={gap}
       data-density={density}
       {...props}
@@ -110,7 +123,7 @@ const List = ({
             );
           }
           return (
-            <li key={index} className="dndev-list-item">
+            <li key={index} className="dndev-list-item" data-plain="true">
               {item}
             </li>
           );
@@ -119,7 +132,7 @@ const List = ({
         // Handle ReactNode (JSX elements)
         if (!item || typeof item !== 'object' || !('content' in item)) {
           return (
-            <li key={index} className="dndev-list-item">
+            <li key={index} className="dndev-list-item" data-plain="true">
               {item as ReactNode}
             </li>
           );
@@ -129,7 +142,11 @@ const List = ({
         const listItem = item as ListItem;
         const itemIcon = listItem.icon ?? icon;
         return (
-          <li key={index} className={cn('dndev-list-item', listItem.className)}>
+          <li
+            key={index}
+            className={cn('dndev-list-item', listItem.className)}
+            data-plain={itemIcon ? undefined : 'true'}
+          >
             {itemIcon && (
               <span className="dndev-list-item-icon">{itemIcon}</span>
             )}

@@ -5,11 +5,11 @@
  * @description Cover media for Card: fit, alt, hover view and loading priority.
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 
 import type { MediaBackground } from '../../types';
 import { isResponsiveImage, ResponsiveImg } from '../../utils/responsiveImage';
-import type { ResponsiveImage } from '../../utils/responsiveImage';
+import type { ImageRenditions, ResponsiveImage } from '../../utils/responsiveImage';
 
 /** An image cover: a URL, or a full + thumbnail pair (CRUD `Picture`). */
 export type CardCoverImage = string | ResponsiveImage;
@@ -28,10 +28,17 @@ export interface CardCoverMedia {
   fit?: 'cover' | 'contain';
   /** Alt text. Empty (default) marks the cover as decorative. */
   alt?: string;
+  /**
+   * Size-based rendition picking for the cover and hover image (see
+   * {@link ImageRenditions}).
+   */
+  renditions?: ImageRenditions;
   /** Second image revealed on hover / focus-within (always `fit: cover`). */
   hover?: CardCoverImage;
   /** Load eagerly with high fetch priority (above-the-fold covers). @default false */
   eager?: boolean;
+  /** Ref to the image `<img>` (not the hover view), e.g. a {@link flyTo} source. */
+  imageRef?: Ref<HTMLImageElement>;
   /**
    * Opt-in background behind the media. `'transparent'` paints nothing.
    * @default 'transparent'
@@ -57,7 +64,8 @@ function toImage(image: CardCoverImage): ResponsiveImage {
  *   `loading="lazy"`, `decoding="async"`, `referrerpolicy="no-referrer"`;
  *   `media` sets fit, alt (decorative by default), a hover view and eager
  *   loading. An image pair shows the thumbnail on phones, the full image above
- *   ({@link ResponsiveImg}).
+ *   ({@link ResponsiveImg}); with `renditions` the browser picks by
+ *   displayed size instead.
  * - `ReactNode` cover → passthrough; child `<img>`/`<video>` auto-fill via CSS.
  *
  * Overlay is absolutely positioned over the cover AND over the body slot,
@@ -79,6 +87,8 @@ export function renderCardCover(
     hover,
     eager = false,
     background = 'transparent',
+    imageRef,
+    renditions,
   } = media;
 
   // When body is present the cover owns the top region sized by coverAspect.
@@ -98,6 +108,8 @@ export function renderCardCover(
     >
       {image ? (
         <ResponsiveImg
+          ref={imageRef}
+          renditions={renditions}
           image={toImage(image)}
           alt={alt}
           loading={eager ? 'eager' : 'lazy'}
@@ -113,6 +125,7 @@ export function renderCardCover(
         // revealed on hover / keyboard focus, hidden from assistive tech.
         <ResponsiveImg
           className="dndev-card-cover-hover"
+          renditions={renditions}
           image={toImage(hover)}
           alt=""
           aria-hidden="true"

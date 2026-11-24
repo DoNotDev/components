@@ -51,6 +51,25 @@ export function scrollToSlide(
 }
 
 /**
+ * Scrolls a strip by the least amount that brings child `index` fully into view; no-op
+ * when it already is. Only the strip scrolls, never the page (unlike `scrollIntoView`).
+ * Direction-agnostic: the delta is physical (rects), as `scrollBy` expects in LTR and RTL.
+ */
+export function revealInStrip(strip: HTMLElement, index: number): void {
+  const child = strip.children[index];
+  if (!(child instanceof HTMLElement)) return;
+  const view = strip.getBoundingClientRect();
+  const box = child.getBoundingClientRect();
+  const delta =
+    box.left < view.left
+      ? box.left - view.left
+      : box.right > view.right
+        ? box.right - view.right
+        : 0;
+  if (delta !== 0) strip.scrollBy({ left: delta, behavior: 'auto' });
+}
+
+/**
  * Logical paging step of a physical arrow key: `1` (next) or `-1` (previous), `0` for
  * any other key. In RTL, ArrowLeft is next.
  */

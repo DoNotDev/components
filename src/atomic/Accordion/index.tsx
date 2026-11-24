@@ -21,6 +21,7 @@ import {
 } from './AccordionPrimitive';
 import type { AccordionTitleAs } from './AccordionPrimitive';
 import { cn } from '../../utils/helpers';
+import { getGridColsProps, type GridCols } from '../Grid';
 
 /** Single item within an Accordion. */
 export interface AccordionItemType {
@@ -58,13 +59,24 @@ export interface AccordionProps {
    * @default 'h3'
    */
   titleAs?: AccordionTitleAs;
+  /**
+   * Lay the items out in a responsive grid (items flow in order, cells align to
+   * the start so opening one does not stretch its row neighbour). Same type and
+   * breakpoints as `Section`'s `gridCols` / `<Grid cols>`: number, string
+   * template or a `[mobile, tablet, laptop, desktop]` tuple. Absent = one column.
+   * @example [1, 1, 2, 2] - 1 column on mobile/tablet, 2 on laptop/desktop
+   */
+  gridCols?: GridCols;
   /** Additional CSS classes */
   className?: string;
 }
 
 /**
  * A vertically stacked set of interactive headings that each reveal a section of content.
- * Built on Radix UI Accordion.
+ * Built on Radix UI Accordion. Closed items stay mounted (in the server HTML,
+ * crawlable) and are hidden with `display: none` (not visible, focusable or
+ * announced); their effects run while closed. Opening fades in (no height
+ * slide); collapsing is instant.
  *
  * @component
  * @example
@@ -75,6 +87,10 @@ export interface AccordionProps {
  *     { value: '2', trigger: 'Item 2', content: 'Content 2' }
  *   ]}
  * />
+ * ```
+ * @example
+ * ```tsx
+ * <Accordion items={items} gridCols={[1, 1, 2, 2]} />
  * ```
  * @param {AccordionProps} props - The props for the accordion
  * @returns {JSX.Element} The rendered accordion
@@ -87,8 +103,29 @@ const Accordion = ({
   onValueChange,
   items,
   titleAs = 'h3',
+  gridCols,
   className,
 }: AccordionProps) => {
+  // gridCols: the root reuses Grid's class, attributes and column mapping
+  // (Grid.css); absent = today's single column, same DOM.
+  const gridProps = gridCols
+    ? (() => {
+        const { style, responsive, responsiveTpl } = getGridColsProps(gridCols);
+        return {
+          style: { display: 'grid', width: '100%', ...style },
+          'data-gap': 'medium',
+          'data-align': 'start',
+          'data-responsive': responsive ? 'true' : undefined,
+          'data-responsive-tpl': responsiveTpl ? 'true' : undefined,
+        };
+      })()
+    : undefined;
+  const rootClassName = cn(
+    'dndev-accordion',
+    gridCols && 'dndev-grid-component',
+    className
+  );
+
   // Handle type narrowing for Radix's union types
   if (type === 'multiple') {
     return (
@@ -97,7 +134,8 @@ const Accordion = ({
         defaultValue={defaultValue as string[] | undefined}
         value={value as string[] | undefined}
         onValueChange={onValueChange as ((value: string[]) => void) | undefined}
-        className={cn('dndev-accordion', className)}
+        className={rootClassName}
+        {...gridProps}
       >
         {items.map((item) => (
           <AccordionItemPrimitive
@@ -129,7 +167,8 @@ const Accordion = ({
       defaultValue={defaultValue as string | undefined}
       value={value as string | undefined}
       onValueChange={onValueChange as ((value: string) => void) | undefined}
-      className={cn('dndev-accordion', className)}
+      className={rootClassName}
+        {...gridProps}
     >
       {items.map((item) => (
         <AccordionItemPrimitive

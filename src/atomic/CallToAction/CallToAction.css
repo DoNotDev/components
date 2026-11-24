@@ -79,12 +79,8 @@
   align-items: center;
   max-width: var(--content-width);
   margin-inline: auto;
-  /* Padding to match PageContainer behavior */
-  padding-inline: var(--gap-md);
-
-  @media (width >= 1024px) {
-    padding-inline: var(--gap-lg);
-  }
+  /* The Section content gutter: lines up with the page content */
+  padding-inline: var(--section-gutter);
 }
 
 /* Text alignment */

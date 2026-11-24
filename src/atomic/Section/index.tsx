@@ -101,6 +101,16 @@ export interface SectionOwnProps {
    */
   titleAs?: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
+  /**
+   * Controls at the end of the title row, beside the heading (never inside the
+   * collapsible trigger; clicking them does not toggle the section). On a narrow
+   * row they wrap under the heading, aligned to the start. Without `title`, the
+   * row holds only the actions. Absent: no wrapper, markup unchanged.
+   *
+   * @example <Section title="Routines" actions={<Link href="/routines">See all</Link>}>...</Section>
+   */
+  actions?: ReactNode;
+
   /** Show separator above section @default false */
   separator?: boolean;
 
@@ -152,7 +162,9 @@ export interface SectionOwnProps {
   bleed?: boolean;
 
   /**
-   * Whether the section is collapsible
+   * Whether the section is collapsible. The title heading wraps a `<button>`
+   * trigger (keyboard: Tab, Enter, Space; `aria-expanded`). Closed content
+   * stays in the server HTML (crawlable), hidden with `display: none`; opening fades in.
    * @default false
    */
   collapsible?: boolean;
@@ -203,6 +215,9 @@ export type SectionProps<T extends ElementType = 'section'> = SectionOwnProps &
  *
  * **Bleed:** `bleed` breaks out of PageContainer to span full viewport width.
  *
+ * **Nested:** a Section inside another Section's content is flush (no own padding, width or centring; a `tone` other than `ghost` keeps its padding).
+ * **Consecutive:** a `ghost` Section directly after a `ghost` Section has no top padding, so the two share one gap (`--gap-lg`) instead of doubling it; a toned Section keeps its padding on both sides.
+ *
  * @component
  * @example
  * ```tsx
@@ -232,6 +247,7 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
       children,
       title,
       titleAs = 'h2',
+      actions,
       separator = false,
       tone = TONE.GHOST,
       textAlign = 'center',
@@ -267,32 +283,52 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
       children
     );
 
+    // Collapsible: WAI-ARIA disclosure, heading > button (like Accordion's
+    // trigger). The button is the tab stop; Enter/Space toggle natively; Radix
+    // sets aria-expanded/aria-controls. The heading keeps its role and level.
     const titleElement =
       title &&
       (collapsible ? (
-        <CollapsibleTrigger asChild>
-          <Stack
-            as="div"
-            direction="row"
-            align="center"
-            justify="between"
-            className="dndev-section-title-trigger"
-          >
-            <Text as={titleAs} level="h2" className="dndev-section-title">
+        <Text as={titleAs} level="h2" className="dndev-section-title">
+          <CollapsibleTrigger asChild>
+            <Stack
+              as="button"
+              direction="row"
+              align="center"
+              justify="between"
+              className="dndev-section-title-trigger"
+            >
               {title}
-            </Text>
-            {isOpen ? (
-              <CircleMinus className="dndev-section-icon" aria-hidden="true" />
-            ) : (
-              <CirclePlus className="dndev-section-icon" aria-hidden="true" />
-            )}
-          </Stack>
-        </CollapsibleTrigger>
+              {isOpen ? (
+                <CircleMinus
+                  className="dndev-section-icon"
+                  aria-hidden="true"
+                />
+              ) : (
+                <CirclePlus className="dndev-section-icon" aria-hidden="true" />
+              )}
+            </Stack>
+          </CollapsibleTrigger>
+        </Text>
       ) : (
         <Text as={titleAs} level="h2" className="dndev-section-title">
           {title}
         </Text>
       ));
+
+    // Actions sit beside the heading in a wrapper row (siblings, so never inside
+    // the trigger button). No actions: the heading renders bare, as before.
+    const headerElement = actions ? (
+      <div
+        className="dndev-section-header"
+        data-collapsible={collapsible && title ? 'true' : undefined}
+      >
+        {titleElement}
+        <div className="dndev-section-actions">{actions}</div>
+      </div>
+    ) : (
+      titleElement
+    );
 
     const sectionContent = collapsible ? (
       <CollapsiblePrimitive
@@ -300,14 +336,12 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
           ? { open: isOpen, onOpenChange: handleOpenChange }
           : { defaultOpen: defaultOpen, onOpenChange: handleOpenChange })}
       >
-        {titleElement}
-        <CollapsibleContent className="dndev-collapsible-content">
-          {content}
-        </CollapsibleContent>
+        {headerElement}
+        <CollapsibleContent>{content}</CollapsibleContent>
       </CollapsiblePrimitive>
     ) : (
       <>
-        {titleElement}
+        {headerElement}
         {content}
       </>
     );
