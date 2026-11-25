@@ -1,8 +1,9 @@
 // packages/components/src/atomic/Table/__tests__/DataTableRows.test.tsx
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
+import { render } from '../../../utils/__tests__/locale';
 import { DataTable } from '../index';
 import type { TableColumn } from '../index';
 

@@ -19,6 +19,7 @@ import AlertDialog from '../AlertDialog';
 import Button from '../Button';
 import Spinner from '../Spinner';
 import { useAction } from './useAction';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import type { ButtonProps } from '../Button';
 
 /** Props for the ActionButton component -- async-aware button with loading state and optional confirmation dialog. */
@@ -36,11 +37,11 @@ export interface ActionButtonProps<T = unknown> extends Omit<
   loadingText?: string;
   /** If provided, shows a confirmation dialog before executing */
   confirmText?: string;
-  /** Title for the confirmation dialog */
+  /** Title for the confirmation dialog (default: `dndev` `actions.confirm`) */
   confirmTitle?: string;
-  /** Confirm button label of the confirmation dialog (pass a translated string). @default 'Confirm' */
+  /** Confirm button label of the confirmation dialog (pass a translated string). @default `dndev` `actions.confirm` */
   confirmLabel?: string;
-  /** Cancel button label of the confirmation dialog (pass a translated string). @default 'Cancel' */
+  /** Cancel button label of the confirmation dialog (pass a translated string). @default `dndev` `actions.cancel` */
   cancelLabel?: string;
   /** Additional disabled condition */
   disabled?: boolean;
@@ -77,13 +78,16 @@ function ActionButton<T = unknown>({
   onActionError,
   loadingText,
   confirmText,
-  confirmTitle = 'Confirm',
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmTitle: confirmTitleProp,
+  confirmLabel: confirmLabelProp,
+  cancelLabel,
   disabled = false,
   children,
   ...buttonProps
 }: ActionButtonProps<T>) {
+  const translate = useComponentTranslate();
+  const confirmTitle = componentLabel(translate, confirmTitleProp, 'actions.confirm');
+  const confirmLabel = componentLabel(translate, confirmLabelProp, 'actions.confirm');
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { execute, loading } = useAction({

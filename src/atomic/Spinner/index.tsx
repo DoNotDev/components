@@ -9,6 +9,9 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { useId } from 'react';
+
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { THEME_VARIANT, type ThemeVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
 
@@ -40,8 +43,8 @@ export interface SpinnerProps {
    */
   className?: string;
   /**
-   * Accessibility label
-   * @default 'Loading'
+   * Accessible name. Default: `dndev:messages.loading` in the UI language, as hidden
+   * text that names the status (`aria-labelledby`); a given value is used as is.
    */
   'aria-label'?: string;
 }
@@ -93,20 +96,35 @@ function Spinner({
   message,
   variant = THEME_VARIANT.PRIMARY,
   className,
-  'aria-label': ariaLabel = 'Loading',
+  'aria-label': ariaLabel,
 }: SpinnerProps) {
   const variantAttrs = getVariantDataAttrs({ variant });
-  const spinnerElement = (
-    <div
-      className={cn('dndev-spinner', className)}
-      role="status"
-      aria-busy="true"
-      aria-label={ariaLabel}
-      {...variantAttrs}
-    >
-      <span className="dndev-sr-only">{ariaLabel}</span>
-    </div>
-  );
+  const labelId = useId();
+  // The app's label as is; else the translated default, as the hidden text naming it
+  const spinnerElement =
+    ariaLabel !== undefined ? (
+      <div
+        className={cn('dndev-spinner', className)}
+        role="status"
+        aria-busy="true"
+        aria-label={ariaLabel}
+        {...variantAttrs}
+      >
+        <span className="dndev-sr-only">{ariaLabel}</span>
+      </div>
+    ) : (
+      <div
+        className={cn('dndev-spinner', className)}
+        role="status"
+        aria-busy="true"
+        aria-labelledby={labelId}
+        {...variantAttrs}
+      >
+        <span id={labelId} className="dndev-sr-only">
+          <ComponentLabelText labelKey="messages.loading" />
+        </span>
+      </div>
+    );
 
   // Content: spinner + optional message
   const content = message ? (

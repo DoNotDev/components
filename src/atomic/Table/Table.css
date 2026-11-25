@@ -1,49 +1,62 @@
 /* packages/components/src/atomic/Table/Table.css */
 
+/*
+ * Density token: row height of every DataTable (40px with a mouse, the touch
+ * target on a coarse pointer). `:where(:root)` has no specificity: an app sets
+ * `:root { --table-row-height: 36px; }` in its theme, whatever the load order.
+ * The open-link and checkbox columns are one row height wide.
+ */
+:where(:root) {
+  --table-row-height: 40px;
+}
+
+@media (pointer: coarse) {
+  :where(:root) {
+    --table-row-height: var(--touch-target);
+  }
+}
+
+/* Scroll container in both axes: wide tables scroll sideways (pinned columns
+   stay), long ones under the sticky header. */
 .dndev-table-wrapper {
   position: relative;
   width: 100%;
-  overflow-y: auto;
+  overflow: auto;
+  max-block-size: 100dvh;
   border-radius: 0;
-  border: 1px solid var(--border);
+  border: var(--border-hairline) solid var(--border);
 }
 
+/* Excel-like grid: no inner padding beyond a few px, one line per cell.
+   `separate` + no spacing: cell borders move with pinned (sticky) cells. */
 .dndev-table {
+  --table-cell-padding: 0.375rem;
   width: 100%;
   caption-side: bottom;
   font-size: var(--font-size-sm);
-  border-collapse: collapse;
-}
-
-.dndev-table-header {
-  background-color: var(--accent);
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 /* Filter row above header */
-.dndev-table-filter-row {
-  border: 1px solid var(--border);
-  border-bottom: none;
-}
-
 .dndev-table-filter-row .dndev-table-head {
   background-color: var(--muted);
   padding: var(--gap-sm);
   height: auto;
-  min-height: auto;
 }
 
-.dndev-table-body {
-  /* Base body styles */
-}
-
-/* Table row styles */
+/* Rows: plain (no striping), faint hover, checked rows tinted with the primary.
+   The tint is painted by the cells (a pinned cell keeps an opaque background). */
 .dndev-table-row {
-  border-bottom: 1px solid var(--border);
-  transition: background-color var(--dur-fast) ease-out;
+  --table-row-tint: transparent;
+}
 
-  &:hover {
-    background-color: color-mix(in oklab, var(--accent) 15%, transparent);
-  }
+.dndev-table-body .dndev-table-row:hover {
+  --table-row-tint: color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+.dndev-table-body .dndev-table-row[data-selected='true'] {
+  --table-row-tint: color-mix(in oklab, var(--primary) 8%, transparent);
 }
 
 /* Cursor pointer for clickable rows */
@@ -51,47 +64,35 @@
   cursor: pointer;
 }
 
-/* Zebra striping for data tables */
-.dndev-table-body .dndev-table-row:nth-child(even) {
-  background-color: var(--muted);
-
-  &:hover {
-    background-color: color-mix(
-      in oklab,
-      var(--muted) 80%,
-      var(--foreground) 20%
-    );
-  }
-}
-
-.dndev-table-body tr:last-child {
-  border-bottom: 0;
-}
-
 /* Table footer styles */
-.dndev-table-footer {
-  border-top: 1px solid var(--border);
+.dndev-table-footer .dndev-table-cell {
+  border-block-start: var(--border-hairline) solid var(--border);
   background-color: color-mix(in srgb, var(--muted) 50%, transparent);
   font-weight: var(--font-weight-medium);
 }
 
-/* Table head (th) styles */
+/* Header: on the page background, 1px bottom border, muted 13px medium labels,
+   sticky at the top of the table's scroll area. */
 .dndev-table-head {
   text-align: start;
   vertical-align: middle;
   font-weight: var(--font-weight-medium);
+  font-size: 0.8125rem;
   color: var(--muted-foreground);
-  height: var(--touch-target);
-  padding-inline: var(--gap-md);
-  padding-block: var(--gap-sm);
-}
-
-/* Header cells use accent foreground for contrast */
-.dndev-table-header .dndev-table-head {
-  color: var(--accent-foreground);
+  height: var(--table-row-height);
+  padding-inline: var(--table-cell-padding);
+  padding-block: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 24rem;
 
   &[data-sortable='true'] {
     cursor: pointer;
+  }
+
+  &[data-sorted='true'] {
+    color: var(--foreground);
   }
 
   &[data-align='center'] {
@@ -105,6 +106,58 @@
   &[data-align='start'] {
     text-align: start;
   }
+}
+
+.dndev-table-header .dndev-table-head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background-color: var(--background);
+  border-block-end: var(--border-hairline) solid var(--border);
+}
+
+.dndev-table-head-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.dndev-table-head-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sort arrow: only on the sorted column, or on hover of a sortable header.
+   Overlaid, never in the flow: column widths come from the field type (P4) or
+   the content, never from the arrow, so showing it shifts nothing. It sits at
+   the inline end of the header (inline start in end-aligned columns, where the
+   free space of a number column is) and, with no free space, covers the end of
+   the label on the header background. The sticky header cell is its containing
+   block. */
+.dndev-table-sort-icon {
+  display: none;
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--table-cell-padding);
+  translate: 0 -50%;
+  width: 1em;
+  height: 1em;
+  background-color: var(--background);
+  box-shadow: 0 0 0 0.25rem var(--background);
+}
+
+.dndev-table-head[data-align='end'] .dndev-table-sort-icon {
+  inset-inline-start: var(--table-cell-padding);
+  inset-inline-end: auto;
+}
+
+.dndev-table-head[data-sortable='true']:hover .dndev-table-sort-icon,
+.dndev-table-head[data-sorted='true'] .dndev-table-sort-icon {
+  display: inline-block;
 }
 
 /* Active filter indicator */
@@ -112,13 +165,18 @@
   color: var(--primary);
 }
 
-/* Table cell (td) styles */
+/* Cells: one line, "…" when cut (full text in a native tooltip), up to 24rem
+   wide unless the column sets a width. */
 .dndev-table-cell {
   vertical-align: middle;
-  padding-inline: var(--gap-md);
-  padding-block: var(--gap-sm);
-  min-height: var(--touch-target);
-  line-height: 1.5; /* Ensure consistent line height for empty cells */
+  height: var(--table-row-height);
+  padding-inline: var(--table-cell-padding);
+  padding-block: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 24rem;
 
   &[data-align='center'] {
     text-align: center;
@@ -126,6 +184,7 @@
 
   &[data-align='end'] {
     text-align: end;
+    font-variant-numeric: tabular-nums;
   }
 
   &[data-align='start'] {
@@ -133,19 +192,98 @@
   }
 }
 
+.dndev-table-body .dndev-table-cell {
+  border-block-end: var(--border-hairline) solid var(--border);
+  background-image: linear-gradient(
+    var(--table-row-tint),
+    var(--table-row-tint)
+  );
+}
+
+.dndev-table-body .dndev-table-row:last-child > .dndev-table-cell {
+  border-block-end: 0;
+}
+
+/* Long text (`lines: 2`): two lines, then "…" */
+.dndev-table-cell[data-lines='2'] {
+  white-space: normal;
+}
+
+.dndev-table-cell-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Pinned columns (`sticky`, with the utility columns before it): opaque, above
+   the cells scrolling under them; the inline-start offset is set inline. */
+.dndev-table-head[data-sticky='true'],
+.dndev-table-cell[data-sticky='true'] {
+  position: sticky;
+  z-index: 1;
+  background-color: var(--background);
+}
+
+.dndev-table-header .dndev-table-head[data-sticky='true'] {
+  z-index: 3;
+}
+
+/* The opaque cells (sticky header, pinned columns, the sort arrow's backdrop) paint
+   the colour of what the table sits on: the page (`--background`, above) or a Card
+   family surface (`.dndev-surface`: Card, Dialog, AlertDialog, Sheet), whose colour is
+   `--card` (STYLING_SYSTEM.md, CSS Variable Hierarchy). A surface variant that sets
+   `--card` is followed as is. `:where()` keeps the page rules' specificity, so the
+   later rules still win as before (changed cells, phone rows). */
+:where(.dndev-surface) .dndev-table-header .dndev-table-head,
+:where(.dndev-surface) .dndev-table-head[data-sticky='true'],
+:where(.dndev-surface) .dndev-table-cell[data-sticky='true'] {
+  background-color: var(--card);
+}
+
+:where(.dndev-surface) .dndev-table-sort-icon {
+  background-color: var(--card);
+  box-shadow: 0 0 0 0.25rem var(--card);
+}
+
+/* Edge of the pinned data column: cells scrolling under it stop at a line instead of
+   showing cut-off text (tables only: phone rows are stacked). 768px =
+   BREAKPOINT_THRESHOLDS.tablet (CSS cannot read a variable in @media). */
+@media (width >= 768px) {
+  .dndev-table-head[data-sticky='true']:not(.dndev-table-utility),
+  .dndev-table-cell[data-sticky='true']:not(.dndev-table-utility) {
+    border-inline-end: var(--border-hairline) solid var(--border);
+  }
+}
+
+/* Star ratings in a cell: row-sized stars that keep their shape */
+.dndev-table-cell .dndev-rating-star svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  flex-shrink: 0;
+}
+
+/* Utility columns (open link, checkbox): one row height wide */
+.dndev-table-utility {
+  width: var(--table-row-height);
+  min-width: var(--table-row-height);
+  max-width: var(--table-row-height);
+  padding: 0;
+  text-align: center;
+}
+
 /* Excel-like grid lines variant */
 .dndev-table-grid .dndev-table-head,
 .dndev-table-grid .dndev-table-cell {
-  border: 1px solid var(--border);
-  padding: 0;
+  border-inline-end: var(--border-hairline) solid var(--border);
+  border-block-end: var(--border-hairline) solid var(--border);
 }
 
-.dndev-table-grid .dndev-table-row {
-  border-bottom: 1px solid var(--border);
-}
-
-.dndev-table-grid .dndev-table-row:last-child {
-  border-bottom: 1px solid var(--border);
+.dndev-table-grid .dndev-table-head:last-child,
+.dndev-table-grid .dndev-table-cell:last-child {
+  border-inline-end: 0;
 }
 
 /* Input components inside grid cells should be borderless and fit snugly */
@@ -172,6 +310,17 @@
   padding: var(--gap-md);
 }
 
+/* Toolbar: one row, [search][toolbarStart] … [Export][toolbarEnd] */
+.dndev-table-toolbar-start {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+/* Buttons keep their label; the search box is what shrinks */
+.dndev-table-toolbar .dndev-button {
+  flex-shrink: 0;
+}
+
 /* DataTable search container */
 .dndev-table-search-container {
   max-width: var(--content-narrow);
@@ -193,43 +342,40 @@
   padding-inline-start: calc(var(--gap-md) + var(--icon-md) + var(--gap-sm));
 }
 
-/* Skeleton rows - apply standard skeleton pulse animation to entire rows */
-/* Keep existing background colors (zebra striping) - just add opacity pulse */
+/* No row to show: one full-width row */
+.dndev-table-cell.dndev-table-empty {
+  height: calc(var(--table-row-height) * 3);
+  max-width: none;
+  white-space: normal;
+  text-align: center;
+  background-image: none;
+}
+
+/* Skeleton rows: as many as the page shows, pulsing */
 .dndev-table-body .dndev-table-row.dndev-skeleton-row {
   animation: dndev-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   pointer-events: none;
-
-  /* Keep hover state but disabled (pointer-events: none prevents hover) */
-  &:hover {
-    /* Inherit from parent .dndev-table-row hover styles */
-  }
 }
 
-/* Even rows keep their var(--muted) background, just pulse */
-.dndev-table-body .dndev-table-row.dndev-skeleton-row:nth-child(even) {
-  animation: dndev-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-
-  &:hover {
-    /* Inherit from parent .dndev-table-row:nth-child(even) hover styles */
-  }
-}
-
-/* Skeleton bars inside cells - adapt to row background for visibility */
-/* Odd rows (transparent background): use default var(--muted) skeleton */
-/* Even rows (var(--muted) background): use lighter skeleton for contrast */
 .dndev-table-body .dndev-table-row.dndev-skeleton-row .dndev-skeleton {
   background-color: var(--muted);
 }
 
-.dndev-table-body
-  .dndev-table-row.dndev-skeleton-row:nth-child(even)
-  .dndev-skeleton {
-  /* Even rows have var(--muted) background, so skeleton should be lighter for contrast */
-  background-color: color-mix(
-    in oklab,
-    var(--muted) 60%,
-    var(--foreground) 40%
-  );
+.dndev-table-skeleton-bar {
+  width: 80%;
+  height: 0.75rem;
+  border-radius: var(--radius);
+}
+
+.dndev-table-skeleton-bar[data-short] {
+  width: 60%;
+}
+
+.dndev-table-skeleton-box {
+  width: 1rem;
+  height: 1rem;
+  margin-inline: auto;
+  border-radius: var(--radius);
 }
 
 /* Use the same pulse animation as standard skeleton (from Skeleton.css) */
@@ -250,81 +396,328 @@
   display: contents;
 }
 
-.dndev-table-bulk-bar {
-  padding: var(--gap-sm) var(--gap-sm);
-  border: 1px solid var(--border);
-  background-color: var(--muted);
+/* Editable cell: the text (display) and its editor fill the cell with the same
+   inline padding as other cells, so text lines up with the header and does not
+   move when the editor opens. */
+.dndev-table-cell[data-editable='true'] {
+  padding: 0;
 }
 
-/* Cell editor: fills the cell, reads as text until focused. */
+.dndev-table-cell-display {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: var(--table-row-height);
+  padding-inline: var(--table-cell-padding);
+  cursor: text;
+}
+
+.dndev-table-cell[data-align='end'] .dndev-table-cell-display {
+  justify-content: flex-end;
+}
+
+.dndev-table-cell[data-align='center'] .dndev-table-cell-display {
+  justify-content: center;
+}
+
+/* Hover cue: the cell is editable */
+.dndev-table-cell-display:hover {
+  box-shadow: inset 0 0 0 var(--border-hairline) var(--border);
+}
+
+.dndev-table-cell-display:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.dndev-table-cell-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Select chevron: only on hover / focus (space kept: no shift) */
+.dndev-table-cell-chevron {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  margin-inline-start: auto;
+  color: var(--muted-foreground);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dndev-table-cell-display:hover .dndev-table-cell-chevron,
+.dndev-table-cell-display:focus .dndev-table-cell-chevron {
+  opacity: 1;
+}
+
+/* Editor: in place of the text, same padding and alignment, focus ring inside */
 .dndev-table-cell-editor {
+  display: block;
+  box-sizing: border-box;
   width: 100%;
-  min-width: 6rem;
+  min-width: 0;
+  min-height: var(--table-row-height);
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  background-color: var(--background);
+  border: 0;
+  border-radius: 0;
+  padding-block: 0;
+  padding-inline: var(--table-cell-padding);
+  appearance: none;
+}
+
+.dndev-table-cell-editor:focus,
+.dndev-table-cell-editor:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.dndev-table-cell-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dndev-table-cell-select .dndev-table-cell-editor {
+  padding-inline-end: calc(var(--table-cell-padding) + 1.25em);
+}
+
+.dndev-table-cell-select .dndev-table-cell-chevron {
+  position: absolute;
+  inset-inline-end: var(--table-cell-padding);
+  opacity: 1;
+}
+
+/* Date / date-time editor (DatePicker / DateTimePicker in the cell): styled as the text,
+   number and select editors above: the cell's height, padding and background, no field
+   border, radius or shadow, the same inside focus ring. Mobile: its native input, same. */
+.dndev-table-cell-date {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  background-color: var(--background);
+}
+
+.dndev-table-cell-date .dndev-datepicker-field,
+.dndev-table-cell-date .dndev-datepicker-native {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--table-row-height);
+  margin: 0;
   font: inherit;
   color: inherit;
   background-color: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: var(--gap-sm);
-}
-
-.dndev-table-cell-editor:hover {
-  border-color: var(--border);
-}
-
-.dndev-table-cell-editor:focus-visible,
-.dndev-table-cell-editor:focus {
-  outline: 2px solid var(--ring);
-  outline-offset: -1px;
-  background-color: var(--background);
-}
-
-.dndev-table-bulk-bar .dndev-table-cell-editor {
-  width: auto;
-  border-color: var(--border);
-  background-color: var(--background);
-}
-
-.dndev-table-cell[data-editable='true'] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   padding-block: 0;
+  padding-inline-start: var(--table-cell-padding);
 }
 
-/* Changed, not saved yet */
+.dndev-table-cell-date .dndev-datepicker-native {
+  padding-inline-end: var(--table-cell-padding);
+}
+
+.dndev-table-cell-date .dndev-datepicker-field:focus-within,
+.dndev-table-cell-date .dndev-datepicker-native:focus,
+.dndev-table-cell-date .dndev-datepicker-native:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+/* Changed, not saved yet (opaque: a pinned cell keeps hiding what scrolls under it) */
 .dndev-table-cell[data-dirty='true'] {
-  background-color: color-mix(in oklab, var(--primary) 12%, transparent);
+  background-color: color-mix(in oklab, var(--primary) 12%, var(--background));
 }
 
 /* Value that does not parse, or breaks a rule (cellErrors): the save will reject it */
-.dndev-table-cell[data-invalid='true'] .dndev-table-cell-editor {
-  border-color: var(--destructive);
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-display,
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-editor,
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-date .dndev-datepicker-field,
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-date .dndev-datepicker-native {
+  box-shadow: inset 0 0 0 var(--border-hairline) var(--destructive);
 }
 
 /* Message of a rule the cell value breaks (cellErrors) */
 .dndev-table-cell-error {
   display: block;
-  margin-block-start: var(--gap-sm);
+  margin-block-start: 0.125rem;
   color: var(--destructive);
   font-size: var(--font-size-xs);
   line-height: 1.3;
+  white-space: normal;
 }
 
-/* Open cell: icon link to the row's record (touch-sized hit area) */
-.dndev-table-open-link {
+.dndev-table-cell[data-editable='true'] .dndev-table-cell-error {
+  margin-block-start: 0;
+  padding-inline: var(--table-cell-padding);
+  padding-block-end: 0.25rem;
+}
+
+/* Open cell: icon link to the row's record, the cell's whole box */
+.dndev-table .dndev-table-open-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--touch-target);
-  min-height: var(--touch-target);
+  width: var(--table-row-height);
+  height: var(--table-row-height);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
   color: var(--muted-foreground);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-interactive);
 }
 
-.dndev-table-open-link:hover {
+.dndev-table .dndev-table-open-link:hover {
   color: var(--foreground);
   background-color: var(--muted);
 }
 
 .dndev-table-open-link:focus-visible {
   outline: 2px solid var(--ring);
-  outline-offset: -1px;
+  outline-offset: -2px;
+}
+
+/* Selection bar (in the bottom ActionBar): one row. The labelled field and value pickers
+   are fieldsets, full width by default: fixed width here so the bar does not stack. */
+.dndev-table-selection-bar > .dndev-floating-fieldset {
+  width: 12rem;
+}
+
+/*
+ * Phones (< 768px, BREAKPOINT_THRESHOLDS.tablet; CSS cannot read a variable in
+ * @media): the same markup, stacked by CSS only. Each row is a block:
+ * the pinned (`sticky`) column on top as its title, then one "label  value"
+ * line per cell (label from `data-label`), the open link and checkbox in the
+ * top end corner. The header is visually hidden (kept for assistive tech),
+ * columns marked `hideOnPhone` (`data-phone='hidden'`) are left out.
+ * `!important` overrides the column sizes and pin offsets set inline.
+ */
+@media (width < 768px) {
+  .dndev-table-wrapper {
+    max-block-size: none;
+  }
+
+  .dndev-table,
+  .dndev-table-body {
+    display: block;
+  }
+
+  .dndev-table-header {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .dndev-table-body .dndev-table-row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding-block: var(--gap-sm);
+    padding-inline: var(--table-cell-padding);
+    border-block-end: var(--border-hairline) solid var(--border);
+    background-image: linear-gradient(
+      var(--table-row-tint),
+      var(--table-row-tint)
+    );
+  }
+
+  .dndev-table[data-utilities='1'] .dndev-table-body .dndev-table-row {
+    padding-inline-end: var(--table-row-height);
+  }
+
+  .dndev-table[data-utilities='2'] .dndev-table-body .dndev-table-row {
+    padding-inline-end: calc(var(--table-row-height) * 2);
+  }
+
+  .dndev-table-body .dndev-table-row:last-child {
+    border-block-end: 0;
+  }
+
+  .dndev-table-body .dndev-table-cell {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-sm);
+    position: static !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: start;
+  }
+
+  .dndev-table-body .dndev-table-cell[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 40%;
+    min-width: 0;
+    color: var(--muted-foreground);
+    font-size: var(--font-size-xs);
+  }
+
+  .dndev-table-body .dndev-table-cell[data-phone='hidden'] {
+    display: none;
+  }
+
+  /* The row's name: its title, first */
+  .dndev-table-body .dndev-table-cell[data-sticky='true'] {
+    order: -1;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .dndev-table-body .dndev-table-cell[data-sticky='true']::before {
+    content: none;
+  }
+
+  .dndev-table-body .dndev-table-cell[data-editable='true'] > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Editable text starts on the same line as the title and the labels */
+  .dndev-table-body .dndev-table-cell-display {
+    padding-inline: 0;
+  }
+
+  /* A thumbnail has no text baseline: its label sits at its middle */
+  .dndev-table-body .dndev-table-cell:has(img, [data-image-placeholder]) {
+    align-items: center;
+  }
+
+  /* Open link and checkbox: top end corner of the row */
+  .dndev-table-body .dndev-table-utility {
+    position: absolute !important;
+    inset-block-start: 0;
+    inset-inline-start: auto !important;
+    inset-inline-end: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--table-row-height) !important;
+    height: var(--table-row-height);
+  }
+
+  .dndev-table[data-utilities='2'] .dndev-table-body .dndev-table-open-cell {
+    inset-inline-end: var(--table-row-height);
+  }
+
+  .dndev-table-body .dndev-table-cell.dndev-table-empty {
+    display: block;
+    text-align: center;
+  }
 }

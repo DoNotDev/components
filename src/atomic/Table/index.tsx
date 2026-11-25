@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Search,
   Download,
+  X,
 } from 'lucide-react';
 import {
   useState,
@@ -23,22 +24,33 @@ import {
   useRef,
   type ReactNode,
   type HTMLAttributes,
+  type TdHTMLAttributes,
+  type ThHTMLAttributes,
   type ChangeEvent,
+  type CSSProperties,
+  type PointerEvent,
 } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { useLinkRenderer } from '../../utils/linkComponent';
-import Button, { BUTTON_VARIANT } from '../Button';
+import { sortableTableColumns, sortTableRows } from '../../utils/tableSort';
+import { componentLabel, useComponentLocale } from '../../utils/translator';
+import ActionBar from '../ActionBar';
+import Button from '../Button';
 import Checkbox from '../Checkbox';
+import DatePicker from '../DatePicker';
+import DateTimePicker from '../DateTimePicker';
 import Input from '../Input';
-import Pagination from '../Pagination';
+import Pagination, { DEFAULT_TABLE_PAGE_SIZE } from '../Pagination';
 import Select from '../Select';
 import Stack from '../Stack';
 import Text from '../Text';
 import {
-  DEFAULT_EDIT_LABELS,
+  EDIT_LABEL_KEYS,
   EditCell,
+  cellText,
   focusEditor,
+  formatCellNumber,
   isCellValueValid,
   parseCellText,
   setPendingCell,
@@ -75,8 +87,28 @@ export interface TableColumn<T = unknown> {
   key: string;
   /** Column header - can be a string or ReactNode (e.g., Button, icon) */
   title: string | ReactNode;
+  /** Row field shown in the cell. Sorting reads a dotted key (`'offer.price'`) as is when the row has it, else as a path. */
   dataIndex?: keyof T;
+  /**
+   * Sorting is on by default: a column with `dataIndex` or `render` sorts on
+   * what its cells show, in the UI language (the i18n language): numbers, dates
+   * and booleans by value, other cells by the text `render` shows (a reference
+   * label, a translated enum; a formatted number such as `1 234,50 €` by
+   * value), case and accents ignored; empty cells last. A column whose cells
+   * are all empty or all the same over the data (an action column, icon-only
+   * cells) has nothing to sort: no arrow, header click inert. `false` opts
+   * this column out. See `sortTableRows`, `sortableTableColumns`.
+   * @default true
+   */
   sortable?: boolean;
+  /**
+   * Sort value of a row in this column, used instead of the value derived from
+   * `dataIndex` / `render`; it goes through the same comparison (numbers, dates,
+   * texts with the collator, empty last). Framework-internal for field-typed lists
+   * (EntityList sets it for price fields: the discounted price the cell shows).
+   * Apps normally don't need it: put the shown value in the row instead.
+   */
+  sortValue?: (row: T) => unknown;
   /** Enable column header filter (Excel-style dropdown) */
   filterable?: boolean;
   /**
@@ -89,8 +121,40 @@ export interface TableColumn<T = unknown> {
    * Column width - LAYOUT EXCEPTION
    * Controls structural data presentation, not styling.
    * Analogous to Grid's cols for defining layout structure.
+   * Cells never wrap: text wider than the column ends with "…" (full text in
+   * a native tooltip). Without `width`, a column fits its content up to 24rem.
    */
   width?: string | number;
+  /**
+   * Minimum width of a flexible column (no `width`): it takes its share of the
+   * free space but never gets narrower (e.g. the record name column, 240 px).
+   * @since 0.3.8
+   */
+  minWidth?: string | number;
+  /**
+   * Pins the column at the inline start while the table scrolls sideways (the
+   * open-link and checkbox columns pin with it). Put it on the one column that
+   * identifies the row (its name); on phones (< 768 px) that column is the
+   * stacked row's title.
+   * @since 0.3.8
+   */
+  sticky?: boolean;
+  /**
+   * Lines a cell shows before "…": `1` (one line, the default), `2` for long
+   * text (description, notes).
+   * @default 1
+   * @since 0.3.8
+   */
+  lines?: 1 | 2;
+  /**
+   * Under 768 px the rows stack (one "label  value" line per cell, the
+   * header hidden): `true` leaves this column's line out there. Desktop is
+   * unchanged. EntityList hides the columns outside the entity's
+   * `listCardFields`.
+   * @default false
+   * @since 0.3.8
+   */
+  hideOnPhone?: boolean;
   /**
    * Text alignment - LAYOUT CONTROL
    * Semantic alignment for data presentation (start for text, end for numbers).
@@ -99,7 +163,12 @@ export interface TableColumn<T = unknown> {
   align?: 'start' | 'center' | 'end';
   /**
    * In-place editor of this column's cells when the DataTable is `editable`.
-   * Requires `dataIndex`. In edit mode it replaces `render`.
+   * Requires `dataIndex`. The cell shows `render` of the current (pending or
+   * saved) value as text (no `render`: a select's option label, a number in the
+   * UI language, `29,9` in French), and the editor while focused. The text is
+   * focusable with the editor's role and name (`textbox` / `combobox`, the
+   * column title). `date` / `datetime` edit with the DatePicker / DateTimePicker in
+   * `edit.timeZone` (the bulk edit value too).
    */
   edit?: TableCellEdit;
 }
@@ -116,17 +185,78 @@ export interface DataTableProps<T = unknown> {
   data: T[];
   /** Column definitions */
   columns: TableColumn<T>[];
-  /** Enable sorting */
+  /**
+   * Header click sorts the rows on that column (see `TableColumn.sortable`);
+   * `false` turns sorting off for every column.
+   * @default true
+   */
   sortable?: boolean;
   /** Enable row selection */
   selectable?: boolean;
+  /**
+   * Accessible label of the header checkbox.
+   * @default `dndev` key `table.selectAllRows` (ComponentLocaleProvider)
+   * @since 0.3.8
+   */
+  selectAllLabel?: string;
+  /**
+   * Accessible label of a row checkbox; `{{index}}` is replaced by the 1-based
+   * row number.
+   * @default `dndev` key `table.selectRow`
+   * @since 0.3.8
+   */
+  selectRowLabel?: string;
   /** Enable search */
   searchable?: boolean;
+  /**
+   * Placeholder of the search box.
+   * @default `dndev` key `table.searchPlaceholder`
+   * @since 0.3.8
+   */
+  searchPlaceholder?: string;
+  /**
+   * Toolbar content after the search box (e.g. a "Filters" button). The
+   * toolbar is one row: [search][toolbarStart] … [Export][toolbarEnd].
+   * @since 0.3.8
+   */
+  toolbarStart?: ReactNode;
+  /**
+   * Toolbar content at the end, after Export (e.g. Refresh, Add).
+   * @since 0.3.8
+   */
+  toolbarEnd?: ReactNode;
+  /**
+   * Actions on the checked rows (e.g. Delete), shown in the selection bar at
+   * the bottom of the viewport next to "N selected" and the bulk edit
+   * controls. With row selection (`selectable` / `editable`), the bar shows
+   * while rows are checked when the table is `editable` or this is set.
+   * @since 0.3.8
+   */
+  selectionActions?: (selectedRows: T[]) => ReactNode;
+  /**
+   * More content of the table's bottom bar (`ActionBar`, fixed to the viewport
+   * bottom), e.g. "1 unsaved change · Discard · Save". The bar shows while this
+   * is set or rows are checked (both in one bar): nothing is inserted above the
+   * table. One bar per page: a page bar of its own (form footer) is covered
+   * while this one shows.
+   * @since 0.3.8
+   */
+  actionBarContent?: ReactNode;
+  /**
+   * Content of the one full-width row shown when there is no row to show
+   * (not while loading).
+   * @default `dndev` key `table.empty`
+   * @since 0.3.8
+   */
+  emptyState?: ReactNode;
   /** Enable pagination */
   pagination?: boolean;
   /** Current page (1-indexed) */
   currentPage?: number;
-  /** Page size */
+  /**
+   * Page size (`0` = all). The loading skeleton shows as many rows (3 without pagination).
+   * @default 25
+   */
   pageSize?: number;
   /** Total number of items (for server-side pagination) */
   total?: number;
@@ -142,11 +272,17 @@ export interface DataTableProps<T = unknown> {
   paginationNextLabel?: string;
   /** Placeholder for items per page selector (passed to Pagination) */
   paginationItemsPerPagePlaceholder?: string;
+  /** "All" page-size choice (passed to Pagination as `allLabel`) @since 0.3.8 */
+  paginationAllLabel?: string;
+  /** Page button label, `{{page}}` = number (passed to Pagination as `pageLabel`) @since 0.3.8 */
+  paginationPageLabel?: string;
+  /** Pagination landmark label (passed to Pagination as `navigationLabel`) @since 0.3.8 */
+  paginationNavigationLabel?: string;
   /** Loading state */
   loading?: boolean;
   /** Excel-like grid lines (borders on all cells) */
   gridLines?: boolean;
-  /** Callback when sorting changes */
+  /** Called with the column key and direction after a header click (the table sorts the rows itself). */
   onSort?: (column: string, direction: 'asc' | 'desc') => void;
   /** Callback when selection changes */
   onSelect?: (selectedRows: T[]) => void;
@@ -180,13 +316,14 @@ export interface DataTableProps<T = unknown> {
   onExport?: (data: T[]) => void;
   /**
    * Label for the export button
-   * @default 'Export'
+   * @default `dndev` key `table.export`
    */
   exportLabel?: string;
   /**
-   * Spreadsheet-style editing of the columns that declare `edit`: cells are
-   * edited in place, rows are checked to set one field on all of them (bulk
-   * bar), a block copied from Excel / Sheets pastes across rows and columns.
+   * Spreadsheet-style editing of the columns that declare `edit`: cells show
+   * their value as text and are edited in place once focused, rows are checked
+   * to set one field on all of them (selection bar, at the bottom of the
+   * viewport), a block copied from Excel / Sheets pastes across rows and columns.
    * Implies row selection; `onRowClick` is ignored (open records from a link
    * cell). Edits go to `pendingChanges` — nothing is saved by the table.
    * Requires `getRowId`, `pendingChanges` and `onPendingChange`.
@@ -199,7 +336,7 @@ export interface DataTableProps<T = unknown> {
   pendingChanges?: TablePendingChanges;
   /** Called with the new pending changes after every edit, paste, bulk apply or undo. */
   onPendingChange?: (changes: TablePendingChanges) => void;
-  /** Labels of the bulk edit bar (translated by the consumer). */
+  /** Labels of the selection bar: count, bulk edit, clear (defaults: `dndev` `table.*` keys). */
   editLabels?: DataTableEditLabels;
   /**
    * Leading "open" cell: an icon link to the row's record. Renders a real
@@ -269,14 +406,14 @@ function TableRow({
 function TableHead({
   className,
   ...props
-}: HTMLAttributes<HTMLTableCellElement>) {
+}: ThHTMLAttributes<HTMLTableCellElement>) {
   return <th className={cn('dndev-table-head', className)} {...props} />;
 }
 
 function TableCell({
   className,
   ...props
-}: HTMLAttributes<HTMLTableCellElement>) {
+}: TdHTMLAttributes<HTMLTableCellElement>) {
   return <td className={cn('dndev-table-cell', className)} {...props} />;
 }
 
@@ -289,9 +426,102 @@ function TableCaption({
   );
 }
 
+/**
+ * Inline-start offsets of pinned cells: 0, 1 or 2 utility columns (open link,
+ * checkbox) before them, each one row height wide. Module-level: no style
+ * object per render.
+ */
+const STICKY_OFFSETS: CSSProperties[] = [0, 1, 2].map((n) => ({
+  insetInlineStart: `calc(var(--table-row-height) * ${n})`,
+}));
+
+/** Size style of a column (header and cells), with its pin offset when `sticky`. */
+function columnStyle<T>(
+  column: TableColumn<T>,
+  stickyOffset: CSSProperties | undefined
+): CSSProperties | undefined {
+  const { width, minWidth } = column;
+  const sticky = column.sticky ? stickyOffset : undefined;
+  if (width === undefined && minWidth === undefined && !sticky) return undefined;
+  return {
+    ...sticky,
+    ...(width !== undefined && { width, maxWidth: width }),
+    ...(minWidth !== undefined && { minWidth }),
+  };
+}
+
+/**
+ * Text an editable cell shows while not edited: the column's `render` of the
+ * current value, the option label of a select, a number in the UI language
+ * (`29,9` in French; the editor keeps `29.9`), else the value as text. A value
+ * that does not parse shows as typed (it is what the save will reject).
+ */
+function editCellDisplay<T>(
+  column: TableColumn<T>,
+  value: unknown,
+  row: T,
+  index: number,
+  valid: boolean,
+  language: string
+): ReactNode {
+  if (!valid) return cellText(value);
+  if (column.render) return column.render(value, row, index);
+  const edit = column.edit!;
+  if (edit.type === 'select') {
+    const text = cellText(value);
+    const option = edit.options?.find((o) => o.value === text);
+    return option ? option.label : text;
+  }
+  if (edit.type === 'number' && typeof value === 'number') {
+    return formatCellNumber(value, language);
+  }
+  return cellText(value);
+}
+
+/**
+ * Native tooltip with the full text of a cell cut by "…" (`title`, set on hover
+ * from the DOM, removed once the text fits). One delegated listener per table.
+ */
+function showOverflowTitle(e: PointerEvent<HTMLDivElement>) {
+  const cell = (e.target as HTMLElement).closest<HTMLElement>(
+    '.dndev-table-cell, .dndev-table-head'
+  );
+  if (!cell) return;
+  const box =
+    cell.querySelector<HTMLElement>(
+      '.dndev-table-cell-clamp, .dndev-table-cell-text, .dndev-table-head-label'
+    ) ?? cell;
+  const cut =
+    box.scrollWidth > box.clientWidth || box.scrollHeight > box.clientHeight;
+  const text = cut ? (cell.textContent ?? '').trim() : '';
+  if (text) cell.setAttribute('title', text);
+  else cell.removeAttribute('title');
+}
+
 // Enhanced DataTable component
 /**
  * High-level DataTable component with built-in sorting, filtering, search, pagination, and export.
+ *
+ * ## Sorting
+ *
+ * Every column with `dataIndex` or `render` sorts on header click, with no
+ * config: on what the cell shows, in the UI language (`sortTableRows`).
+ * A column with nothing to sort over the data (all cells empty or the same,
+ * fewer than 2 rows) shows no sort arrow (`sortableTableColumns`).
+ * Opt out with `sortable: false` on a column or `sortable={false}` on the table.
+ *
+ * ## Layout (admin grid)
+ *
+ * Neutral sticky header, no striping, one line per cell ("…" + native tooltip),
+ * rows `--table-row-height` high (40px, 48px on a coarse pointer), a few px of
+ * inline cell padding. The sort arrow (sorted column, or hover) is overlaid at the
+ * header's inline end, out of the flow: it never changes a column width. Columns
+ * size with `width` / `minWidth`; `sticky` pins the row's name column at the
+ * inline start; `lines: 2` for long text. One toolbar row:
+ * `[search][toolbarStart] … [Export][toolbarEnd]`. Nothing to show: one full-width
+ * `emptyState` row. Checked rows and `actionBarContent` show in one bottom
+ * `ActionBar`; nothing is inserted above the table. Under 768px rows stack by CSS
+ * (the `sticky` column as title, "label  value" lines, `hideOnPhone` left out).
  *
  * ## Row clicks & native link affordances
  *
@@ -326,8 +556,9 @@ function TableCaption({
  * <DataTable
  *   data={users}
  *   columns={[
- *     { key: 'name', title: 'Name', dataIndex: 'name', sortable: true },
- *     { key: 'role', title: 'Role', dataIndex: 'role' }
+ *     { key: 'name', title: 'Name', dataIndex: 'name' },
+ *     { key: 'role', title: 'Role', dataIndex: 'role', render: (v) => t(`role.${v}`) },
+ *     { key: 'actions', title: '', sortable: false, render: (_, row) => <RowActions row={row} /> }
  *   ]}
  *   searchable
  *   pagination
@@ -354,6 +585,9 @@ const DataTable = <T = unknown,>({
   paginationPreviousLabel,
   paginationNextLabel,
   paginationItemsPerPagePlaceholder,
+  paginationAllLabel,
+  paginationPageLabel,
+  paginationNavigationLabel,
   loading = false,
   gridLines = false,
   onSort,
@@ -364,7 +598,15 @@ const DataTable = <T = unknown,>({
   exportable = false,
   exportFilename = 'export',
   onExport,
-  exportLabel = 'Export',
+  exportLabel,
+  selectAllLabel,
+  selectRowLabel,
+  searchPlaceholder,
+  toolbarStart,
+  toolbarEnd,
+  selectionActions,
+  actionBarContent,
+  emptyState,
   editable = false,
   getRowId,
   pendingChanges,
@@ -390,21 +632,25 @@ const DataTable = <T = unknown,>({
     );
   }
   const LinkComponent = useLinkRenderer();
+  // UI language and default labels (ComponentLocaleProvider): the same on the server
+  // render and the client, so sorting and number cells hydrate identically
+  const { language, translate } = useComponentLocale();
   const showSelection = selectable || editable;
   const rowClick = editable ? undefined : onRowClick;
   const tableRef = useRef<HTMLDivElement>(null);
   // Previous pending states, for Ctrl/Cmd+Z
   const historyRef = useRef<TablePendingChanges[]>([]);
   const [bulkKey, setBulkKey] = useState('');
-  // Bulk value stays in the DOM (uncontrolled), read on Apply
-  const bulkValueRef = useRef<HTMLInputElement & HTMLSelectElement>(null);
+  // Bulk value: a select column's choice (state), else typed text kept in the DOM (read on Apply)
+  const [bulkOption, setBulkOption] = useState('');
+  const bulkValueRef = useRef<HTMLInputElement>(null);
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
   const [checkedRows, setCheckedRows] = useState<T[]>([]);
 
-  // Page size state (for client-side pagination) - default 12
-  const [internalPageSize, setInternalPageSize] = useState(12);
+  // Page size state (for client-side pagination)
+  const [internalPageSize, setInternalPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);
   const effectivePageSize = pageSizeProp ?? internalPageSize;
 
   // Controlled vs uncontrolled pagination
@@ -432,6 +678,12 @@ const DataTable = <T = unknown,>({
     }
   };
 
+  // Columns with something to sort over the data (2+ different values), once per data / columns change
+  const sortableKeys = useMemo(
+    () => sortableTableColumns(data, columns, sortable, language),
+    [data, columns, sortable, language]
+  );
+
   // Filter and sort data
   const processedData = useMemo(() => {
     let filtered = data;
@@ -448,22 +700,14 @@ const DataTable = <T = unknown,>({
       );
     }
 
-    // Apply sorting
-    if (sortColumn) {
-      filtered = [...filtered].sort((a, b) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: not yet narrowed (any-audit 2026-11-11 follow-up)
-        const aVal = sortColumn ? (a as Record<string, any>)[sortColumn] : '';
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- why: not yet narrowed (any-audit 2026-11-11 follow-up)
-        const bVal = sortColumn ? (b as Record<string, any>)[sortColumn] : '';
-
-        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
+    // Apply sorting: on what the column shows, in the UI language (tableSort)
+    const sortBy = columns.find((col) => col.key === sortColumn);
+    if (sortBy && sortableKeys.has(sortBy.key)) {
+      filtered = sortTableRows(filtered, sortBy, sortDirection, language);
     }
 
     return filtered;
-  }, [data, searchQuery, sortColumn, sortDirection, columns]);
+  }, [data, searchQuery, sortColumn, sortDirection, columns, sortableKeys, language]);
 
   // Pagination: use server-side total if provided, otherwise client-side
   const total = totalProp ?? processedData.length;
@@ -591,11 +835,29 @@ const DataTable = <T = unknown,>({
     applyCells(cells);
   };
 
-  const labels = { ...DEFAULT_EDIT_LABELS, ...editLabels };
+  const editLabel = (name: keyof DataTableEditLabels) =>
+    componentLabel(translate, editLabels?.[name], EDIT_LABEL_KEYS[name], {
+      count: selectedRows.length,
+    });
+  const labels = {
+    selected: editLabel('selected'),
+    field: editLabel('field'),
+    value: editLabel('value'),
+    apply: editLabel('apply'),
+    clear: editLabel('clear'),
+  };
+  const exportText = componentLabel(translate, exportLabel, 'table.export');
   const bulkColumn = editColumns.find((c) => c.key === bulkKey);
   const applyBulk = () => {
     if (!bulkColumn) return;
-    const text = bulkValueRef.current?.value ?? '';
+    // select / date / datetime: the picked value (state); else the typed text (DOM).
+    // A datetime pick is a wall time, read in the column's zone by parseCellText.
+    const pickedType = ['select', 'date', 'datetime'].includes(
+      bulkColumn.edit!.type
+    );
+    const text = pickedType
+      ? bulkOption
+      : (bulkValueRef.current?.value ?? '');
     const { value } = parseCellText(text, bulkColumn.edit!);
     applyCells(selectedRows.map((row) => ({ row, column: bulkColumn, value })));
   };
@@ -662,189 +924,215 @@ const DataTable = <T = unknown,>({
   };
 
   // Loading slots carry no record and must never enter consumer data paths.
+  // As many skeleton rows as the page shows, so nothing jumps when rows arrive.
   type RowSlot = { kind: 'loading' } | { kind: 'data'; row: T };
+  const skeletonCount =
+    pagination && effectivePageSize > 0 ? effectivePageSize : 3;
   const rowSlots: RowSlot[] = loading
-    ? Array.from({ length: 3 }, () => ({ kind: 'loading' }))
+    ? Array.from({ length: skeletonCount }, () => ({ kind: 'loading' }))
     : displayData.map((row) => ({ kind: 'data', row }));
+
+  // Pinned columns: open link, checkbox, then the `sticky` column, offset by
+  // the utility columns before it (each one row height wide).
+  const hasSticky = columns.some((c) => c.sticky);
+  const utilityCount = (showOpen ? 1 : 0) + (showSelection ? 1 : 0);
+  const openOffset = STICKY_OFFSETS[0];
+  const checkboxOffset = STICKY_OFFSETS[showOpen ? 1 : 0];
+  // One style object per column (shared by its header and cells)
+  const columnStyles = columns.map((column) =>
+    columnStyle(column, hasSticky ? STICKY_OFFSETS[utilityCount] : undefined)
+  );
+  const columnCount = columns.length + utilityCount;
+
+  // Selection bar: count, bulk edit, app actions, clear; pending edits beside it
+  const showSelectionBar =
+    showSelection &&
+    selectedRows.length > 0 &&
+    (editColumns.length > 0 || !!selectionActions);
+  const showActionBar = showSelectionBar || actionBarContent != null;
+
+  const hasToolbar =
+    searchable || exportable || toolbarStart != null || toolbarEnd != null;
 
   return (
     <Stack>
-      {/* Toolbar: Search + Export */}
-      {(searchable || exportable) && (
-        <Stack direction="row" align="center" gap="tight">
-          {searchable && (
-            <Stack
-              direction="row"
-              align="center"
-              className="dndev-relative dndev-flex-1 dndev-table-search-container"
-            >
-              <Search className="dndev-table-search-icon" />
-              <Input
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  handleSearch(e.target.value)
-                }
-                className="dndev-table-search-input"
-              />
-            </Stack>
-          )}
-          {exportable && (
-            <Button
-              variant="outline"
-              icon={Download}
-              onClick={handleExport}
-              disabled={loading || processedData.length === 0}
-              display="compact"
-              aria-label={exportLabel}
-            >
-              {exportLabel}
-            </Button>
-          )}
-        </Stack>
-      )}
-
-      {/* Bulk edit bar: set one field on every checked row */}
-      {editable && selectedRows.length > 0 && editColumns.length > 0 && (
+      {/* Toolbar, one row: [search][toolbarStart] … [Export][toolbarEnd] */}
+      {hasToolbar && (
         <Stack
           direction="row"
           align="center"
+          justify="between"
           gap="tight"
           wrap="wrap"
-          className="dndev-table-bulk-bar"
-          role="toolbar"
-          aria-label={labels.apply}
+          className="dndev-table-toolbar"
         >
-          <Text level="body">
-            {labels.selected.replace('{{count}}', String(selectedRows.length))}
-          </Text>
-          <select
-            className="dndev-table-cell-editor"
-            aria-label={labels.field}
-            value={bulkKey}
-            onChange={(e) => setBulkKey(e.target.value)}
+          <Stack
+            direction="row"
+            align="center"
+            gap="tight"
+            className="dndev-table-toolbar-start"
           >
-            <option value="">{labels.field}</option>
-            {editColumns.map((c) => (
-              <option key={c.key} value={c.key}>
-                {typeof c.title === 'string' ? c.title : c.key}
-              </option>
-            ))}
-          </select>
-          {bulkColumn?.edit?.type === 'select' ? (
-            <select
-              key={bulkKey}
-              ref={bulkValueRef}
-              className="dndev-table-cell-editor"
-              aria-label={labels.value}
-              defaultValue=""
-            >
-              <option value="" />
-              {bulkColumn.edit.options?.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              key={bulkKey}
-              ref={bulkValueRef}
-              className="dndev-table-cell-editor"
-              aria-label={labels.value}
-              placeholder={labels.value}
-              inputMode={
-                bulkColumn?.edit?.type === 'number' ? 'decimal' : undefined
-              }
-              defaultValue=""
-              disabled={!bulkColumn}
-            />
+            {searchable && (
+              <Stack
+                direction="row"
+                align="center"
+                className="dndev-relative dndev-flex-1 dndev-table-search-container"
+              >
+                <Search className="dndev-table-search-icon" />
+                <Input
+                  placeholder={componentLabel(
+                    translate,
+                    searchPlaceholder,
+                    'table.searchPlaceholder'
+                  )}
+                  value={searchQuery}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    handleSearch(e.target.value)
+                  }
+                  className="dndev-table-search-input"
+                />
+              </Stack>
+            )}
+            {toolbarStart}
+          </Stack>
+          {(exportable || toolbarEnd != null) && (
+            <Stack direction="row" align="center" gap="tight" width="fit">
+              {exportable && (
+                <Button
+                  variant="outline"
+                  icon={Download}
+                  onClick={handleExport}
+                  disabled={loading || processedData.length === 0}
+                  aria-label={exportText}
+                >
+                  {exportText}
+                </Button>
+              )}
+              {toolbarEnd}
+            </Stack>
           )}
-          <Button
-            variant="outline"
-            display="compact"
-            onClick={applyBulk}
-            disabled={!bulkColumn}
-          >
-            {labels.apply}
-          </Button>
         </Stack>
       )}
 
       {/* Table */}
-      <div ref={tableRef} className="dndev-table-edit-scope">
-        <Table className={cn(gridLines && 'dndev-table-grid')}>
+      <div
+        ref={tableRef}
+        className="dndev-table-edit-scope"
+        onPointerOver={showOverflowTitle}
+      >
+        <Table
+          className={cn(gridLines && 'dndev-table-grid')}
+          data-utilities={utilityCount || undefined}
+        >
           <TableHeader>
             <TableRow>
               {showOpen && (
-                <TableHead className="dndev-w-touch">
+                <TableHead
+                  className="dndev-table-utility"
+                  data-sticky={hasSticky || undefined}
+                  style={hasSticky ? openOffset : undefined}
+                >
                   <span className="dndev-sr-only">{openLabel}</span>
                 </TableHead>
               )}
               {showSelection && (
-                <TableHead className="dndev-w-touch">
+                <TableHead
+                  className="dndev-table-utility"
+                  data-sticky={hasSticky || undefined}
+                  style={hasSticky ? checkboxOffset : undefined}
+                >
                   <Checkbox
                     checked={allSelected}
                     disabled={loading}
                     onCheckedChange={handleSelectAll}
-                    aria-label="Select all rows"
+                    aria-label={componentLabel(
+                      translate,
+                      selectAllLabel,
+                      'table.selectAllRows'
+                    )}
                   />
                 </TableHead>
               )}
-              {columns.map((column) => (
-                <TableHead
-                  key={column.key}
-                  className={cn(column.sortable && 'dndev-cursor-pointer')}
-                  data-sortable={column.sortable}
-                  data-align={column.align}
-                  style={{ width: column.width }}
-                  onClick={(e) => {
-                    // Only sort if clicking on header, not on interactive elements (buttons, inputs, etc.)
-                    if (column.sortable) {
-                      const target = e.target as HTMLElement;
-                      const isInteractive = target.closest(
-                        'button, input, a, [role="button"]'
-                      );
-                      if (!isInteractive) {
-                        handleSort(column.key);
-                      }
+              {columns.map((column, columnIndex) => {
+                const columnSortable = sortableKeys.has(column.key);
+                const sorted = columnSortable && sortColumn === column.key;
+                return (
+                  <TableHead
+                    key={column.key}
+                    className={cn(columnSortable && 'dndev-cursor-pointer')}
+                    data-sortable={columnSortable || undefined}
+                    data-sorted={sorted || undefined}
+                    data-align={column.align}
+                    data-sticky={column.sticky || undefined}
+                    aria-sort={
+                      sorted
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : undefined
                     }
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    align="center"
-                    justify={column.align || 'start'}
-                    gap="tight"
+                    style={columnStyles[columnIndex]}
+                    onClick={(e) => {
+                      // Only sort if clicking on header, not on interactive elements (buttons, inputs, etc.)
+                      if (columnSortable) {
+                        const target = e.target as HTMLElement;
+                        const isInteractive = target.closest(
+                          'button, input, a, [role="button"]'
+                        );
+                        if (!isInteractive) {
+                          handleSort(column.key);
+                        }
+                      }
+                    }}
                   >
-                    {typeof column.title === 'string' ? (
-                      <Text level="body">{column.title}</Text>
-                    ) : (
-                      column.title
-                    )}
-                    {column.sortable &&
-                      (sortColumn === column.key ? (
-                        sortDirection === 'asc' ? (
-                          <ChevronUp className="dndev-size-md" />
-                        ) : (
-                          <ChevronDown className="dndev-size-md" />
-                        )
+                    <span className="dndev-table-head-content">
+                      {typeof column.title === 'string' ? (
+                        <span className="dndev-table-head-label">
+                          {column.title}
+                        </span>
                       ) : (
-                        <ChevronUp
-                          className="dndev-size-md"
-                          style={{ opacity: 0.3 }}
-                        />
-                      ))}
-                  </Stack>
-                </TableHead>
-              ))}
+                        column.title
+                      )}
+                      {/* Arrow: shown on the sorted column, else on hover (CSS) */}
+                      {columnSortable &&
+                        (sorted && sortDirection === 'desc' ? (
+                          <ChevronDown
+                            className="dndev-table-sort-icon"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ChevronUp
+                            className="dndev-table-sort-icon"
+                            aria-hidden="true"
+                          />
+                        ))}
+                    </span>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
+            {!loading && rowSlots.length === 0 && (
+              <TableRow className="dndev-table-empty-row">
+                <TableCell colSpan={columnCount} className="dndev-table-empty">
+                  {emptyState === undefined || typeof emptyState === 'string' ? (
+                    <Text as="span" variant="muted">
+                      {emptyState ?? translate('table.empty')}
+                    </Text>
+                  ) : (
+                    emptyState
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
             {rowSlots.map((slot, index) => {
+              const selected =
+                slot.kind === 'data' && showSelection && isSelected(slot.row);
               return (
                 <TableRow
                   key={index}
+                  data-selected={selected || undefined}
                   onClick={(e) => {
                     if (rowClick && slot.kind === 'data') {
                       const target = e.target as HTMLElement;
@@ -859,13 +1147,15 @@ const DataTable = <T = unknown,>({
                   }}
                   className={cn(
                     slot.kind === 'loading' && 'dndev-skeleton-row',
-                    rowClick &&
-                      slot.kind === 'data' &&
-                      'dndev-cursor-pointer dndev-hover-bg-muted'
+                    rowClick && slot.kind === 'data' && 'dndev-cursor-pointer'
                   )}
                 >
                   {showOpen && (
-                    <TableCell className="dndev-table-open-cell">
+                    <TableCell
+                      className="dndev-table-utility dndev-table-open-cell"
+                      data-sticky={hasSticky || undefined}
+                      style={hasSticky ? openOffset : undefined}
+                    >
                       {slot.kind === 'loading' ? null : onRowOpen ? (
                         <Button
                           variant="ghost"
@@ -873,6 +1163,7 @@ const DataTable = <T = unknown,>({
                           icon={ArrowUpRight}
                           onClick={() => onRowOpen(slot.row)}
                           aria-label={openLabel}
+                          className="dndev-table-open-link"
                         />
                       ) : (
                         <LinkComponent
@@ -890,29 +1181,33 @@ const DataTable = <T = unknown,>({
                     </TableCell>
                   )}
                   {showSelection && (
-                    <TableCell>
+                    <TableCell
+                      className="dndev-table-utility dndev-table-select-cell"
+                      data-sticky={hasSticky || undefined}
+                      style={hasSticky ? checkboxOffset : undefined}
+                    >
                       {slot.kind === 'loading' ? (
                         <div
-                          className="dndev-skeleton dndev-skeleton-pulse"
-                          style={{
-                            width: 'var(--icon-md)',
-                            height: 'var(--icon-md)',
-                            borderRadius: 'var(--radius)',
-                          }}
+                          className="dndev-skeleton dndev-skeleton-pulse dndev-table-skeleton-box"
                           aria-hidden="true"
                         />
                       ) : (
                         <Checkbox
-                          checked={isSelected(slot.row)}
+                          checked={selected}
                           onCheckedChange={(checked: boolean) =>
                             handleSelectRow(slot.row, !!checked)
                           }
-                          aria-label={`Select row ${index + 1}`}
+                          aria-label={componentLabel(
+                            translate,
+                            selectRowLabel,
+                            'table.selectRow',
+                            { index: index + 1 }
+                          )}
                         />
                       )}
                     </TableCell>
                   )}
-                  {columns.map((column) => {
+                  {columns.map((column, columnIndex) => {
                     let content: ReactNode;
                     let isEditable = false;
                     let dirty: 'true' | undefined;
@@ -922,12 +1217,8 @@ const DataTable = <T = unknown,>({
                     if (slot.kind === 'loading') {
                       content = (
                         <div
-                          className="dndev-skeleton dndev-skeleton-pulse"
-                          style={{
-                            height: 'var(--gap-md)',
-                            width: index % 2 === 0 ? '80%' : '60%',
-                            borderRadius: 'var(--radius)',
-                          }}
+                          className="dndev-skeleton dndev-skeleton-pulse dndev-table-skeleton-bar"
+                          data-short={index % 2 === 1 || undefined}
                           aria-hidden="true"
                         />
                       );
@@ -943,17 +1234,16 @@ const DataTable = <T = unknown,>({
                       if (editCol >= 0) {
                         const value = currentValue(row, column);
                         const pending = pendingChanges?.[getRowId!(row)];
+                        const valid = isCellValueValid(value, column.edit!);
                         isEditable = true;
                         dirty =
                           pending && column.key in pending ? 'true' : undefined;
-                        invalid =
-                          isCellValueValid(value, column.edit!) && !cellError
-                            ? undefined
-                            : 'true';
+                        invalid = valid && !cellError ? undefined : 'true';
                         content = (
                           <EditCell
                             edit={column.edit!}
                             value={value}
+                            display={editCellDisplay(column, value, row, index, valid, language)}
                             error={cellError}
                             position={{ row: index, col: editCol }}
                             label={
@@ -986,12 +1276,25 @@ const DataTable = <T = unknown,>({
                     return (
                       <TableCell
                         key={column.key}
+                        data-label={
+                          typeof column.title === 'string'
+                            ? column.title
+                            : undefined
+                        }
                         data-align={column.align}
+                        data-sticky={column.sticky || undefined}
+                        data-lines={column.lines === 2 ? '2' : undefined}
+                        data-phone={column.hideOnPhone ? 'hidden' : undefined}
                         data-editable={isEditable ? 'true' : undefined}
                         data-dirty={dirty}
                         data-invalid={invalid ?? (cellError ? 'true' : undefined)}
+                        style={columnStyles[columnIndex]}
                       >
-                        {content}
+                        {column.lines === 2 && !isEditable ? (
+                          <div className="dndev-table-cell-clamp">{content}</div>
+                        ) : (
+                          content
+                        )}
                         {cellError && !isEditable && (
                           <span className="dndev-table-cell-error" role="alert">
                             {cellError}
@@ -1020,7 +1323,116 @@ const DataTable = <T = unknown,>({
           previousLabel={paginationPreviousLabel}
           nextLabel={paginationNextLabel}
           itemsPerPagePlaceholder={paginationItemsPerPagePlaceholder}
+          allLabel={paginationAllLabel}
+          pageLabel={paginationPageLabel}
+          navigationLabel={paginationNavigationLabel}
         />
+      )}
+
+      {/* Bottom bar: pending edits (consumer) and the selection bar; nothing moves above the table */}
+      {showActionBar && (
+        <ActionBar className="dndev-table-action-bar">
+          <Stack
+            direction="row"
+            align="center"
+            justify="between"
+            gap="medium"
+            wrap="wrap"
+          >
+            {actionBarContent != null && (
+              <Stack direction="row" align="center" gap="tight" wrap="wrap">
+                {actionBarContent}
+              </Stack>
+            )}
+            {showSelectionBar && (
+              <Stack
+                direction="row"
+                align="center"
+                gap="tight"
+                wrap="wrap"
+                role="toolbar"
+                aria-label={labels.selected}
+                className="dndev-table-selection-bar"
+              >
+                <Text as="span" weight="medium">
+                  {labels.selected}
+                </Text>
+                {editColumns.length > 0 && (
+                  <>
+                    <Select
+                      label={labels.field}
+                      placeholder={labels.field}
+                      value={bulkKey}
+                      onValueChange={(key) => {
+                        setBulkKey(key);
+                        setBulkOption('');
+                      }}
+                      options={editColumns.map((c) => ({
+                        value: c.key,
+                        label: typeof c.title === 'string' ? c.title : c.key,
+                      }))}
+                    />
+                    {bulkColumn?.edit?.type === 'select' ? (
+                      <Select
+                        key={bulkKey}
+                        label={labels.value}
+                        placeholder={labels.value}
+                        value={bulkOption}
+                        onValueChange={setBulkOption}
+                        options={[...(bulkColumn.edit.options ?? [])]}
+                      />
+                    ) : bulkColumn?.edit?.type === 'date' ? (
+                      <DatePicker
+                        key={bulkKey}
+                        label={labels.value}
+                        value={bulkOption === '' ? null : bulkOption}
+                        onChange={(picked) => setBulkOption(picked ?? '')}
+                      />
+                    ) : bulkColumn?.edit?.type === 'datetime' ? (
+                      <DateTimePicker
+                        key={bulkKey}
+                        label={labels.value}
+                        value={bulkOption === '' ? null : bulkOption}
+                        onChange={(picked) => setBulkOption(picked ?? '')}
+                      />
+                    ) : (
+                      <Input
+                        key={bulkKey}
+                        ref={bulkValueRef}
+                        label={labels.value}
+                        placeholder={labels.value}
+                        inputMode={
+                          bulkColumn?.edit?.type === 'number'
+                            ? 'decimal'
+                            : undefined
+                        }
+                        defaultValue=""
+                        disabled={!bulkColumn}
+                      />
+                    )}
+                    <Button
+                      variant="outline"
+                      display="full"
+                      onClick={applyBulk}
+                      disabled={!bulkColumn}
+                    >
+                      {labels.apply}
+                    </Button>
+                  </>
+                )}
+                {selectionActions?.(selectedRows)}
+                <Button
+                  variant="ghost"
+                  display="compact"
+                  icon={X}
+                  onClick={() => handleSelectAll(false)}
+                  aria-label={labels.clear}
+                  tooltip={labels.clear}
+                />
+              </Stack>
+            )}
+          </Stack>
+        </ActionBar>
       )}
     </Stack>
   );

@@ -15,6 +15,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { InputHTMLAttributes, Ref } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import Label, { FieldInfo } from '../Label';
 
 import './PinInput.css';
@@ -65,7 +66,7 @@ export interface PinInputProps extends Omit<
   digitAriaLabel?: (index: number, length: number) => string;
   /**
    * Labels for the mask-reveal button (when `mask` is true and
-   * `hideMaskToggle` is false). Default: `{ show: 'Show PIN', hide: 'Hide PIN' }`.
+   * `hideMaskToggle` is false). Default: `dndev` `pin.show` / `pin.hide`.
    */
   revealAriaLabel?: { show: string; hide: string };
   /** The underlying input (React 19 ref prop), e.g. to focus it again after an action */
@@ -143,6 +144,7 @@ const PinInput = ({
   ref: externalRef,
   ...rest
 }: PinInputProps) => {
+  const translate = useComponentTranslate();
   const id = useId();
   const ref = useRef<HTMLInputElement>(null);
   const prevValue = useRef(value);
@@ -268,8 +270,8 @@ const PinInput = ({
           onClick={() => setRevealed((r) => !r)}
           aria-label={
             revealed
-              ? (revealAriaLabel?.hide ?? 'Hide PIN')
-              : (revealAriaLabel?.show ?? 'Show PIN')
+              ? (revealAriaLabel?.hide ?? translate('pin.hide'))
+              : (revealAriaLabel?.show ?? translate('pin.show'))
           }
           aria-pressed={revealed}
           tabIndex={-1}

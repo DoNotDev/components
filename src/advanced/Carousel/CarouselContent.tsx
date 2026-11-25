@@ -854,7 +854,7 @@ function CarouselComponent<T = unknown>({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
-      aria-roledescription="carousel"
+      aria-roledescription={translate('carousel.roleDescription')}
       aria-label={ariaLabel}
     >
       {/* Main carousel track */}
@@ -898,7 +898,7 @@ function CarouselComponent<T = unknown>({
                   opacity: shouldLoad ? 1 : 0,
                 }}
                 role="group"
-                aria-roledescription="slide"
+                aria-roledescription={translate('carousel.slideRoleDescription')}
                 aria-label={slideLabel(realIndex + 1, items.length)}
                 inert={offscreen || undefined}
                 onClick={() => onSlideClick?.(item, realIndex)}

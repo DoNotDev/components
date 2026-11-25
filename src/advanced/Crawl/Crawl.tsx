@@ -22,6 +22,7 @@ import {
 
 import { parseHtml } from './utils/parseHtml';
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 
 // Lazy load heavy 3D animation content
 const CrawlContent = lazy(() => import('./CrawlContent'));
@@ -70,6 +71,7 @@ const Crawl = ({
   style,
   'aria-label': ariaLabel,
 }: CrawlProps) => {
+  const translate = useComponentTranslate();
   const [showPlayOverlay, setShowPlayOverlay] = useState(true);
 
   // Parse intro immediately (lightweight)
@@ -115,7 +117,7 @@ const Crawl = ({
         className
       )}
       style={{ ...style, height: 'calc(100dvh - var(--header-height))' }}
-      aria-label={ariaLabel || 'Animated text crawl'}
+      aria-label={ariaLabel || translate('crawl.label')}
       role="region"
       aria-live="polite"
     >
@@ -168,7 +170,7 @@ const Crawl = ({
               e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
               e.currentTarget.style.transform = 'scale(1)';
             }}
-            aria-label="Start animated introduction"
+            aria-label={translate('crawl.start')}
           >
             <svg
               width="48"

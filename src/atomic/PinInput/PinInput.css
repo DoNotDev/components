@@ -138,7 +138,7 @@
 .dndev-pin-input__reveal:focus-visible {
   outline: 2px solid var(--primary, currentColor);
   outline-offset: 2px;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-interactive);
 }
 
 /* Shake animation hook — the container flips data-shake='true' on error

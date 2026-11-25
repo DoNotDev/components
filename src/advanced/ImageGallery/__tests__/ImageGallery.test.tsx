@@ -10,7 +10,7 @@ import {
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 
-import { TranslatorProvider } from '../../../utils/translator';
+import { ComponentLocaleProvider } from '../../../utils/translator';
 import { ImageGallery } from '../ImageGallery';
 
 /** Stand-in for the framework translation: the few English strings the tests read. */
@@ -21,7 +21,7 @@ const english = (key: string, values?: Record<string, string | number>): string 
 function render(ui: ReactElement): ReturnType<typeof rtlRender> {
   return rtlRender(ui, {
     wrapper: ({ children }) => (
-      <TranslatorProvider value={english}>{children}</TranslatorProvider>
+      <ComponentLocaleProvider value={{ language: 'en', translate: english }}>{children}</ComponentLocaleProvider>
     ),
   });
 }
@@ -371,9 +371,9 @@ describe('ImageGallery', () => {
         `${key}${values ? JSON.stringify(values) : ''}`
     );
     const { container } = render(
-      <TranslatorProvider value={translate}>
+      <ComponentLocaleProvider value={{ language: 'en', translate }}>
         <ImageGallery images={IMAGES} />
-      </TranslatorProvider>
+      </ComponentLocaleProvider>
     );
     expect(screen.getByRole('region', { name: 'gallery.label' })).toBeTruthy();
     expect(
@@ -393,7 +393,7 @@ describe('ImageGallery', () => {
 
   it('names every control with the label props, which override the translation', () => {
     const { container } = render(
-      <TranslatorProvider value={(key) => `T:${key}`}>
+      <ComponentLocaleProvider value={{ language: 'en', translate: (key) => `T:${key}` }}>
         <ImageGallery
           images={IMAGES}
           label="Galerie"
@@ -402,7 +402,7 @@ describe('ImageGallery', () => {
           nextLabel="Suivante"
           viewImageLabel={(index) => `Voir ${index}`}
         />
-      </TranslatorProvider>
+      </ComponentLocaleProvider>
     );
     expect(screen.getByRole('region', { name: 'Galerie' })).toBeTruthy();
     expect(screen.getByRole('tablist', { name: 'Miniatures' })).toBeTruthy();

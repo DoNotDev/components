@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TranslatorProvider } from '../../../utils/translator';
+import { ComponentLocaleProvider } from '../../../utils/translator';
 import CarouselContent from '../CarouselContent';
 
 const ITEMS = ['a', 'b', 'c'];
@@ -56,9 +56,9 @@ describe('Carousel labels', () => {
       values?: Record<string, string | number>
     ): string => `${key}${values ? JSON.stringify(values) : ''}`;
     render(
-      <TranslatorProvider value={translate}>
+      <ComponentLocaleProvider value={{ language: 'en', translate }}>
         <CarouselContent items={ITEMS} renderItem={renderItem} showDots />
-      </TranslatorProvider>
+      </ComponentLocaleProvider>
     );
     expect(screen.getByRole('region', { name: 'carousel.label' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'carousel.previous' })).toBeTruthy();
@@ -72,7 +72,7 @@ describe('Carousel labels', () => {
 
   it('lets the label props override the translation', () => {
     render(
-      <TranslatorProvider value={(key) => `T:${key}`}>
+      <ComponentLocaleProvider value={{ language: 'en', translate: (key) => `T:${key}` }}>
         <CarouselContent
           items={ITEMS}
           renderItem={renderItem}
@@ -82,7 +82,7 @@ describe('Carousel labels', () => {
           nextLabel="Suivant"
           goToSlideLabel={(index) => `Aller à ${index}`}
         />
-      </TranslatorProvider>
+      </ComponentLocaleProvider>
     );
     expect(screen.getByRole('region', { name: 'Vitrine' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Précédent' })).toBeTruthy();
@@ -92,9 +92,9 @@ describe('Carousel labels', () => {
 
   it('translates the empty text', () => {
     render(
-      <TranslatorProvider value={(key) => `T:${key}`}>
+      <ComponentLocaleProvider value={{ language: 'en', translate: (key) => `T:${key}` }}>
         <CarouselContent items={[]} renderItem={renderItem} />
-      </TranslatorProvider>
+      </ComponentLocaleProvider>
     );
     expect(screen.getByText('T:carousel.empty')).toBeTruthy();
   });

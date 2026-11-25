@@ -5,7 +5,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { DropdownProps, ChevronProps } from 'react-day-picker';
 
 import { CalendarPrimitive } from './CalendarPrimitive';
+import { toDate, toZonedCalendarDate } from '../../utils/date';
 import { cn } from '../../utils/helpers';
+import { useComponentLocale } from '../../utils/translator';
 import Button from '../Button';
 import DropdownMenu from '../DropdownMenu';
 import type { CalendarPrimitiveProps } from './CalendarPrimitive';
@@ -94,6 +96,21 @@ function CalendarDropdown({
   );
 }
 
+/**
+ * Today in `timeZone`, as the local-midnight Date the calendar compares its days with:
+ * the app's day, not the browser's (a Paris app at 00:30 is already on the next day for
+ * a browser in New York, and still on the previous one for a UTC server).
+ */
+function zonedToday(timeZone: string): Date {
+  return toDate(toZonedCalendarDate(new Date().toISOString(), timeZone));
+}
+
+/**
+ * Month calendar (react-day-picker) with DoNotDev theming. "Today" (its highlight, the
+ * month shown first, the default year range of the month / year dropdowns) is today in
+ * the app's time zone (`ComponentLocale.timeZone`, `i18n.timeZone`), never the browser's;
+ * `today` overrides it.
+ */
 function Calendar({
   className,
   classNames,
@@ -102,13 +119,17 @@ function Calendar({
   captionLayout = 'dropdown',
   startMonth,
   endMonth,
+  today: todayProp,
   ...props
 }: CalendarProps) {
-  const currentYear = new Date().getFullYear();
+  const { timeZone } = useComponentLocale();
+  const today = todayProp ?? zonedToday(timeZone);
+  const currentYear = today.getFullYear();
   const defaultStartMonth = startMonth || new Date(currentYear - 10, 0);
   const defaultEndMonth = endMonth || new Date(currentYear + 10, 11);
   return (
     <CalendarPrimitive
+      today={today}
       showOutsideDays={showOutsideDays}
       weekStartsOn={weekStartsOn}
       captionLayout={captionLayout}

@@ -982,34 +982,14 @@
   }
 }
 
-/* Specific containers that need start-align (not general stacks/grids) */
+/* Specific containers that need start-align (not general stacks/grids). The layout's
+   sidebar zones and phone menu sheet are @donotdev/ui: styled in its layout-variables.css
+   (alignment, outline end border, tooltip side); components never style them */
 .dndev-nav-menu-list[data-vertical='true'] .dndev-interactive,
 .dndev-floating .dndev-interactive,
-.dndev-command-group .dndev-interactive,
-.sidebar-top .dndev-interactive,
-.sidebar-content .dndev-interactive,
-.sidebar-bottom .dndev-interactive {
+.dndev-command-group .dndev-interactive {
   justify-content: flex-start;
   width: 100%; /* Stretch to fill container */
-}
-
-/* Remove right border from outline buttons in sidebar - resize handle provides separator */
-.sidebar-content .dndev-interactive[data-variant='outline'],
-.sidebar-bottom .dndev-interactive[data-variant='outline'] {
-  border-inline-end: none;
-}
-
-/* Sidebar tooltip positioning - right in LTR, left in RTL */
-.sidebar-top,
-.sidebar-content,
-.sidebar-bottom {
-  --tooltip-side: right;
-}
-
-[dir='rtl'] .sidebar-top,
-[dir='rtl'] .sidebar-content,
-[dir='rtl'] .sidebar-bottom {
-  --tooltip-side: left;
 }
 
 /* INTERACTIVE LABEL - Unified label class for all interactive elements */
@@ -1058,9 +1038,25 @@
   display: inline-flex;
 }
 
-/* Auto mode - container-responsive, hidden in narrow containers */
+/* Auto mode - label shown, hidden where the layout has no room for it: the landing header
+   and the collapsed sidebar (layout-variables.css, @donotdev/ui), and the equal-width
+   action bar below */
 .dndev-interactive-label[data-display='auto'] {
   display: inline-flex;
+}
+
+/* Equal-width action bar on phones (< 768px, the tablet threshold): `fullWidth` buttons
+   with an icon, side by side in a Grid of 2+ cells, show the icon only; a third of a phone
+   cannot hold "Annuler la commande". The label stays the accessible name (aria-label) and
+   the tooltip. One button alone keeps its label. */
+@media (width < 768px) {
+  .dndev-grid-component:has(> :nth-child(2))
+    > .dndev-interactive[data-full-width='true'][data-display='auto']:has(
+      > :not(.dndev-interactive-label)
+    )
+    > .dndev-interactive-label {
+    display: none;
+  }
 }
 
 /* CONTROL - Form controls (switch, toggle, checkbox, radio, slider) */
@@ -1333,6 +1329,9 @@
          OVERLAY
          =========================== */
 
+/* Dims everything under a modal (dialog, alert dialog, sheet), page chrome included: on the
+   overlay layer (--z-overlay = --z-modal), above the header, sidebar and ActionBar
+   (--z-header, --z-sidebar); the modal surface renders after it, on top */
 .dndev-overlay {
   position: fixed;
   inset: 0;
@@ -1348,25 +1347,31 @@
   }
 }
 
+/* `translate` / `scale`, not `transform`: the swipe-to-close drag (useSwipeToClose)
+   owns the content's `transform` */
 @keyframes dialog-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    translate: 0 2%;
+    scale: 0.96;
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    translate: 0 0;
+    scale: 1;
   }
 }
 
 @keyframes dialog-out {
   from {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    translate: 0 0;
+    scale: 1;
   }
   to {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
+    translate: 0 2%;
+    scale: 0.96;
   }
 }
 
@@ -1429,14 +1434,17 @@
          =========================== */
 
 .dndev-modal-content {
+  /* Centred both ways by inset + auto margins (direction-agnostic: same box in LTR
+     and RTL; no centring transform for the swipe drag to overwrite) */
   position: fixed;
-  inset-inline-start: 50%;
-  top: 50%;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
   z-index: calc(var(--z-modal) + 1);
-  transform: translate(-50%, -50%);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  width: 100%;
+  /* A gutter on each side on phones; each size's max-width below caps it */
+  width: calc(100% - 2 * var(--gap-md));
   gap: var(--gap-sm);
   padding-block: var(--gap-md);
   overflow: hidden;
@@ -1447,13 +1455,15 @@
     animation: dialog-out var(--dur-normal) var(--ease-in-out);
   }
 
-  /* Dialog content size variants */
+  /* Dialog content size variants. No data-content-size (the Dialog default) = auto */
+  &:not([data-content-size]),
   &[data-content-size='auto'],
   &[data-content-size='form'],
   &[data-content-size='text'] {
     max-height: 80dvh;
   }
 
+  &:not([data-content-size]),
   &[data-content-size='auto'] {
     max-width: var(--dialog-auto);
   }
@@ -1503,7 +1513,8 @@
   flex-shrink: 0;
   padding-inline: var(--gap-md);
 
-  @media (width >= 640px) {
+  /* 768px = BREAKPOINT_THRESHOLDS.tablet (CSS cannot read a variable in @media) */
+  @media (width >= 768px) {
     flex-direction: row;
     justify-content: flex-end;
   }
@@ -1545,7 +1556,8 @@
 .dndev-modal-cancel {
   margin-top: var(--gap-sm);
 
-  @media (width >= 640px) {
+  /* 768px = BREAKPOINT_THRESHOLDS.tablet, as .dndev-modal-footer */
+  @media (width >= 768px) {
     margin-top: 0;
   }
 }
@@ -1581,7 +1593,7 @@
   justify-content: center;
   min-width: 1.5em;
   padding: var(--gap-sm);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-weight: var(--font-weight-semibold);
   transition: all var(--dur-fast) var(--ease-in-out);
 

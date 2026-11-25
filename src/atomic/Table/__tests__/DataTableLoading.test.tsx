@@ -1,8 +1,9 @@
 // packages/components/src/atomic/Table/__tests__/DataTableLoading.test.tsx
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { render } from '../../../utils/__tests__/locale';
 import { DataTable } from '../index';
 import type { TableColumn } from '../index';
 import type { TablePendingChanges } from '../editing';
@@ -86,14 +87,15 @@ describe('DataTable loading slots', () => {
         const cells = row.querySelectorAll('td');
         expect(cells).toHaveLength(columns.length + 2);
         expect(cells[0].childElementCount).toBe(0);
-        expect(cells[1].querySelector<HTMLElement>('.dndev-skeleton')?.style.width).toBe('var(--icon-md)');
+        expect(cells[1].querySelector('.dndev-skeleton.dndev-table-skeleton-box')).toBeTruthy();
         columns.forEach((column, colIndex) => {
           const cell = cells[colIndex + 2];
           expect(cell.getAttribute('data-align')).toBe(column.align ?? null);
           expect(cell.hasAttribute('data-editable')).toBe(false);
           const skeleton = cell.querySelector<HTMLElement>('.dndev-skeleton-pulse');
           expect(skeleton?.getAttribute('aria-hidden')).toBe('true');
-          expect(skeleton?.style.width).toBe(index % 2 === 0 ? '80%' : '60%');
+          expect(skeleton?.classList.contains('dndev-table-skeleton-bar')).toBe(true);
+          expect(skeleton?.hasAttribute('data-short')).toBe(index % 2 === 1);
           fireEvent.click(cell);
           fireEvent.blur(cell);
           fireEvent.paste(cell, { clipboardData: { getData: () => 'Changed\t42' } });
@@ -131,14 +133,15 @@ describe('DataTable loading slots', () => {
         expect(callback.mock.calls[index][0]).toBe(value);
       }
     }
+    // Editable cells show `render` of their value too (the editor opens on focus)
+    expect(nameRender).toHaveBeenCalledWith(ROWS[0].name, ROWS[0], 0);
     if (editable) {
-      expect(nameRender).not.toHaveBeenCalled();
+      const display = container.querySelector<HTMLElement>('[data-edit-row="0"][data-edit-col="0"]')!;
+      act(() => display.focus());
       const editor = screen.getAllByRole('textbox', { name: 'Name' })[0];
       fireEvent.change(editor, { target: { value: 'Changed' } });
       fireEvent.blur(editor);
       expect(onPendingChange).toHaveBeenLastCalledWith({ A: { name: 'Changed' } });
-    } else {
-      expect(nameRender).toHaveBeenCalledWith(ROWS[0].name, ROWS[0], 0);
     }
 
     fireEvent.click(screen.getByText('No note: First'));
@@ -165,7 +168,9 @@ describe('DataTable loading slots', () => {
     assertLoading();
 
     rerender(view(false, []));
-    expect(container.querySelectorAll('tbody tr')).toHaveLength(0);
+    // No rows: the one full-width empty row
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(1);
+    expect(container.querySelector('tbody td.dndev-table-empty')?.getAttribute('colspan')).toBe(String(columns.length + 2));
     expect(container.querySelectorAll('.dndev-skeleton')).toHaveLength(0);
     callbacks.forEach((callback) => expect(callback).not.toHaveBeenCalled());
   });

@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparatorPrimitive,
 } from './DropdownMenuPrimitive';
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import ScrollArea from '../ScrollArea';
 
 import './DropdownMenu.css';
@@ -141,6 +142,7 @@ const DropdownMenu = ({
   open,
   onOpenChange,
 }: DropdownMenuProps) => {
+  const translate = useComponentTranslate();
   if (!trigger) return null;
 
   const normalizedChildren = children ? Children.toArray(children) : [];
@@ -196,7 +198,7 @@ const DropdownMenu = ({
                     hasSubIcon,
                     hasSubLabel,
                     submenuItem.label,
-                    'Submenu'
+                    translate('dropdownMenu.submenu')
                   )}
                   {...(hasSubIcon &&
                     !hasSubLabel && { 'data-display': 'compact' })}
@@ -262,7 +264,7 @@ const DropdownMenu = ({
                               hasSubItemIcon,
                               hasSubItemLabel,
                               normalSubItem.label,
-                              'Menu item'
+                              translate('dropdownMenu.item')
                             )}
                             {...(hasSubItemIcon &&
                               !hasSubItemLabel && {
@@ -335,7 +337,7 @@ const DropdownMenu = ({
                 hasIcon,
                 hasLabel,
                 normalItem.label,
-                'Menu item'
+                translate('dropdownMenu.item')
               )}
               {...(hasIcon && !hasLabel && { 'data-display': 'compact' })}
               {...(normalItem.variant && {

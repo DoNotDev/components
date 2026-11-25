@@ -18,11 +18,12 @@ import type { KeyboardEvent, ClipboardEvent, Ref } from 'react';
 import {
   DATE_SEGMENT_BASE,
   clampDay,
+  formatWallTime,
   getDaysInMonth,
   getLocaleInfo,
+  getSegmentLabels,
   parseAnyDate,
   parseISODate,
-  resolveLocale,
   toDate,
   toISODate,
 } from '../../utils/date';
@@ -32,6 +33,7 @@ import type {
   DateSegmentValues,
 } from '../../utils/date';
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentLocale } from '../../utils/translator';
 import LazyCalendar, {
   preloadCalendar,
   useIdlePreloadCalendar,
@@ -64,7 +66,10 @@ export interface DatePickerProps {
   required?: boolean;
   /** Whether the field is disabled */
   disabled?: boolean;
-  /** BCP 47 locale for segment order. Default: navigator.language or 'fr-FR' */
+  /**
+   * BCP 47 locale: segment order, separator, placeholders ("DD", "JJ") and segment
+   * names. Default: the UI language (ComponentLocaleProvider, the i18n language).
+   */
   locale?: string;
   /** Additional CSS classes */
   className?: string;
@@ -72,8 +77,17 @@ export interface DatePickerProps {
   id?: string;
   /** HTML name attribute for form submission */
   name?: string;
-  /** Shown in the calendar popover when the calendar cannot be loaded (translate it) */
+  /**
+   * Shown in the calendar popover when the calendar cannot be loaded.
+   * @default `dndev` key `datePicker.calendarLoadError`
+   */
   calendarErrorLabel?: string;
+  /**
+   * Accessible label of the calendar button.
+   * @default `dndev` key `datePicker.openCalendar`
+   * @since 0.3.8
+   */
+  openCalendarLabel?: string;
   /** React 19 native ref */
   ref?: Ref<HTMLDivElement>;
   /** ARIA describedby for error/helper association */
@@ -117,7 +131,8 @@ function DatePicker({
   className,
   id: idProp,
   name,
-  calendarErrorLabel = 'The calendar could not load. Please type the date in the field.',
+  calendarErrorLabel,
+  openCalendarLabel,
   ref,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
@@ -128,8 +143,11 @@ function DatePicker({
   const generatedId = useId();
   const id = idProp ?? generatedId;
 
-  const resolvedLocale = resolveLocale(locale);
+  // The UI language (ComponentLocaleProvider): same segments on the server and the client
+  const { language, translate } = useComponentLocale();
+  const resolvedLocale = locale ?? language;
   const { order, separator } = getLocaleInfo(resolvedLocale);
+  const segmentLabels = getSegmentLabels(resolvedLocale);
 
   // Normalize min/max to Date
   const minDate = min ? toDate(min) : undefined;
@@ -171,7 +189,7 @@ function DatePicker({
   const currentYear = new Date().getFullYear();
 
   const segmentConfigs: DateSegmentConfig[] = order.map((type) => {
-    const base = DATE_SEGMENT_BASE[type];
+    const base = { ...DATE_SEGMENT_BASE[type], ...segmentLabels[type] };
     let segMax: number;
     if (type === 'day') {
       segMax = getDaysInMonth(segments.month, segments.year);
@@ -187,14 +205,18 @@ function DatePicker({
   // Value emission
   // ---------------------------------------------------------------------------
 
+  // A calendar date, announced as written (formatWallTime: never shifted by a zone)
   function announceLive(date: Date) {
     setLiveText(
-      date.toLocaleDateString(resolvedLocale, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+      formatWallTime(
+        {
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+        },
+        resolvedLocale,
+        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+      )
     );
   }
 
@@ -486,7 +508,7 @@ function DatePicker({
         <div
           className="dndev-datepicker-field"
           role="group"
-          aria-label={label || 'Date'}
+          aria-label={label || translate('datePicker.date')}
           data-bare={label ? true : undefined}
           data-disabled={disabled || undefined}
           data-variant={dataVariant}
@@ -537,7 +559,11 @@ function DatePicker({
               onFocus={preloadCalendar}
               className="dndev-datepicker-calendar-btn dndev-inline-action-btn"
               disabled={disabled}
-              aria-label="Ouvrir le calendrier"
+              aria-label={componentLabel(
+                translate,
+                openCalendarLabel,
+                'datePicker.openCalendar'
+              )}
               tabIndex={disabled ? -1 : 0}
             >
               <Icon icon={CalendarDays} className="dndev-size-md" ariaHidden />
@@ -548,7 +574,7 @@ function DatePicker({
         <PopoverContent
           align="end"
           sideOffset={4}
-          className="dndev-floating dndev-datepicker-popover"
+          className="dndev-floating dndev-z-tooltip dndev-datepicker-popover"
           onCloseAutoFocus={(e: Event) => {
             e.preventDefault();
             segmentRefs.current[0]?.focus();

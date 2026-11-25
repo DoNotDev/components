@@ -17,16 +17,24 @@ import type { ComponentProps, ReactElement } from 'react';
 
 import type { ToastType } from './Toast.types';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 
 const ToastProvider = ToastPrimitives.Provider;
 
+/**
+ * The toast region. Its accessible name defaults to `dndev` `toast.region`; the
+ * `{hotkey}` placeholder is filled by Radix with the focus hotkey (F8).
+ */
 function ToastViewport({
   className,
+  label,
   ...props
 }: ComponentProps<typeof ToastPrimitives.Viewport>) {
+  const translate = useComponentTranslate();
   return (
     <ToastPrimitives.Viewport
       className={cn('dndev-toast-viewport', className)}
+      label={componentLabel(translate, label, 'toast.region')}
       {...props}
     />
   );
@@ -104,10 +112,12 @@ function ToastClose({
   className,
   ...props
 }: ComponentProps<typeof ToastPrimitives.Close>) {
+  const translate = useComponentTranslate();
   return (
     <ToastPrimitives.Close
       className={cn('dndev-toast-close', className)}
       toast-close=""
+      aria-label={translate('actions.close')}
       {...props}
     >
       <X className="dndev-size-md" />

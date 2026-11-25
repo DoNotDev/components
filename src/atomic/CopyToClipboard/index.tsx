@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from 'react';
 
 import { DISPLAY } from '../../styles/componentConstants';
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { type ButtonProps } from '../Button';
 import './CopyToClipboard.css';
 
@@ -31,9 +32,9 @@ export interface CopyToClipboardProps extends Omit<
   onCopy?: (text: string) => void;
   /** Optional onClick handler (called after copy, can be used for stopPropagation) */
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  /** Tooltip text when not copied */
+  /** Tooltip text when not copied (default: `dndev` `copyToClipboard`) */
   tooltipText?: string;
-  /** Tooltip text when copied */
+  /** Tooltip text when copied (default: `dndev` `copied`) */
   copiedTooltipText?: string;
   /** Whether to show tooltip */
   showTooltip?: boolean;
@@ -52,12 +53,15 @@ export const CopyToClipboard: React.ComponentType<CopyToClipboardProps> = ({
   className,
   onCopy,
   onClick,
-  tooltipText = 'Copy to clipboard',
-  copiedTooltipText = 'Copied!',
+  tooltipText: tooltipTextProp,
+  copiedTooltipText: copiedTooltipTextProp,
   showTooltip = true,
   ariaLabel,
   ...buttonProps
 }) => {
+  const translate = useComponentTranslate();
+  const tooltipText = componentLabel(translate, tooltipTextProp, 'copyToClipboard');
+  const copiedTooltipText = componentLabel(translate, copiedTooltipTextProp, 'copied');
   const [copied, setCopied] = useState(false);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -113,7 +117,7 @@ export const CopyToClipboard: React.ComponentType<CopyToClipboardProps> = ({
         className
       )}
       aria-label={
-        ariaLabel || (copied ? 'Copied to clipboard' : 'Copy to clipboard')
+        ariaLabel || translate(copied ? 'copiedToClipboard' : 'copyToClipboard')
       }
       {...buttonProps}
     >

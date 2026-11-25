@@ -144,3 +144,12 @@
   color: var(--muted-foreground);
   min-width: 2ch;
 }
+
+/* In a floating-label fieldset (e.g. the list filters): the same box as an input, stars
+   clear of the legend */
+.dndev-floating-fieldset > .dndev-rating {
+  display: flex;
+  min-height: var(--touch-target);
+  padding-inline: var(--gap-md);
+  padding-block: var(--gap-sm);
+}

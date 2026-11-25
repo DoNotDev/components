@@ -17,6 +17,7 @@ import type { ReactNode } from 'react';
 
 import { useSwipeToClose } from '../../hooks';
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT } from '../Button';
 
 /** Context for CommandDialog to pass onClose to children without cloneElement */
@@ -59,6 +60,7 @@ const CommandDialog = ({
   className,
   noSwipe = false,
 }: CommandDialogProps) => {
+  const translate = useComponentTranslate();
   const handleClose = () => {
     onOpenChange?.(false);
   };
@@ -106,7 +108,7 @@ const CommandDialog = ({
                   display="full"
                   icon={X}
                   onClick={handleClose}
-                  aria-label="Close"
+                  aria-label={translate('actions.close')}
                   className="dndev-command-dialog-close"
                 />
               </DialogPrimitive.Close>
@@ -114,10 +116,10 @@ const CommandDialog = ({
           ) : (
             <>
               <DialogPrimitive.Title className="dndev-sr-only">
-                Command Palette
+                {translate('command.title')}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="dndev-sr-only">
-                Search and navigate using keyboard shortcuts
+                {translate('command.description')}
               </DialogPrimitive.Description>
             </>
           )}

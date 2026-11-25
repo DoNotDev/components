@@ -16,6 +16,7 @@ import type { InputHTMLAttributes } from 'react';
 import Input from '../Input';
 import { FloatingLabel } from '../Label';
 import Text from '../Text';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 
 import './RangeInput.css';
 
@@ -28,9 +29,9 @@ export interface RangeInputProps extends Omit<
   label?: string;
   /** Help text: an (i) after the label shows it on hover, focus or tap. Needs `label`. */
   info?: string;
-  /** Placeholder for min input */
+  /** Placeholder for min input (default: `dndev` `range.min`) */
   minPlaceholder?: string;
-  /** Placeholder for max input */
+  /** Placeholder for max input (default: `dndev` `range.max`) */
   maxPlaceholder?: string;
   /** Current min value */
   minValue?: string;
@@ -70,8 +71,8 @@ export function RangeInput({
   type = 'number',
   label,
   info,
-  minPlaceholder = 'Min',
-  maxPlaceholder = 'Max',
+  minPlaceholder: minPlaceholderProp,
+  maxPlaceholder: maxPlaceholderProp,
   minValue = '',
   maxValue = '',
   actualMin,
@@ -82,6 +83,9 @@ export function RangeInput({
   onClear,
   ...props
 }: RangeInputProps) {
+  const translate = useComponentTranslate();
+  const minPlaceholder = componentLabel(translate, minPlaceholderProp, 'range.min');
+  const maxPlaceholder = componentLabel(translate, maxPlaceholderProp, 'range.max');
   const handleMinFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.select();
     if (
@@ -144,7 +148,7 @@ export function RangeInput({
         className="dndev-inline-action-btn dndev-range-input-clear"
         onClick={onClear}
         disabled={!hasValue}
-        aria-label="Clear"
+        aria-label={translate('actions.clear')}
       >
         <X />
       </button>

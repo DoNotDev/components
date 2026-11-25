@@ -16,6 +16,7 @@ import type { ReactNode } from 'react';
 
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT } from '../Button';
 import Dialog from '../Dialog';
 import Spinner from '../Spinner';
@@ -95,7 +96,7 @@ export interface VideoPlayerProps {
    * @default false
    */
   eager?: boolean;
-  /** Video title for accessibility */
+  /** Video title for accessibility (default: `dndev` `video.title`) */
   title?: string;
   /**
    * Whether to open in modal dialog
@@ -121,12 +122,12 @@ export interface VideoPlayerProps {
   allowFullscreen?: boolean;
   /**
    * Aria label for the play button/thumbnail
-   * @default 'Click to watch video'
+   * @default `dndev` `video.clickToWatch`
    */
   playButtonLabel?: string;
   /**
    * Aria label for loading state
-   * @default 'Loading video'
+   * @default `dndev` `video.loading`
    */
   loadingLabel?: string;
 }
@@ -298,15 +299,19 @@ const VideoPlayer = ({
   trigger,
   thumbnail,
   eager = false,
-  title = 'Video',
+  title: titleProp,
   modal = true,
   aspectRatio = '16/9',
   className,
   autoplay = false,
   allowFullscreen = true,
-  playButtonLabel = 'Click to watch video',
-  loadingLabel = 'Loading video',
+  playButtonLabel: playButtonLabelProp,
+  loadingLabel: loadingLabelProp,
 }: VideoPlayerProps) => {
+  const translate = useComponentTranslate();
+  const title = componentLabel(translate, titleProp, 'video.title');
+  const playButtonLabel = componentLabel(translate, playButtonLabelProp, 'video.clickToWatch');
+  const loadingLabel = componentLabel(translate, loadingLabelProp, 'video.loading');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [iframeReady, setIframeReady] = useState(false);

@@ -26,3 +26,4 @@ export * from './variants';
 export * from './imageRetry';
 export * from './responsiveImage';
 export * from './sanitizeHtml';
+export * from './tableSort';

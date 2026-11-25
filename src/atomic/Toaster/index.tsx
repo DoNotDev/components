@@ -23,6 +23,7 @@ import {
 } from './ToastPrimitive';
 import { useToast, type ToasterToast } from '../../hooks/useToast';
 import Stack from '../Stack';
+import { useComponentTranslate } from '../../utils/translator';
 
 /**
  * Toast title component with pattern classes
@@ -54,9 +55,10 @@ const ToastAction = (props: ComponentProps<typeof ToastActionPrimitive>) => (
 
 function Toaster() {
   const { toasts, pause, resume } = useToast();
+  const translate = useComponentTranslate();
 
   return (
-    <ToastProvider>
+    <ToastProvider label={translate('toast.label')}>
       {toasts.map(function ({
         id,
         title,

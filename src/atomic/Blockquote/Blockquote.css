@@ -136,8 +136,8 @@
   z-index: 1; /* Above decorative quote */
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
+/* Phones (< 768px, BREAKPOINT_THRESHOLDS.tablet; CSS cannot read a variable in @media) */
+@media (width < 768px) {
   .dndev-blockquote {
     margin-block: var(--gap-lg);
   }

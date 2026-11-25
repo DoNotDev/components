@@ -15,6 +15,7 @@ import { useState } from 'react';
 
 import Button, { BUTTON_VARIANT } from '../../atomic/Button';
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 
 /** Props for the JsonViewer component -- collapsible JSON tree viewer. */
 export interface JsonViewerProps {
@@ -204,6 +205,7 @@ const JsonViewer = ({
   className,
   collapsed = false,
 }: JsonViewerProps) => {
+  const translate = useComponentTranslate();
   // Use Record<string, true> instead of Set for stable equality semantics in React state
   const [expandedPaths, setExpandedPaths] = useState<Record<string, true>>({});
   const [allExpanded, setAllExpanded] = useState(!collapsed);
@@ -251,7 +253,7 @@ const JsonViewer = ({
               variant={BUTTON_VARIANT.GHOST}
               style={{ fontSize: 'var(--font-size-sm)' }}
             >
-              Expand All
+              {translate('jsonViewer.expandAll')}
             </Button>
           ) : (
             <Button
@@ -259,7 +261,7 @@ const JsonViewer = ({
               variant={BUTTON_VARIANT.GHOST}
               style={{ fontSize: 'var(--font-size-sm)' }}
             >
-              Collapse All
+              {translate('jsonViewer.collapseAll')}
             </Button>
           )}
           {showCopyButton && (
@@ -269,7 +271,7 @@ const JsonViewer = ({
               style={{ fontSize: 'var(--font-size-sm)' }}
               icon={Copy}
             >
-              Copy
+              {translate('jsonViewer.copy')}
             </Button>
           )}
         </div>

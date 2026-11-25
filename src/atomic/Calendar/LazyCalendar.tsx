@@ -19,6 +19,8 @@
 import { Component, lazy, Suspense, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
+
 import type { CalendarProps } from './index';
 
 const loadCalendar = () => import('./index');
@@ -93,8 +95,11 @@ class CalendarLoadBoundary extends Component<
 
 /** Props for LazyCalendar: Calendar props plus the load-error text. */
 export type LazyCalendarProps = CalendarProps & {
-  /** Text shown in the popover when the calendar cannot be loaded */
-  errorLabel: string;
+  /**
+   * Text shown in the popover when the calendar cannot be loaded.
+   * @default `dndev` key `datePicker.calendarLoadError` (ComponentLocaleProvider)
+   */
+  errorLabel?: string;
 };
 
 /**
@@ -111,8 +116,15 @@ export default function LazyCalendar({
   errorLabel,
   ...props
 }: LazyCalendarProps) {
+  const translate = useComponentTranslate();
   return (
-    <CalendarLoadBoundary errorLabel={errorLabel}>
+    <CalendarLoadBoundary
+      errorLabel={componentLabel(
+        translate,
+        errorLabel,
+        'datePicker.calendarLoadError'
+      )}
+    >
       <Suspense
         fallback={
           <div

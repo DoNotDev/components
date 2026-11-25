@@ -38,6 +38,15 @@
   letter-spacing: -0.025em;
 }
 
+/* Default alert (muted variant): --card is the muted surface, unreadable as text;
+   title and icon take the surface's foreground instead */
+.dndev-surface[role='alert'][data-variant='muted'] {
+  .dndev-alert-icon,
+  .dndev-alert-title {
+    color: var(--card-foreground);
+  }
+}
+
 /* Description: default foreground, slightly dimmed */
 .dndev-alert-description {
   font-size: var(--font-size-sm);

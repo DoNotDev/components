@@ -13,6 +13,7 @@
 import type { ReactNode, ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button from '../Button';
 import VisuallyHidden from '../VisuallyHidden';
 import {
@@ -100,7 +101,7 @@ export interface AlertDialogProps {
   description?: ReactNode;
   /**
    * Text for the cancel button.
-   * @default 'Cancel'
+   * @default `dndev` `actions.cancel`
    */
   cancelLabel?: string;
   /** Text for the confirm button */
@@ -137,13 +138,15 @@ const AlertDialog = ({
   trigger,
   title,
   description,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   confirmLabel,
   onConfirm,
   onCancel,
   open,
   onOpenChange,
 }: AlertDialogProps) => {
+  const translate = useComponentTranslate();
+  const cancelText = componentLabel(translate, cancelLabel, 'actions.cancel');
   return (
     <AlertDialogPrimitive open={open} onOpenChange={onOpenChange}>
       {trigger && (
@@ -159,7 +162,7 @@ const AlertDialog = ({
           ) : (
             <VisuallyHidden>
               <AlertDialogDescription>
-                Alert dialog content
+                {translate('dialog.content')}
               </AlertDialogDescription>
             </VisuallyHidden>
           )}
@@ -167,7 +170,7 @@ const AlertDialog = ({
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button variant="ghost" onClick={onCancel}>
-              {cancelLabel}
+              {cancelText}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>

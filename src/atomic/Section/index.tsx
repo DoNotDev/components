@@ -91,8 +91,27 @@ export interface SectionOwnProps {
   /** Section content */
   children: ReactNode;
 
-  /** Section title (small, uppercase, accent color) */
+  /** Section title (small, uppercase, accent color; `titleVariant="heading"`: a plain heading) */
   title?: string;
+
+  /**
+   * Look of the title:
+   * - `'label'`: small uppercase accent label with letter spacing (marketing pages);
+   * - `'heading'`: a plain heading, normal case, no letter spacing (admin /
+   *   tool pages: "Products"); colour: the label's accent (`--accent`).
+   * Same heading element and size either way (`titleAs`).
+   * @default 'label'
+   * @since 0.3.8
+   */
+  titleVariant?: 'label' | 'heading';
+
+  /**
+   * Muted text beside the title, in the title row but outside the heading (a
+   * count: "64 products", a status). Wraps under the title on a narrow row.
+   * Absent: markup unchanged.
+   * @since 0.3.8
+   */
+  titleMeta?: ReactNode;
 
   /**
    * Heading element of the title. Visual size is unchanged: only the semantic
@@ -124,8 +143,7 @@ export interface SectionOwnProps {
   textAlign?: TextAlign;
 
   /**
-   * Item alignment (align-items on the content container: a flex column whose
-   * children are spaced by `--gap-md`; absent: stretched)
+   * Item alignment (align-items on content container)
    * When `gridCols` is set, also passed to the inner Grid
    */
   align?: 'start' | 'center' | 'end' | 'stretch';
@@ -248,6 +266,8 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
       children,
       title,
       titleAs = 'h2',
+      titleVariant = 'label',
+      titleMeta,
       actions,
       separator = false,
       tone = TONE.GHOST,
@@ -290,7 +310,12 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
     const titleElement =
       title &&
       (collapsible ? (
-        <Text as={titleAs} level="h2" className="dndev-section-title">
+        <Text
+          as={titleAs}
+          level="h2"
+          className="dndev-section-title"
+          data-title-variant={titleVariant}
+        >
           <CollapsibleTrigger asChild>
             <Stack
               as="button"
@@ -312,24 +337,41 @@ const Section = forwardRef<HTMLElement, SectionProps<'section'>>(
           </CollapsibleTrigger>
         </Text>
       ) : (
-        <Text as={titleAs} level="h2" className="dndev-section-title">
+        <Text
+          as={titleAs}
+          level="h2"
+          className="dndev-section-title"
+          data-title-variant={titleVariant}
+        >
           {title}
         </Text>
       ));
 
+    // Meta beside the heading (outside it): the heading and its meta are one start group.
+    const titleBlock =
+      titleMeta != null ? (
+        <div className="dndev-section-title-group">
+          {titleElement}
+          <span className="dndev-section-title-meta">{titleMeta}</span>
+        </div>
+      ) : (
+        titleElement
+      );
+
     // Actions sit beside the heading in a wrapper row (siblings, so never inside
     // the trigger button). No actions: the heading renders bare, as before.
-    const headerElement = actions ? (
-      <div
-        className="dndev-section-header"
-        data-collapsible={collapsible && title ? 'true' : undefined}
-      >
-        {titleElement}
-        <div className="dndev-section-actions">{actions}</div>
-      </div>
-    ) : (
-      titleElement
-    );
+    const headerElement =
+      actions || titleMeta != null ? (
+        <div
+          className="dndev-section-header"
+          data-collapsible={collapsible && title ? 'true' : undefined}
+        >
+          {titleBlock}
+          {actions && <div className="dndev-section-actions">{actions}</div>}
+        </div>
+      ) : (
+        titleElement
+      );
 
     const sectionContent = collapsible ? (
       <CollapsiblePrimitive

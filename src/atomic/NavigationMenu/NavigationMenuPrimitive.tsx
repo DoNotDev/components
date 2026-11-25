@@ -16,6 +16,7 @@ import { ChevronDown } from 'lucide-react';
 import type { ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 
 interface NavigationMenuPrimitiveProps extends ComponentProps<
   typeof RadixNavigationMenu.Root
@@ -27,8 +28,10 @@ const NavigationMenuPrimitive = ({
   className,
   children,
   vertical = false,
+  'aria-label': ariaLabel,
   ...props
 }: NavigationMenuPrimitiveProps) => {
+  const translate = useComponentTranslate();
   const orientation = vertical ? 'vertical' : 'horizontal';
 
   return (
@@ -36,6 +39,7 @@ const NavigationMenuPrimitive = ({
       orientation={orientation}
       className={cn('dndev-nav-menu-base', className)}
       data-vertical={vertical ? 'true' : 'false'}
+      aria-label={componentLabel(translate, ariaLabel, 'navigation.main')}
       {...props}
     >
       {children}

@@ -55,7 +55,7 @@
 .image-gallery:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
 }
 
 /* Empty state */
@@ -64,7 +64,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--muted);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
 }
 
 .image-gallery__placeholder {
@@ -259,8 +259,8 @@
   background-color: var(--accent);
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
+/* Phones (< 768px, BREAKPOINT_THRESHOLDS.tablet; CSS cannot read a variable in @media) */
+@media (width < 768px) {
   .image-gallery {
     --image-gallery-thumbnail-block: 45px;
   }
@@ -280,7 +280,6 @@
 /* Lightbox: full-screen dialog, the viewer owns every gesture */
 .image-gallery__lightbox.dndev-modal-content {
   inset: 0;
-  transform: none;
   width: 100vw;
   height: 100dvh;
   max-width: none;

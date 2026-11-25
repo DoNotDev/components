@@ -9,6 +9,7 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { cn } from '../../utils/helpers';
 import Button from '../Button';
 import Card from '../Card';
@@ -16,14 +17,21 @@ import Icon from '../Icons/Icon';
 import Stack from '../Stack';
 import './FeatureFallback.css';
 
-/** Props for the FeatureFallback component -- placeholder for unavailable features. */
+/**
+ * Props for the FeatureFallback component -- placeholder for unavailable features.
+ * Texts not given default to `dndev:featureFallback.*` in the UI language (the title
+ * always), with `{{featureName}}`.
+ */
 export interface FeatureFallbackProps {
   featureName: string;
+  /** Default: `featureFallback.message` ("Billing is not available") */
   message?: string;
   icon?: React.ReactNode;
   showActionButton?: boolean;
+  /** Default: `featureFallback.action` ("Billing (unavailable)") */
   actionButtonText?: string;
   className?: string;
+  /** Default: `featureFallback.help` ("This feature requires Billing to be configured.") */
   helpText?: string;
 }
 
@@ -36,10 +44,18 @@ function FeatureFallback({
   className = '',
   helpText,
 }: FeatureFallbackProps) {
-  const defaultMessage = message || `${featureName} is not available`;
-  const defaultActionText = actionButtonText || `${featureName} (Unavailable)`;
-  const defaultHelpText =
-    helpText || `This feature requires ${featureName} to be configured.`;
+  // App text as is; else the translated default (a client text node: this component
+  // stays server-safe)
+  const values = { featureName };
+  const defaultMessage = message || (
+    <ComponentLabelText labelKey="featureFallback.message" values={values} />
+  );
+  const defaultActionText = actionButtonText || (
+    <ComponentLabelText labelKey="featureFallback.action" values={values} />
+  );
+  const defaultHelpText = helpText || (
+    <ComponentLabelText labelKey="featureFallback.help" values={values} />
+  );
 
   return (
     <Card
@@ -53,7 +69,7 @@ function FeatureFallback({
           className="dndev-text-xl dndev-font-bold dndev-feature-fallback-title"
         >
           <Icon icon={icon} fallback="🔧" />
-          {featureName} Unavailable
+          <ComponentLabelText labelKey="featureFallback.title" values={values} />
         </Stack>
       }
       content={

@@ -98,7 +98,9 @@
   padding: 0 var(--gap-sm);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  line-height: 1;
+  /* Not 1: the line box must hold capital accents and descenders ("É", "g"), which the
+     overflow clipping below would cut */
+  line-height: var(--line-height);
   color: var(--foreground);
   /* Ellipsis by default */
   max-width: 100%;

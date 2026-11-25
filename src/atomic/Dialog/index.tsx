@@ -29,6 +29,7 @@ import {
 import { useSwipeToClose } from '../../hooks';
 import { SURFACE_VARIANT, type SurfaceVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT, type ButtonVariant } from '../Button';
 
 /** Preset content width for Dialog. Controls max-width of the dialog content area. */
@@ -135,6 +136,12 @@ export interface DialogProps extends Omit<
   onOpenChange?: (open: boolean) => void;
   /** Whether to show the close button */
   showClose?: boolean;
+  /**
+   * Accessible label of the close button.
+   * @default `dndev` key `actions.close` (ComponentLocaleProvider)
+   * @since 0.3.8
+   */
+  closeLabel?: string;
   /** Visual variant of the dialog (uses surface variants: default, muted, primary, secondary, accent, success, warning, destructive) */
   variant?: SurfaceVariant;
   /** Whether to disable swipe-to-close functionality */
@@ -186,11 +193,21 @@ const Dialog = ({
   variant,
   actions,
   showClose = true,
+  closeLabel,
   className,
   noSwipe = false,
   ...contentProps
 }: DialogProps) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const translate = useComponentTranslate();
+  // Radix requires a title and a description: hidden ones (translated) when not given
+  const descriptionNode = description ? (
+    <DialogDescription>{description}</DialogDescription>
+  ) : (
+    <DialogDescription className="dndev-sr-only">
+      {translate('dialog.content')}
+    </DialogDescription>
+  );
   const variantAttrs = getVariantDataAttrs({
     variant: variant !== SURFACE_VARIANT.DEFAULT ? variant : undefined,
   });
@@ -209,24 +226,14 @@ const Dialog = ({
         {title ? (
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description ? (
-              <DialogDescription>{description}</DialogDescription>
-            ) : (
-              <DialogDescription className="dndev-sr-only">
-                Dialog content
-              </DialogDescription>
-            )}
+            {descriptionNode}
           </DialogHeader>
         ) : (
           <>
-            <DialogTitle className="dndev-sr-only">Dialog</DialogTitle>
-            {description ? (
-              <DialogDescription>{description}</DialogDescription>
-            ) : (
-              <DialogDescription className="dndev-sr-only">
-                Dialog content
-              </DialogDescription>
-            )}
+            <DialogTitle className="dndev-sr-only">
+              {translate('dialog.title')}
+            </DialogTitle>
+            {descriptionNode}
           </>
         )}
         <div className="dndev-modal-body">{children}</div>
@@ -264,7 +271,7 @@ const Dialog = ({
               display="full"
               icon={X}
               className="dndev-modal-close"
-              aria-label="Close"
+              aria-label={componentLabel(translate, closeLabel, 'actions.close')}
             />
           </Close>
         )}

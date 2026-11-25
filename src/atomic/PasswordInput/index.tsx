@@ -15,6 +15,7 @@ import { useState, useId } from 'react';
 import type { InputHTMLAttributes } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import { FloatingLabel } from '../Label';
 
 import './PasswordInput.css';
@@ -37,7 +38,7 @@ export interface PasswordInputProps extends Omit<
   /**
    * Accessible names of the show / hide toggle; pass translated strings
    * (framework keys: `t('auth:passwordToggle.show')` / `t('auth:passwordToggle.hide')`).
-   * @default { show: 'Show password', hide: 'Hide password' }
+   * @default `dndev` `password.show` / `password.hide`
    */
   revealAriaLabel?: { show: string; hide: string };
 }
@@ -85,6 +86,7 @@ const PasswordInput = ({
   revealAriaLabel,
   ...props
 }: PasswordInputProps) => {
+  const translate = useComponentTranslate();
   // A passed id must reach both the input and its label
   const generatedId = useId();
   const id = idProp ?? generatedId;
@@ -129,8 +131,8 @@ const PasswordInput = ({
         onClick={toggleVisibility}
         aria-label={
           isVisible
-            ? (revealAriaLabel?.hide ?? 'Hide password')
-            : (revealAriaLabel?.show ?? 'Show password')
+            ? (revealAriaLabel?.hide ?? translate('password.hide'))
+            : (revealAriaLabel?.show ?? translate('password.show'))
         }
         aria-describedby={props['aria-describedby']}
         tabIndex={-1}

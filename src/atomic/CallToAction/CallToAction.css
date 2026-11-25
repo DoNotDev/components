@@ -38,8 +38,8 @@
 
 /* Bleed: the page width (`100cqi`: the layout's <main> content box, see Section.css) */
 .dndev-cta--bleed {
-  width: 100cqi;
-  margin-inline: calc(50% - 50cqi);
+  width: var(--page-bleed-width);
+  margin-inline: var(--page-bleed-margin);
 }
 
 /* Background image with overlay for text readability */

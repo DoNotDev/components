@@ -128,10 +128,10 @@ const NavigationMenu = ({
 
     const Link = LinkComponent === undefined ? 'a' : LinkComponent;
 
-    // WCAG: aria-label provides context for COMPACT/AUTO (icon-only when collapsed)
+    // WCAG: the label names icon-only links (COMPACT, AUTO when collapsed); never the path
     const ariaLabel =
       display === DISPLAY.COMPACT || display === DISPLAY.AUTO
-        ? `${item?.label || ''} - ${path}`
+        ? item?.label || undefined
         : undefined;
 
     const activeProps = item?.active

@@ -57,11 +57,13 @@
 import {
   createElement,
   forwardRef,
+  useId,
   type ElementType,
   type ComponentPropsWithRef,
   type ReactNode,
 } from 'react';
 
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { TONE, type Tone, type TextAlign } from '../../utils/constants';
 import { cn } from '../../utils/helpers';
 import Text, { TEXT_VARIANT } from '../Text';
@@ -163,12 +165,16 @@ const CallToAction = forwardRef<HTMLElement, CallToActionProps>(
     ref
   ) {
     const Component = as;
+    const labelId = useId();
+    // Name: the app's aria-label as is; else `dndev:callToAction.label` in the UI
+    // language, as hidden text (aria-labelledby)
+    const appLabel = props['aria-label'];
 
     return createElement(
       Component,
       {
         ref,
-        'aria-label': props['aria-label'] || 'Call to Action',
+        ...(appLabel ? { 'aria-label': appLabel } : { 'aria-labelledby': labelId }),
         className: cn(
           'dndev-cta',
           bleed && 'dndev-cta--bleed',
@@ -184,6 +190,11 @@ const CallToAction = forwardRef<HTMLElement, CallToActionProps>(
         },
         ...props,
       },
+      appLabel ? null : (
+        <span id={labelId} className="dndev-sr-only">
+          <ComponentLabelText labelKey="callToAction.label" />
+        </span>
+      ),
       <div
         className="dndev-cta-content"
         data-text-align={textAlign}

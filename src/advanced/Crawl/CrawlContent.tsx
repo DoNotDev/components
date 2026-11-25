@@ -25,6 +25,7 @@ const isClient = () =>
   typeof window !== 'undefined' && typeof document !== 'undefined';
 
 import { parseHtml } from './utils/parseHtml';
+import { useComponentTranslate } from '../../utils/translator';
 
 /** Props for the internal CrawlContent renderer. */
 export interface CrawlContentProps {
@@ -56,6 +57,7 @@ const CrawlContent = ({
   onPause,
   onResume,
 }: CrawlContentProps) => {
+  const translate = useComponentTranslate();
   const textRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -198,7 +200,7 @@ const CrawlContent = ({
               cursor: 'pointer',
               transition: 'all var(--dur-normal) var(--ease-in-out)',
             }}
-            aria-label="Resume animation"
+            aria-label={translate('crawl.resume')}
           >
             <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
               <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />

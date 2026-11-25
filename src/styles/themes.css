@@ -2,29 +2,28 @@
 
 /* ===========================
    CORE THEMES (FRAMEWORK DEFAULTS)
-   Aligned with Demo App High Contrast Themes
+   Neutral zinc surfaces, one restrained primary (blue), neutral accent.
+   Every text/surface pair holds WCAG AA (4.5:1), filled-button hover states included.
    =========================== */
 
-/* Light Theme (Default/High Contrast Light) */
-/* Framework provides ONLY light theme as minimal default */
-/* Users define their own themes (including dark) in their themes.css */
-/* Note: :root defaults in variables.css should match this */
+/* Light theme (default): <html> without a theme class, or class="light".
+   Note: :root defaults in variables.css match this block. */
 :root {
   --theme-icon: 'Sun';
   --theme-label: 'Light';
   --theme-is-dark: 0;
 
   /* Colors */
-  --foreground: #000000;
+  --foreground: #09090b; /* zinc-950 */
   --background: #ffffff;
-  --primary: #00bcd4; /* Cyan */
-  --secondary: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
-  --accent: #ff9800; /* Orange */
+  --primary: #1d4ed8; /* blue-700: 6.70:1 with white */
+  --secondary: #52525b; /* zinc-600: 7.73:1 with white */
+  --accent: #27272a; /* zinc-800: selection fills (checkbox, tabs, calendar), section titles */
 
   /* Semantic */
-  --success: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
-  --warning: #f59e0b;
-  --destructive: #dc2626;
+  --success: #047857; /* emerald-700: 5.48:1 with white */
+  --warning: #b45309; /* amber-700: 5.02:1 with white, readable as text too */
+  --destructive: #dc2626; /* red-600: 4.83:1 with white */
 
   /* Surfaces (Glow provides shading) */
   --card: var(--background);
@@ -33,10 +32,48 @@
   --popover-foreground: var(--card-foreground);
 
   /* Text Variants */
-  --primary-foreground: var(--foreground);
-  --secondary-foreground: var(--background);
-  --accent-foreground: var(--foreground);
-  --success-foreground: var(--background);
-  --warning-foreground: var(--foreground);
-  --destructive-foreground: var(--background);
+  --primary-foreground: #ffffff;
+  --secondary-foreground: #ffffff;
+  --accent-foreground: #ffffff;
+  --success-foreground: #ffffff;
+  --warning-foreground: #ffffff;
+  --destructive-foreground: #ffffff;
+}
+
+/* Dark theme: <html class="dark"> (theme store applyTheme). Offered in the theme
+   switcher of apps whose CSS declares no theme of their own (core ThemeDiscovery).
+   Class-only selector (0,1,0): an app's own `.dark` / `:root.dark` block, loaded
+   after the framework CSS, wins token by token. --muted, --muted-foreground and
+   --border derive from --foreground/--background (variables.css). */
+.dark {
+  --theme-icon: 'Moon';
+  --theme-label: 'Dark';
+  --theme-is-dark: 1;
+  color-scheme: dark;
+
+  /* Colors */
+  --foreground: #fafafa; /* zinc-50 */
+  --background: #09090b; /* zinc-950 */
+  --primary: #60a5fa; /* blue-400: 7.83:1 with --primary-foreground */
+  --secondary: #a1a1aa; /* zinc-400 */
+  --accent: #e4e4e7; /* zinc-200 */
+
+  /* Semantic */
+  --success: #34d399; /* emerald-400 */
+  --warning: #fbbf24; /* amber-400 */
+  --destructive: #f87171; /* red-400 */
+
+  /* Surfaces: cards and popovers one step above the page */
+  --card: #18181b; /* zinc-900 */
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  /* Text Variants: dark text on the light dark-theme fills */
+  --primary-foreground: #09090b;
+  --secondary-foreground: #09090b;
+  --accent-foreground: #18181b;
+  --success-foreground: #09090b;
+  --warning-foreground: #09090b;
+  --destructive-foreground: #09090b;
 }

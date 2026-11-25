@@ -12,7 +12,7 @@ describe('DatePicker calendar', () => {
       expect(screen.queryByRole('grid')).toBeNull();
 
       const trigger = screen.getByRole('button', {
-        name: 'Ouvrir le calendrier',
+        name: 'datePicker.openCalendar',
       });
       fireEvent.pointerEnter(trigger);
       fireEvent.click(trigger);

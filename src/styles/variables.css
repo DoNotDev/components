@@ -1,15 +1,10 @@
 /* packages/components/src/styles/variables.css */
 
 :root {
-  /* ===========================
-     BREAKPOINT SYSTEM - SINGLE SOURCE OF TRUTH
-     Used by: CSS @media queries, JavaScript hooks, responsive components
-     Note: CSS variables don't work in @media, so we use hardcoded px values
-     =========================== */
-  --breakpoint-mobile: 768px; /* < 768 = mobile */
-  --breakpoint-tablet: 1024px; /* 768-1023 = tablet */
-  --breakpoint-laptop: 1440px; /* 1024-1439 = laptop (key layout split) */
-  --breakpoint-desktop: 1920px; /* 1440+ = desktop */
+  /* Breakpoints: no tokens. The one source is BREAKPOINT_THRESHOLDS
+     (core/types/src/layout/breakpoint.ts: 768 tablet, 1024 laptop, 1440 desktop); CSS
+     cannot read a variable in @media, so each media query repeats the literal with a
+     comment naming the threshold. */
 
   /* ===========================
      INTERACTIVE ELEMENTS
@@ -67,7 +62,9 @@
   --z-header: 100;
   --z-sidebar: 90;
   --z-footer: 1;
-  --z-overlay: 40;
+  /* Full-screen overlays (modal backdrop, spinner and redirect overlays): the modal
+     layer, above the header, sidebar and ActionBar; the modal surface sits on top */
+  --z-overlay: var(--z-modal);
   --z-breadcrumbs: 10;
   --z-dropdown: 50;
   --z-modal: 1000;
@@ -75,7 +72,9 @@
   --z-toast: 1200;
 
   /* ===========================
-     THEME COLORS (HIGH CONTRAST LIGHT DEFAULTS)
+     THEME COLORS (NEUTRAL LIGHT DEFAULTS - match themes.css :root)
+     Intentional copy: themes.css (loaded later) overrides it; removing it breaks.
+     Dark theme: .dark in themes.css (sets color-scheme: dark).
      =========================== */
   color-scheme: light dark;
 
@@ -84,24 +83,24 @@
 
   /* Base colors */
   --background: #ffffff;
-  --foreground: #000000;
-  --text-color: #000000;
+  --foreground: #09090b; /* zinc-950 */
+  --text-color: #09090b;
 
   /* Brand colors */
-  --primary: #00bcd4; /* Cyan */
-  --primary-foreground: #000000;
-  --secondary: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
+  --primary: #1d4ed8; /* blue-700 - 6.70:1 with white */
+  --primary-foreground: #ffffff;
+  --secondary: #52525b; /* zinc-600 - 7.73:1 with white */
   --secondary-foreground: #ffffff;
-  --accent: #ff9800; /* Orange */
-  --accent-foreground: #000000;
+  --accent: #27272a; /* zinc-800 - neutral selection fill, 14.89:1 with white */
+  --accent-foreground: #ffffff;
 
   /* Status colors */
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --success: #047857; /* Emerald-700 - WCAG AA compliant (5.48:1 with white) */
   --success-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #000000;
+  --warning: #b45309; /* amber-700 - 5.02:1 with white, readable as text */
+  --warning-foreground: #ffffff;
 
   /* UI colors (Computed) */
   --muted: color-mix(in oklab, var(--foreground) 5%, var(--background));
@@ -146,7 +145,7 @@
   --radius-full: 9999px; /* pill shape */
 
   /* Component-specific radius */
-  --radius-interactive: 0; /* Buttons, links = square */
+  --radius-interactive: var(--radius-md); /* Buttons, links = rounded like cards */
   --radius-surface: var(--radius-md); /* Cards, dialogs = rounded */
   --radius-floating: var(--radius-none); /* Dropdowns, popovers = square */
 
@@ -309,6 +308,14 @@
   --content-width-standard: min(87.5rem, 100%);
   --content-width-docs: min(56.25rem, 100%);
   --content-width-narrow: min(var(--narrow-content-max), 100%);
+
+  /* Page bleed — full page width for Section / HeroSection / CallToAction `bleed` and the
+     ui breakthrough rules. `100cqi`: the nearest inline-size container, the layout's
+     <main> content box (scrollbar gutter excluded; `100vw` includes it). Custom
+     properties keep their value as written (`cqi`, `%` are resolved on the element that
+     uses them, like `100%` above), so each rule gets its own container and box. */
+  --page-bleed-width: 100cqi;
+  --page-bleed-margin: calc(50% - 50cqi);
 }
 
 /* ===========================

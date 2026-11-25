@@ -4,7 +4,23 @@ import { resolve } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+import { FR_LOCALE, render as renderInLocale } from '../../../utils/__tests__/locale';
 import NavigationMenu from '../index';
+
+describe('NavigationMenu accessible names', () => {
+  it('names an icon-only link by its label, never its path', () => {
+    render(
+      <NavigationMenu display="compact" items={[{ label: 'À propos', path: '/about' }]} />
+    );
+    const link = document.querySelector('a[href="/about"]')!;
+    expect(link.getAttribute('aria-label')).toBe('À propos');
+  });
+
+  it('names the navigation landmark in the UI language', () => {
+    renderInLocale(<NavigationMenu items={[{ label: 'Blog', path: '/blog' }]} />, FR_LOCALE);
+    expect(screen.getByRole('navigation', { name: 'Menu principal' })).toBeTruthy();
+  });
+});
 
 describe('NavigationMenu active item', () => {
   it('renders aria-current and data-active on the active link only', () => {

@@ -50,7 +50,7 @@ function CarouselSkeleton({
                 style={{
                   height: '16rem',
                   backgroundColor: 'var(--muted)',
-                  borderRadius: 'var(--radius-lg)',
+                  borderRadius: 'var(--radius-surface)',
                 }}
               />
             </div>

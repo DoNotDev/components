@@ -16,6 +16,7 @@ import { useId } from 'react';
 import type { ReactNode, ComponentProps } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import { FloatingLabel } from '../Label';
 import ScrollArea from '../ScrollArea';
 import {
@@ -58,7 +59,7 @@ export interface SelectProps extends Omit<
   value?: string;
   /** Change handler */
   onValueChange?: (value: string) => void;
-  /** Placeholder text */
+  /** Placeholder text (default: `dndev` `actions.select`) */
   placeholder?: string;
   /** Array of options */
   options?: SelectOption[];
@@ -103,7 +104,7 @@ export interface SelectProps extends Omit<
 const Select = ({
   value,
   onValueChange,
-  placeholder = 'Select an option...',
+  placeholder: placeholderProp,
   options = [],
   trigger,
   disabled,
@@ -116,6 +117,8 @@ const Select = ({
   'aria-describedby': ariaDescribedBy,
   ...props
 }: SelectProps) => {
+  const translate = useComponentTranslate();
+  const placeholder = componentLabel(translate, placeholderProp, 'actions.select');
   const id = useId();
   const hasLabel = !!label;
 
@@ -131,7 +134,7 @@ const Select = ({
       {isLoading ? (
         <div className="dndev-select-loading-container">
           <div className="dndev-animate-spin dndev-select-loading-spinner" />
-          <span>Loading...</span>
+          <span>{translate('messages.loading')}</span>
         </div>
       ) : (
         <SelectValuePrimitive placeholder={placeholder} />

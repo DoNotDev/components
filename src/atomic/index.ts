@@ -195,7 +195,11 @@ export type { NavigationMenuItem, NavigationMenuProps } from './NavigationMenu';
 export { default as PageTitle } from './PageTitle';
 export type { PageTitleProps } from './PageTitle';
 
-export { default as Pagination } from './Pagination';
+export {
+  default as Pagination,
+  DEFAULT_TABLE_PAGE_SIZE,
+  TABLE_PAGE_SIZES,
+} from './Pagination';
 export type { PaginationProps } from './Pagination';
 
 export { default as PasswordInput } from './PasswordInput';

@@ -18,6 +18,7 @@ import { FloatingLabel } from '../Label';
 import ScrollArea from '../ScrollArea';
 import Spinner from '../Spinner';
 import { withCssVars } from '../../utils/cssVars';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 
 import './Combobox.css';
 
@@ -49,11 +50,11 @@ export interface ComboboxProps {
   creatable?: boolean;
   createLabel?: string;
   clearable?: boolean;
-  /** Accessible label of the clear button (default: 'Clear') */
+  /** Accessible label of the clear button (default: `dndev` `actions.clear`) */
   clearLabel?: string;
   /**
    * `multiple` without `chips`: text shown for a selection of several values;
-   * `{{count}}` is replaced by their number (default: '{{count}} selected').
+   * `{{count}}` is replaced by their number (default: `dndev` `filters.selected`, plural).
    * One value shows its option label.
    */
   selectedLabel?: string;
@@ -63,7 +64,7 @@ export interface ComboboxProps {
   required?: boolean;
   /** Callback for a permanent "+" create action at the bottom of the dropdown */
   onCreateClick?: () => void;
-  /** Label for the create action (default: createLabel or 'Create new') */
+  /** Label for the create action (default: createLabel, else `dndev` `actions.create`) */
   createActionLabel?: string;
   /** Inline chips rendered inside the input area (for multiselect token fields) */
   chips?: React.ReactNode;
@@ -93,8 +94,8 @@ function computeTrailingPad(actionCount: number): string {
 const Combobox = ({
   value,
   onValueChange,
-  placeholder = 'Select...',
-  emptyMessage = 'No results found',
+  placeholder: placeholderProp,
+  emptyMessage: emptyMessageProp,
   options = [],
   disabled,
   isLoading,
@@ -103,10 +104,10 @@ const Combobox = ({
   label,
   info,
   creatable = false,
-  createLabel = 'Create',
+  createLabel,
   clearable = false,
-  clearLabel = 'Clear',
-  selectedLabel = '{{count}} selected',
+  clearLabel: clearLabelProp,
+  selectedLabel,
   onOpenChange,
   onSearchChange,
   required,
@@ -116,6 +117,12 @@ const Combobox = ({
   'aria-invalid': ariaInvalid,
   'aria-describedby': ariaDescribedBy,
 }: ComboboxProps) => {
+  const translate = useComponentTranslate();
+  const placeholder = componentLabel(translate, placeholderProp, 'actions.select');
+  const emptyMessage = componentLabel(translate, emptyMessageProp, 'messages.noResults');
+  const clearLabel = componentLabel(translate, clearLabelProp, 'actions.clear');
+  const createActionText =
+    createActionLabel ?? componentLabel(translate, createLabel, 'actions.create');
   const id = useId();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -154,13 +161,16 @@ const Combobox = ({
         ...filteredOptions,
         {
           value: search.trim(),
-          label: `${createLabel} "${search.trim()}"`,
+          label:
+            createLabel === undefined
+              ? translate('combobox.createOption', { value: search.trim() })
+              : `${createLabel} "${search.trim()}"`,
           isCreateOption: true,
         } as ComboboxOption & { isCreateOption?: boolean },
       ];
     }
     return filteredOptions;
-  }, [filteredOptions, showCreateOption, search, createLabel]);
+  }, [filteredOptions, showCreateOption, search, createLabel, translate]);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -301,7 +311,9 @@ const Combobox = ({
       ? ''
       : singleSelectedLabel
         ? singleSelectedLabel
-        : selectedLabel.replace('{{count}}', String(selectedValues.length));
+        : componentLabel(translate, selectedLabel, 'filters.selected', {
+            count: selectedValues.length,
+          });
 
   const getDisplayValue = () => {
     // User is actively typing/backspacing — always show the search text (even if empty)
@@ -413,7 +425,7 @@ const Combobox = ({
                     e.stopPropagation();
                     onCreateClick!();
                   }}
-                  aria-label={createActionLabel || createLabel || 'Create new'}
+                  aria-label={createActionText}
                 >
                   <Plus />
                 </button>
@@ -439,7 +451,7 @@ const Combobox = ({
                   onClick={handleChevronClick}
                   onMouseDown={(e) => e.preventDefault()}
                   tabIndex={-1}
-                  aria-label={open ? 'Close' : 'Open'}
+                  aria-label={translate(open ? 'actions.close' : 'actions.open')}
                   aria-expanded={open}
                   disabled={disabled}
                 >
@@ -496,7 +508,7 @@ const Combobox = ({
                   e.stopPropagation();
                   onCreateClick!();
                 }}
-                aria-label={createActionLabel || createLabel || 'Create new'}
+                aria-label={createActionText}
               >
                 <Plus />
               </button>

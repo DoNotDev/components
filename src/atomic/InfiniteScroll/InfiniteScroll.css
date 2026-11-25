@@ -28,6 +28,7 @@
     grid-template-columns: 1fr;
   }
 
+  /* Tablet and up (768px = BREAKPOINT_THRESHOLDS.tablet): 2 columns */
   @media (width >= 768px) {
     &[data-cols='2'],
     &[data-cols='3'],
@@ -38,16 +39,13 @@
     }
   }
 
+  /* Laptop and up (1024px = BREAKPOINT_THRESHOLDS.laptop; CSS cannot read a variable in
+     @media): 3 columns, 4 for a 4- to 6-column grid */
   @media (width >= 1024px) {
-    &[data-cols='3'],
-    &[data-cols='4'],
-    &[data-cols='5'],
-    &[data-cols='6'] {
+    &[data-cols='3'] {
       grid-template-columns: repeat(3, 1fr);
     }
-  }
 
-  @media (width >= 1280px) {
     &[data-cols='4'],
     &[data-cols='5'],
     &[data-cols='6'] {
@@ -55,7 +53,8 @@
     }
   }
 
-  @media (width >= 1536px) {
+  /* Desktop and up (1440px = BREAKPOINT_THRESHOLDS.desktop): 5 and 6 columns */
+  @media (width >= 1440px) {
     &[data-cols='5'] {
       grid-template-columns: repeat(5, 1fr);
     }

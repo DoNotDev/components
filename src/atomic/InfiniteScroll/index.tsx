@@ -20,6 +20,7 @@ import {
 
 import { GAP_VARIANT } from '../../styles/componentConstants';
 import { cn, observeElement } from '../../utils';
+import { useComponentTranslate } from '../../utils/translator';
 import Spinner from '../Spinner';
 import Stack from '../Stack';
 import './InfiniteScroll.css';
@@ -59,6 +60,7 @@ const InfiniteScroll = <T,>({
   gridCols = 3,
   gap = GAP_VARIANT.MEDIUM,
 }: InfiniteScrollProps<T>) => {
+  const translate = useComponentTranslate();
   const [isLoading, setIsLoading] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -107,7 +109,7 @@ const InfiniteScroll = <T,>({
         className="dndev-infinite-scroll-loading-container"
       >
         <Spinner />
-        <span>Loading more...</span>
+        <span>{translate('infiniteScroll.loadingMore')}</span>
       </Stack>
     </Stack>
   );
@@ -150,7 +152,7 @@ const InfiniteScroll = <T,>({
             loadingComponent || defaultLoadingComponent
           ) : (
             <div className="dndev-text-sm dndev-infinite-scroll-more-text">
-              Scroll down to load more...
+              {translate('infiniteScroll.scrollForMore')}
             </div>
           )}
         </Stack>

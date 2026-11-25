@@ -16,6 +16,7 @@ import type { HTMLAttributes, KeyboardEvent } from 'react';
 
 import { cn } from '../../utils/helpers';
 import { withCssVars } from '../../utils/cssVars';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 
 import './ColorPicker.css';
 
@@ -36,61 +37,62 @@ export const COLOR_PRESETS = {
 /** Union of available color preset palette names. */
 export type ColorPreset = (typeof COLOR_PRESETS)[keyof typeof COLOR_PRESETS];
 
+/** Preset swatches: `label` is the color's `dndev` key under `colorPicker.colors` */
 const BASIC_SWATCHES: ColorSwatch[] = [
-  { value: '#000000', label: 'Black' },
-  { value: '#ffffff', label: 'White' },
-  { value: '#6b7280', label: 'Gray' },
-  { value: '#9ca3af', label: 'Light gray' },
-  { value: '#dc2626', label: 'Red' },
-  { value: '#ea580c', label: 'Orange' },
-  { value: '#d97706', label: 'Amber' },
-  { value: '#eab308', label: 'Yellow' },
-  { value: '#84cc16', label: 'Lime' },
-  { value: '#16a34a', label: 'Green' },
-  { value: '#14b8a6', label: 'Teal' },
-  { value: '#06b6d4', label: 'Cyan' },
-  { value: '#2563eb', label: 'Blue' },
-  { value: '#7c3aed', label: 'Purple' },
-  { value: '#db2777', label: 'Pink' },
-  { value: '#e11d48', label: 'Rose' },
+  { value: '#000000', label: 'black' },
+  { value: '#ffffff', label: 'white' },
+  { value: '#6b7280', label: 'gray' },
+  { value: '#9ca3af', label: 'lightGray' },
+  { value: '#dc2626', label: 'red' },
+  { value: '#ea580c', label: 'orange' },
+  { value: '#d97706', label: 'amber' },
+  { value: '#eab308', label: 'yellow' },
+  { value: '#84cc16', label: 'lime' },
+  { value: '#16a34a', label: 'green' },
+  { value: '#14b8a6', label: 'teal' },
+  { value: '#06b6d4', label: 'cyan' },
+  { value: '#2563eb', label: 'blue' },
+  { value: '#7c3aed', label: 'purple' },
+  { value: '#db2777', label: 'pink' },
+  { value: '#e11d48', label: 'rose' },
 ];
 
 const MATERIAL_SWATCHES: ColorSwatch[] = [
-  { value: '#f44336', label: 'Red' },
-  { value: '#e91e63', label: 'Pink' },
-  { value: '#9c27b0', label: 'Purple' },
-  { value: '#673ab7', label: 'Deep purple' },
-  { value: '#3f51b5', label: 'Indigo' },
-  { value: '#2196f3', label: 'Blue' },
-  { value: '#03a9f4', label: 'Light blue' },
-  { value: '#00bcd4', label: 'Cyan' },
-  { value: '#009688', label: 'Teal' },
-  { value: '#4caf50', label: 'Green' },
-  { value: '#8bc34a', label: 'Light green' },
-  { value: '#cddc39', label: 'Lime' },
-  { value: '#ffeb3b', label: 'Yellow' },
-  { value: '#ffc107', label: 'Amber' },
-  { value: '#ff9800', label: 'Orange' },
-  { value: '#ff5722', label: 'Deep orange' },
+  { value: '#f44336', label: 'red' },
+  { value: '#e91e63', label: 'pink' },
+  { value: '#9c27b0', label: 'purple' },
+  { value: '#673ab7', label: 'deepPurple' },
+  { value: '#3f51b5', label: 'indigo' },
+  { value: '#2196f3', label: 'blue' },
+  { value: '#03a9f4', label: 'lightBlue' },
+  { value: '#00bcd4', label: 'cyan' },
+  { value: '#009688', label: 'teal' },
+  { value: '#4caf50', label: 'green' },
+  { value: '#8bc34a', label: 'lightGreen' },
+  { value: '#cddc39', label: 'lime' },
+  { value: '#ffeb3b', label: 'yellow' },
+  { value: '#ffc107', label: 'amber' },
+  { value: '#ff9800', label: 'orange' },
+  { value: '#ff5722', label: 'deepOrange' },
 ];
 
 const PASTEL_SWATCHES: ColorSwatch[] = [
-  { value: '#fecdd3', label: 'Pastel rose' },
-  { value: '#fbcfe8', label: 'Pastel pink' },
-  { value: '#e9d5ff', label: 'Pastel purple' },
-  { value: '#c7d2fe', label: 'Pastel indigo' },
-  { value: '#bfdbfe', label: 'Pastel blue' },
-  { value: '#a5f3fc', label: 'Pastel cyan' },
-  { value: '#99f6e4', label: 'Pastel teal' },
-  { value: '#bbf7d0', label: 'Pastel green' },
-  { value: '#d9f99d', label: 'Pastel lime' },
-  { value: '#fef08a', label: 'Pastel yellow' },
-  { value: '#fed7aa', label: 'Pastel orange' },
-  { value: '#fecaca', label: 'Pastel red' },
-  { value: '#e5e7eb', label: 'Pastel gray' },
-  { value: '#f5f5f4', label: 'Pastel stone' },
-  { value: '#fce7f3', label: 'Pastel fuchsia' },
-  { value: '#dbeafe', label: 'Pastel sky' },
+  { value: '#fecdd3', label: 'pastelRose' },
+  { value: '#fbcfe8', label: 'pastelPink' },
+  { value: '#e9d5ff', label: 'pastelPurple' },
+  { value: '#c7d2fe', label: 'pastelIndigo' },
+  { value: '#bfdbfe', label: 'pastelBlue' },
+  { value: '#a5f3fc', label: 'pastelCyan' },
+  { value: '#99f6e4', label: 'pastelTeal' },
+  { value: '#bbf7d0', label: 'pastelGreen' },
+  { value: '#d9f99d', label: 'pastelLime' },
+  { value: '#fef08a', label: 'pastelYellow' },
+  { value: '#fed7aa', label: 'pastelOrange' },
+  { value: '#fecaca', label: 'pastelRed' },
+  { value: '#e5e7eb', label: 'pastelGray' },
+  { value: '#f5f5f4', label: 'pastelStone' },
+  { value: '#fce7f3', label: 'pastelFuchsia' },
+  { value: '#dbeafe', label: 'pastelSky' },
 ];
 
 const PRESET_MAP: Record<ColorPreset, ColorSwatch[]> = {
@@ -119,7 +121,7 @@ export interface ColorPickerProps extends Omit<
   /** Callback when color changes. Returns hex string. */
   onChange?: (color: string) => void;
   /**
-   * Preset swatch palette name, or custom array.
+   * Preset swatch palette name (color names from `dndev` `colorPicker.colors`), or custom array.
    * @default 'basic'
    */
   swatches?: ColorPreset | ColorSwatch[];
@@ -143,7 +145,7 @@ export interface ColorPickerProps extends Omit<
    * @default false
    */
   disabled?: boolean;
-  /** Accessible label for the color picker */
+  /** Accessible label for the color picker (default: `dndev` `colorPicker.label`) */
   'aria-label'?: string;
   /** Additional CSS classes */
   className?: string;
@@ -205,12 +207,14 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
       showCustom = true,
       showHexValue = false,
       disabled = false,
-      'aria-label': ariaLabel = 'Color picker',
+      'aria-label': ariaLabelProp,
       className,
       ...props
     },
     ref
   ) {
+    const translate = useComponentTranslate();
+    const ariaLabel = componentLabel(translate, ariaLabelProp, 'colorPicker.label');
     const [internalValue, setInternalValue] = useState(defaultValue);
     const isControlled = value !== undefined;
     const currentValue = isControlled ? value : internalValue;
@@ -220,7 +224,10 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
 
     const resolvedSwatches =
       typeof swatches === 'string'
-        ? (PRESET_MAP[swatches] ?? BASIC_SWATCHES)
+        ? (PRESET_MAP[swatches] ?? BASIC_SWATCHES).map((swatch) => ({
+            value: swatch.value,
+            label: translate(`colorPicker.colors.${swatch.label}`),
+          }))
         : swatches;
 
     const selectColor = (hex: string) => {
@@ -324,12 +331,12 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
         {showCustom && (
           <div className="dndev-color-custom">
             <label className="dndev-color-custom-label">
-              <span>Custom</span>
+              <span>{translate('colorPicker.custom')}</span>
               <input
                 type="color"
                 value={currentValue}
                 disabled={disabled}
-                aria-label="Custom color"
+                aria-label={translate('colorPicker.customColor')}
                 onChange={(e) => selectColor(e.target.value)}
               />
             </label>

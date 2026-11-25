@@ -15,7 +15,8 @@
     display: none;
   }
 
-  @media (width >= 640px) {
+  /* 768px = BREAKPOINT_THRESHOLDS.tablet (CSS cannot read a variable in @media) */
+  @media (width >= 768px) {
     bottom: var(--gap-md);
     inset-inline-end: var(--gap-md);
     top: auto;
@@ -74,7 +75,8 @@
   animation: toast-slide-in-mobile var(--dur-normal) var(--ease-heavy);
 }
 
-@media (width >= 640px) {
+/* 768px = BREAKPOINT_THRESHOLDS.tablet */
+@media (width >= 768px) {
   .dndev-notification[data-state='open'] {
     animation: toast-slide-in-desktop var(--dur-normal) var(--ease-heavy);
   }

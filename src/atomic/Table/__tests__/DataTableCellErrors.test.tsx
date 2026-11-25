@@ -1,8 +1,9 @@
 // packages/components/src/atomic/Table/__tests__/DataTableCellErrors.test.tsx
 
-import { render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
+import { render } from '../../../utils/__tests__/locale';
 import { DataTable } from '../index';
 import type { TableColumn } from '../index';
 
@@ -36,14 +37,23 @@ describe('DataTable cellErrors', () => {
         pagination={false}
       />
     );
-    const prices = screen.getAllByRole('textbox', { name: 'Price' });
-    expect(prices[0]!.getAttribute('aria-invalid')).toBe('true');
-    const describedBy = prices[0]!.getAttribute('aria-describedby');
+    const cell = (row: number, col: number) =>
+      document.querySelector<HTMLElement>(`[data-edit-row="${row}"][data-edit-col="${col}"]`)!;
+    // Shown as text: the invalid mark and the message are on the cell already
+    expect(cell(0, 1).getAttribute('aria-invalid')).toBe('true');
+    expect(document.getElementById(cell(0, 1).getAttribute('aria-describedby')!)?.textContent).toBe('Price is required');
+    expect(cell(0, 1).closest('td')?.getAttribute('data-invalid')).toBe('true');
+    // The editor (on focus) keeps them
+    act(() => cell(0, 1).focus());
+    const price = cell(0, 1);
+    expect(price.tagName).toBe('INPUT');
+    expect(price.getAttribute('aria-label')).toBe('Price');
+    expect(price.getAttribute('aria-invalid')).toBe('true');
+    const describedBy = price.getAttribute('aria-describedby');
     expect(document.getElementById(describedBy!)?.textContent).toBe('Price is required');
-    expect(prices[0]!.closest('td')?.getAttribute('data-invalid')).toBe('true');
     // Other rows / cells untouched
-    expect(prices[1]!.getAttribute('aria-invalid')).toBeNull();
-    expect(screen.getAllByRole('textbox', { name: 'Name' })[0]!.getAttribute('aria-invalid')).toBeNull();
+    expect(cell(1, 1).getAttribute('aria-invalid')).toBeNull();
+    expect(cell(0, 0).getAttribute('aria-invalid')).toBeNull();
     // A cell without an editor shows the message too
     const note = screen.getByText('Note is not valid');
     expect(note.closest('td')?.getAttribute('data-invalid')).toBe('true');

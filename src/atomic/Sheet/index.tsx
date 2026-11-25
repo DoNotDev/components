@@ -18,6 +18,7 @@ import type { ComponentProps, ReactNode, RefObject } from 'react';
 import { useSwipeToClose } from '../../hooks';
 import { SURFACE_VARIANT, type SurfaceVariant } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT } from '../Button';
 
 /** Props for the Sheet component -- slide-out panel for sidebars and editing. */
@@ -59,7 +60,7 @@ export interface SheetProps extends Omit<
   /**
    * Accessible name of the close button; pass a translated string
    * (framework key: `t('dndev:sheet.close')`).
-   * @default 'Close sheet'
+   * @default `dndev` `sheet.close`
    */
   closeLabel?: string;
 }
@@ -97,9 +98,11 @@ const Sheet = ({
   className = '',
   noSwipe = false,
   size = 'default',
-  closeLabel = 'Close sheet',
+  closeLabel: closeLabelProp,
   ...contentProps
 }: SheetProps) => {
+  const translate = useComponentTranslate();
+  const closeLabel = componentLabel(translate, closeLabelProp, 'sheet.close');
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const getSwipeDirection = () => {
@@ -161,7 +164,7 @@ const Sheet = ({
                 {title}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="dndev-sr-only">
-                {description || 'Sheet content'}
+                {description || translate('sheet.content')}
               </DialogPrimitive.Description>
               <DialogPrimitive.Close ref={closeButtonRef} asChild>
                 <Button
@@ -176,10 +179,10 @@ const Sheet = ({
           ) : (
             <>
               <DialogPrimitive.Title className="dndev-sr-only">
-                Sheet
+                {translate('sheet.title')}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="dndev-sr-only">
-                {description || 'Sheet content'}
+                {description || translate('sheet.content')}
               </DialogPrimitive.Description>
               <div className="dndev-sheet-header">
                 <DialogPrimitive.Close ref={closeButtonRef} asChild>

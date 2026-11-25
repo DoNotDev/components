@@ -23,6 +23,7 @@ import {
 } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT } from '../Button';
 import { useCommandDialogClose } from '../CommandDialog';
 import Input from '../Input';
@@ -63,9 +64,9 @@ export interface CommandGroup {
 
 /** Props for the Command component -- searchable command palette. */
 export interface CommandProps {
-  /** Placeholder text for the search input */
+  /** Placeholder text for the search input (default: `dndev` `actions.searchPlaceholder`) */
   placeholder?: string;
-  /** Message to show when no results found */
+  /** Message to show when no results found (default: `dndev` `messages.noResults`) */
   emptyMessage?: string;
   /** Groups of command items */
   groups?: CommandGroup[];
@@ -97,14 +98,17 @@ export interface CommandProps {
  * @returns {JSX.Element} The rendered command palette
  */
 const Command = ({
-  placeholder = 'Search...',
-  emptyMessage = 'No results found.',
+  placeholder: placeholderProp,
+  emptyMessage: emptyMessageProp,
   groups = [],
   items = [],
   onClose: onCloseProp,
   className,
 }: CommandProps) => {
   // Use context fallback when inside CommandDialog (no cloneElement needed)
+  const translate = useComponentTranslate();
+  const placeholder = componentLabel(translate, placeholderProp, 'actions.searchPlaceholder');
+  const emptyMessage = componentLabel(translate, emptyMessageProp, 'messages.noResults');
   const contextClose = useCommandDialogClose();
   const onClose = onCloseProp ?? contextClose;
 
@@ -208,7 +212,7 @@ const Command = ({
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setSearch(e.target.value)
           }
-          aria-label="Search"
+          aria-label={translate('search.ariaLabel')}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={true}
@@ -223,7 +227,7 @@ const Command = ({
             variant={BUTTON_VARIANT.GHOST}
             icon={X}
             onClick={onClose}
-            aria-label="Close"
+            aria-label={translate('actions.close')}
             className="dndev-command-close-inline"
           />
         )}
@@ -258,9 +262,7 @@ const Command = ({
 
                 // WCAG: aria-label for icon-only items
                 const ariaLabel =
-                  hasIcon && !hasLabel
-                    ? item.label || 'Command item'
-                    : undefined;
+                  hasIcon && !hasLabel ? translate('command.item') : undefined;
 
                 return (
                   <div
@@ -312,7 +314,7 @@ const Command = ({
 
               // WCAG: aria-label for icon-only items
               const ariaLabel =
-                hasIcon && !hasLabel ? item.label || 'Command item' : undefined;
+                hasIcon && !hasLabel ? translate('command.item') : undefined;
 
               return (
                 <div

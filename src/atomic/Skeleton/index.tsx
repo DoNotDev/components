@@ -9,6 +9,9 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { useId } from 'react';
+
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { cn } from '../../utils/helpers';
 
 /** Props for the Skeleton component -- loading placeholder with animation. */
@@ -23,7 +26,10 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string | number;
   /** Number of lines for text skeleton */
   lines?: number;
-  /** Accessibility label for screen readers */
+  /**
+   * Accessible name. Default: `dndev:messages.loading` in the UI language, as hidden
+   * text that names the status (`aria-labelledby`); a given value is used as is.
+   */
   'aria-label'?: string;
 }
 
@@ -78,9 +84,23 @@ function Skeleton({
   width,
   height,
   lines = 1,
-  'aria-label': ariaLabel = 'Loading content',
+  'aria-label': ariaLabel,
   ...props
 }: SkeletonProps) {
+  const labelId = useId();
+  // The app's label as is; else the translated default, as the hidden text naming it
+  const name =
+    ariaLabel !== undefined
+      ? { 'aria-label': ariaLabel }
+      : { 'aria-labelledby': labelId };
+  const label =
+    ariaLabel !== undefined ? (
+      <span className="dndev-sr-only">{ariaLabel}</span>
+    ) : (
+      <span id={labelId} className="dndev-sr-only">
+        <ComponentLabelText labelKey="messages.loading" />
+      </span>
+    );
   const sizeStyles = sizePresets[size];
   const animationClass = animationClasses[variant];
 
@@ -101,7 +121,7 @@ function Skeleton({
       <div
         role="status"
         aria-busy="true"
-        aria-label={ariaLabel}
+        {...name}
         className={cn('dndev-grid dndev-gap-sm', className)}
         {...props}
       >
@@ -112,7 +132,7 @@ function Skeleton({
             style={i === lines - 1 ? { ...style, width: '75%' } : style}
           />
         ))}
-        <span className="dndev-sr-only">{ariaLabel}</span>
+        {label}
       </div>
     );
   }
@@ -121,12 +141,12 @@ function Skeleton({
     <div
       role="status"
       aria-busy="true"
-      aria-label={ariaLabel}
+      {...name}
       className={cn('dndev-skeleton', animationClass, className)}
       style={style}
       {...props}
     >
-      <span className="dndev-sr-only">{ariaLabel}</span>
+      {label}
     </div>
   );
 }

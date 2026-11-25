@@ -6,11 +6,16 @@ import { useState } from 'react';
 
 import './Pagination.css';
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button from '../Button';
 import Select from '../Select';
 import Text from '../Text';
 
-/** Props for the Pagination component. */
+/**
+ * Props for the Pagination component. Every label defaults to its `dndev` namespace
+ * key, translated in the UI language (ComponentLocaleProvider, mounted by the app
+ * providers); a label prop overrides it.
+ */
 export interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -20,12 +25,51 @@ export interface PaginationProps {
   onPageSizeChange?: (pageSize: number) => void;
   maxVisible?: number;
   showNavigation?: boolean;
+  /** Previous-page button. @default `dndev` key `pagination.previous` */
   previousLabel?: string;
+  /** Next-page button. @default `dndev` key `pagination.next` */
   nextLabel?: string;
+  /** Label of the page-size selector. @default `dndev` key `pagination.itemsPerPage` */
   itemsPerPagePlaceholder?: string;
+  /**
+   * Range text; `{{from}}`, `{{to}}`, `{{total}}` are replaced.
+   * @default `dndev` key `pagination.showing`
+   */
   showingLabel?: string;
+  /**
+   * Page-size choice that shows every row, when the total is unknown.
+   * @default `dndev` key `pagination.all`
+   * @since 0.3.8
+   */
+  allLabel?: string;
+  /**
+   * Accessible label of a page button; `{{page}}` is replaced by the page number.
+   * @default `dndev` key `pagination.pageNumber`
+   * @since 0.3.8
+   */
+  pageLabel?: string;
+  /**
+   * Accessible label of the pagination landmark.
+   * @default `dndev` key `pagination.label`
+   * @since 0.3.8
+   */
+  navigationLabel?: string;
   className?: string;
 }
+
+/**
+ * Rows-per-page choices of the page-size selector (with "all"); the first is the
+ * default page size ({@link DEFAULT_TABLE_PAGE_SIZE}).
+ * @since 0.3.8
+ */
+export const TABLE_PAGE_SIZES = [25, 50, 100] as const;
+
+/**
+ * Rows per page of a table that is not told (`DataTable`, `Pagination`, crud lists'
+ * stored preference, the `@donotdev/expo` DataTable): the one default.
+ * @since 0.3.8
+ */
+export const DEFAULT_TABLE_PAGE_SIZE: number = TABLE_PAGE_SIZES[0];
 
 const Pagination = ({
   currentPage,
@@ -36,13 +80,17 @@ const Pagination = ({
   onPageSizeChange,
   maxVisible = 5, // Default to 5 to fit safe on mobile (48px * 7 items ~= 336px)
   showNavigation = true,
-  previousLabel = 'Previous',
-  nextLabel = 'Next',
-  itemsPerPagePlaceholder = 'Items per page',
+  previousLabel,
+  nextLabel,
+  itemsPerPagePlaceholder,
   showingLabel,
+  allLabel,
+  pageLabel,
+  navigationLabel,
   className,
 }: PaginationProps) => {
-  const [internalPageSize, setInternalPageSize] = useState(12);
+  const translate = useComponentTranslate();
+  const [internalPageSize, setInternalPageSize] = useState<number>(DEFAULT_TABLE_PAGE_SIZE);
   const pageSize = pageSizeProp ?? internalPageSize;
   const total = totalProp;
 
@@ -65,37 +113,27 @@ const Pagination = ({
 
   const selectValue = isShowingAll ? 'all' : String(pageSize);
 
-  let pageSizeOptions: Array<{ value: string; label: string }> = [];
-  if (typeof total === 'number' && total > 0) {
-    if (total < 12) {
-      pageSizeOptions = [];
-    } else if (total < 36) {
-      pageSizeOptions = [
-        { value: '12', label: '12' },
-        { value: 'all', label: String(total) },
-      ];
-    } else if (total < 120) {
-      pageSizeOptions = [
-        { value: '12', label: '12' },
-        { value: '36', label: '36' },
-        { value: 'all', label: String(total) },
-      ];
-    } else {
-      pageSizeOptions = [
-        { value: '12', label: '12' },
-        { value: '36', label: '36' },
-        { value: '120', label: '120' },
-        { value: 'all', label: String(total) },
-      ];
-    }
-  } else {
-    pageSizeOptions = [
-      { value: '12', label: '12' },
-      { value: '36', label: '36' },
-      { value: '120', label: '120' },
-      { value: 'all', label: 'All' },
-    ];
-  }
+  // Table page sizes below the total, then "all"; the current size is always a
+  // choice (a size stored before, e.g. 12, still shows in the selector).
+  const sizes = new Set<number>(
+    TABLE_PAGE_SIZES.filter((size) => typeof total !== 'number' || size < total)
+  );
+  if (!isShowingAll) sizes.add(pageSize);
+  const pageSizeOptions: Array<{ value: string; label: string }> =
+    typeof total === 'number' && total > 0 && total <= DEFAULT_TABLE_PAGE_SIZE
+      ? []
+      : [
+          ...[...sizes]
+            .sort((a, b) => a - b)
+            .map((size) => ({ value: String(size), label: String(size) })),
+          {
+            value: 'all',
+            label:
+              typeof total === 'number' && total > 0
+                ? String(total)
+                : componentLabel(translate, allLabel, 'pagination.all'),
+          },
+        ];
 
   const showPageSizeSelector = pageSizeOptions.length > 1;
 
@@ -130,22 +168,20 @@ const Pagination = ({
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, total || 0);
-  const showInfo = typeof total === 'number' && total > 0;
 
   const showingText =
-    showInfo && showingLabel
-      ? showingLabel
-          .replace('{{from}}', String(startItem))
-          .replace('{{to}}', String(endItem))
-          .replace('{{total}}', String(total))
-      : showInfo
-        ? `Showing ${startItem}-${endItem} of ${total}`
-        : null;
+    typeof total === 'number' && total > 0
+      ? componentLabel(translate, showingLabel, 'pagination.showing', {
+          from: startItem,
+          to: endItem,
+          total,
+        })
+      : null;
 
   return (
     <nav
       role="navigation"
-      aria-label="pagination"
+      aria-label={componentLabel(translate, navigationLabel, 'pagination.label')}
       className={cn('dndev-pagination', className)}
     >
       <div className="dndev-pagination-info">
@@ -161,7 +197,11 @@ const Pagination = ({
           <>
             <span className="dndev-pagination-size-label">
               <Text level="small" variant="muted">
-                {itemsPerPagePlaceholder}
+                {componentLabel(
+                  translate,
+                  itemsPerPagePlaceholder,
+                  'pagination.itemsPerPage'
+                )}
               </Text>
             </span>
             <Select
@@ -182,7 +222,7 @@ const Pagination = ({
             icon={ChevronLeft}
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage <= 1}
-            aria-label={previousLabel}
+            aria-label={componentLabel(translate, previousLabel, 'pagination.previous')}
           />
         )}
 
@@ -203,7 +243,9 @@ const Pagination = ({
                   className="dndev-pagination-button"
                   onClick={() => onPageChange(page)}
                   aria-current={page === currentPage ? 'page' : undefined}
-                  aria-label={`Page ${page}`}
+                  aria-label={componentLabel(translate, pageLabel, 'pagination.pageNumber', {
+                    page,
+                  })}
                 >
                   {page}
                 </Button>
@@ -221,7 +263,7 @@ const Pagination = ({
               onPageChange(Math.min(effectiveTotalPages, currentPage + 1))
             }
             disabled={currentPage >= effectiveTotalPages}
-            aria-label={nextLabel}
+            aria-label={componentLabel(translate, nextLabel, 'pagination.next')}
           />
         )}
       </div>

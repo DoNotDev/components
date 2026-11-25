@@ -68,9 +68,9 @@
 
 /* Bleed: the page width (`100cqi`: the layout's <main> content box, see Section.css) */
 .dndev-hero-section--bleed {
-  width: 100cqi;
+  width: var(--page-bleed-width);
   max-width: none;
-  margin-inline: calc(50% - 50cqi);
+  margin-inline: var(--page-bleed-margin);
 }
 
 /* Background image with overlay for text readability.

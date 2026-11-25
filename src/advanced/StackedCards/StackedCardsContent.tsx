@@ -20,6 +20,7 @@ import Text from '../../atomic/Text';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import type { ComponentData } from '../../types';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import { surfaceVariants } from '../../utils/variants';
 import type { SurfaceVariantProps } from '../../utils/variants';
 
@@ -71,10 +72,11 @@ const StackedCardsContent: ComponentType<StackedCardsProps> = ({
   style,
   threshold = 0.3,
 }) => {
+  const translate = useComponentTranslate();
   return (
     <div
       className={cn('dndev-stacked-cards-container', className)}
-      aria-label={ariaLabel ?? 'Stacked cards'}
+      aria-label={ariaLabel ?? translate('stackedCards.label')}
       style={style}
     >
       {items.map((item, index) => (

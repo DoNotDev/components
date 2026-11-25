@@ -9,8 +9,11 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { useId } from 'react';
+
 import Stack from '../../atomic/Stack';
 import { GAP_VARIANT } from '../../styles/componentConstants';
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { cn } from '../../utils/helpers';
 
 /** Props for the Marquee loading skeleton. */
@@ -36,14 +39,19 @@ function MarqueeSkeleton({
   gap = GAP_VARIANT.MEDIUM,
   direction = 'horizontal',
 }: MarqueeSkeletonProps) {
+  const labelId = useId();
   const isVertical = direction === 'vertical';
 
   return (
     <div
       className={cn('dndev-relative dndev-overflow-hidden', className)}
       role="status"
-      aria-label="Loading content"
+      // Named by the hidden text: `dndev:messages.loading` in the UI language
+      aria-labelledby={labelId}
     >
+      <span id={labelId} className="dndev-sr-only">
+        <ComponentLabelText labelKey="messages.loading" />
+      </span>
       <Stack
         direction={isVertical ? 'column' : 'row'}
         align={!isVertical ? 'center' : undefined}
@@ -59,13 +67,13 @@ function MarqueeSkeleton({
                     height: '4rem',
                     width: '100%',
                     backgroundColor: 'var(--muted)',
-                    borderRadius: 'var(--radius-lg)',
+                    borderRadius: 'var(--radius-surface)',
                   }
                 : {
                     height: '4rem',
                     width: itemWidth || '4rem',
                     backgroundColor: 'var(--muted)',
-                    borderRadius: 'var(--radius-lg)',
+                    borderRadius: 'var(--radius-surface)',
                   }
             }
           />

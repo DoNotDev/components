@@ -18,6 +18,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { IconType } from '../../types';
 import { THEME_VARIANT } from '../../utils/constants';
 import { cn, getVariantDataAttrs } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Button, { BUTTON_VARIANT } from '../Button';
 import Card from '../Card';
 import Stack from '../Stack';
@@ -68,11 +69,11 @@ export interface StepperProps extends VariantProps<typeof stepperVariants> {
   showNavigation?: boolean;
   /** Show step info text "Step X of Y" (default: false) */
   showStepInfo?: boolean;
-  /** Label for previous button (default: "Previous") */
+  /** Label for previous button (default: `dndev` `actions.previous`) */
   previousLabel?: string;
-  /** Label for next button (default: "Next") */
+  /** Label for next button (default: `dndev` `actions.next`) */
   nextLabel?: string;
-  /** Template function for step info (default: "Step {current} of {total}") */
+  /** Template function for step info (default: `dndev` `stepper.stepOf`) */
   stepInfoTemplate?: (current: number, total: number) => string;
   /** Additional CSS classes */
   className?: string;
@@ -107,15 +108,18 @@ export const Stepper: ComponentType<StepperProps> = ({
   showStepNumbers = true,
   showNavigation = false,
   showStepInfo = false,
-  previousLabel = 'Previous',
-  nextLabel = 'Next',
-  stepInfoTemplate = (current, total) => `Step ${current} of ${total}`,
+  previousLabel: previousLabelProp,
+  nextLabel: nextLabelProp,
+  stepInfoTemplate,
   variant,
   className,
   onStepChange,
   activeStep: controlledStep,
   showPrimaryNavigation = false,
 }) => {
+  const translate = useComponentTranslate();
+  const previousLabel = componentLabel(translate, previousLabelProp, 'actions.previous');
+  const nextLabel = componentLabel(translate, nextLabelProp, 'actions.next');
   const [internalStep, setInternalStep] = useState(defaultStep);
   const containerRef = useRef<HTMLDivElement>(null);
   const variantAttrs = getVariantDataAttrs({ variant });
@@ -163,7 +167,7 @@ export const Stepper: ComponentType<StepperProps> = ({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
-      aria-label="Stepper navigation"
+      aria-label={translate('stepper.label')}
     >
       {/* Step Navigation */}
       <div className="dndev-stepper-nav">
@@ -194,7 +198,10 @@ export const Stepper: ComponentType<StepperProps> = ({
                     : 'pending'
               }
               aria-current={index === activeStep ? 'step' : undefined}
-              aria-label={`Go to step ${step.number}: ${step.title}`}
+              aria-label={translate('stepper.goToStep', {
+                number: step.number,
+                title: step.title,
+              })}
               {...variantAttrs}
             >
               {showStepNumbers ? step.number : index + 1}
@@ -243,7 +250,12 @@ export const Stepper: ComponentType<StepperProps> = ({
       {/* Optional Step Info */}
       {showStepInfo && (
         <div className="dndev-stepper-info">
-          {stepInfoTemplate(activeStep + 1, steps.length)}
+          {stepInfoTemplate
+            ? stepInfoTemplate(activeStep + 1, steps.length)
+            : translate('stepper.stepOf', {
+                current: activeStep + 1,
+                total: steps.length,
+              })}
         </div>
       )}
 

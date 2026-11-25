@@ -326,7 +326,7 @@ export function ImageGallery({
       tabIndex={0}
       role="region"
       aria-label={label}
-      aria-roledescription="carousel"
+      aria-roledescription={translate('carousel.roleDescription')}
     >
       {/* Main view */}
       <div

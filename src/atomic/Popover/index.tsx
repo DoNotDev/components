@@ -96,7 +96,7 @@ const Popover = ({
         align={align}
         side={side}
         sideOffset={sideOffset}
-        className={cn('dndev-floating', className)}
+        className={cn('dndev-floating dndev-z-tooltip', className)}
         {...variantAttrs}
         onInteractOutside={onInteractOutside}
       >

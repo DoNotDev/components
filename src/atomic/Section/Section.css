@@ -10,8 +10,8 @@
    gutter; `100vw` includes it and overflowed main). Without a container (components
    used without the UI layout) cqi resolves against the viewport. */
 .dndev-section-bleed {
-  width: 100cqi;
-  margin-inline: calc(50% - 50cqi);
+  width: var(--page-bleed-width);
+  margin-inline: var(--page-bleed-margin);
 }
 
 .dndev-section-bleed > .dndev-section-content {
@@ -28,18 +28,6 @@
   padding-inline: var(--section-gutter);
   padding-top: var(--gap-lg);
   padding-bottom: var(--gap-lg);
-  /* Children stacked with the Stack default gap; `align` / `justify` (data-align /
-     data-justify below) set align-items / justify-content on this flex column. */
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-md);
-}
-
-/* The content gap spaces the title (or title row) from the content: no margin of its
-   own here. Collapsible sections keep it (title and content sit in the disclosure). */
-.dndev-section-content > .dndev-section-title,
-.dndev-section-content > .dndev-section-header {
-  margin-block-end: 0;
 }
 
 /*
@@ -170,6 +158,37 @@
 
 .dndev-section-full-width[data-text-align='end'] .dndev-section-title {
   text-align: end;
+}
+
+/* titleVariant="heading": a plain heading (admin pages), not the marketing label: no
+   uppercase, no tracking. Its colour stays the label's accent (the label rule's
+   !important, on purpose) */
+.dndev-section-title[data-title-variant='heading'] {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Title + titleMeta: one start group, the meta muted beside the heading */
+.dndev-section-title-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--gap-sm) var(--gap-md);
+  min-width: 0;
+}
+
+.dndev-section-title-group > .dndev-section-title {
+  margin-block-end: 0;
+  min-width: 0;
+}
+
+.dndev-section-title-meta {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+}
+
+.dndev-section-header[data-collapsible] > .dndev-section-title-group {
+  flex: 1 1 auto;
 }
 
 /*

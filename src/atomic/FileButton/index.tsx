@@ -14,6 +14,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { useRef, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 import { buttonVariants } from '../Button';
 import Slot from '../Slot';
 import './FileButton.css';
@@ -39,13 +40,15 @@ export interface FileButtonProps
  * @author AMBROISE PARK Consulting
  */
 const FileButton = ({
-  label = 'Upload',
+  label: labelProp,
   variant = 'primary',
   className,
   asChild = false,
   onChange,
   ...inputProps
 }: FileButtonProps) => {
+  const translate = useComponentTranslate();
+  const label = labelProp ?? translate('actions.upload');
   const internalRef = useRef<HTMLInputElement | null>(null);
 
   const handleClick = () => {

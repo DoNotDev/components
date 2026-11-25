@@ -9,7 +9,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import { useId } from 'react';
+
 import Stack from '../../atomic/Stack';
+import { ComponentLabelText } from '../../utils/ComponentLabelText';
 import { cn } from '../../utils/helpers';
 
 /** Props for the Code loading skeleton. */
@@ -28,18 +31,23 @@ function CodeSkeleton({
   compact = false,
   lineCount = 10,
 }: CodeSkeletonProps) {
+  const labelId = useId();
   return (
     <div
       className={cn('dndev-relative', className)}
       style={{
         opacity: 'var(--opacity-muted)',
-        borderRadius: 'var(--radius-lg)',
+        borderRadius: 'var(--radius-surface)',
         border: '1px solid var(--border)',
         backgroundColor: 'var(--muted)',
       }}
       role="status"
-      aria-label="Loading code"
+      // Named by the hidden text: `dndev:code.loading` in the UI language
+      aria-labelledby={labelId}
     >
+      <span id={labelId} className="dndev-sr-only">
+        <ComponentLabelText labelKey="code.loading" />
+      </span>
       <Stack direction="row">
         {showLineNumbers && (
           <div

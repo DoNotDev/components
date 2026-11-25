@@ -15,6 +15,7 @@
 import type { HTMLAttributes, MouseEvent } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 
 import './SkipLink.css';
 
@@ -83,9 +84,10 @@ function handleSkipClick(e: MouseEvent<HTMLAnchorElement>, targetId: string) {
  * @returns {JSX.Element} The rendered skip link navigation
  */
 function SkipLink({ items, className, ...props }: SkipLinkProps) {
+  const translate = useComponentTranslate();
   return (
     <nav
-      aria-label="Skip links"
+      aria-label={translate('skipLink.label')}
       className={cn('dndev-skip-links', className)}
       {...props}
     >

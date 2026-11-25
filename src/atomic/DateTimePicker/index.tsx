@@ -18,16 +18,18 @@ import type { KeyboardEvent, ClipboardEvent, Ref } from 'react';
 import {
   DATE_SEGMENT_BASE,
   clampDay,
+  formatWallTime,
   getDaysInMonth,
   getLocaleInfo,
+  getSegmentLabels,
   parseAnyDate,
-  resolveLocale,
   toDate,
   toISODate,
   toISODateTime,
 } from '../../utils/date';
 import type { DateSegmentType, DateSegmentValues } from '../../utils/date';
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentLocale } from '../../utils/translator';
 import LazyCalendar, {
   preloadCalendar,
   useIdlePreloadCalendar,
@@ -64,9 +66,16 @@ interface SegmentValues extends DateSegmentValues {
 
 /** Props for the DateTimePicker component. */
 export interface DateTimePickerProps {
-  /** ISO 8601 datetime string (YYYY-MM-DDTHH:MM) or null */
+  /**
+   * Wall time `YYYY-MM-DDTHH:MM` (no zone) or null. A stored instant is shown in the
+   * app's zone: `isoToZonedWallTime(iso, timeZone)` (ComponentLocale `timeZone`).
+   */
   value?: string | null;
-  /** Emits ISO datetime string (YYYY-MM-DDTHH:MM) or null */
+  /**
+   * Emits the wall time `YYYY-MM-DDTHH:MM` or null. Store it as the instant of that wall
+   * time in the app's zone: `zonedWallTimeToISO(wall, timeZone)` (what the crud date
+   * field and the DataTable `datetime` cell editor do).
+   */
   onChange?: (datetime: string | null) => void;
   /** FloatingLabel text */
   label?: string;
@@ -80,7 +89,10 @@ export interface DateTimePickerProps {
   required?: boolean;
   /** Whether the field is disabled */
   disabled?: boolean;
-  /** BCP 47 locale for segment order. Default: navigator.language or 'fr-FR' */
+  /**
+   * BCP 47 locale: segment order, separator, placeholders ("DD", "HH") and segment
+   * names. Default: the UI language (ComponentLocaleProvider, the i18n language).
+   */
   locale?: string;
   /** Additional CSS classes */
   className?: string;
@@ -88,8 +100,17 @@ export interface DateTimePickerProps {
   id?: string;
   /** HTML name attribute for form submission */
   name?: string;
-  /** Shown in the calendar popover when the calendar cannot be loaded (translate it) */
+  /**
+   * Shown in the calendar popover when the calendar cannot be loaded.
+   * @default `dndev` key `datePicker.calendarLoadError`
+   */
   calendarErrorLabel?: string;
+  /**
+   * Accessible label of the calendar button.
+   * @default `dndev` key `datePicker.openCalendar`
+   * @since 0.3.8
+   */
+  openCalendarLabel?: string;
   /** React 19 native ref */
   ref?: Ref<HTMLDivElement>;
   /** ARIA describedby for error/helper association */
@@ -104,24 +125,13 @@ export interface DateTimePickerProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/** Time segment bounds; placeholder and aria label come from the locale (`getSegmentLabels`). */
 const TIME_SEGMENT_BASE: Record<
   'hour' | 'minute',
-  Omit<SegmentConfig, 'max'>
+  Omit<SegmentConfig, 'max' | 'placeholder' | 'ariaLabel'>
 > = {
-  hour: {
-    type: 'hour',
-    min: 0,
-    digits: 2,
-    placeholder: 'HH',
-    ariaLabel: 'Heure',
-  },
-  minute: {
-    type: 'minute',
-    min: 0,
-    digits: 2,
-    placeholder: 'MM',
-    ariaLabel: 'Minute',
-  },
+  hour: { type: 'hour', min: 0, digits: 2 },
+  minute: { type: 'minute', min: 0, digits: 2 },
 };
 
 function parseISODateTime(iso: string): SegmentValues {
@@ -170,7 +180,8 @@ function DateTimePicker({
   className,
   id: idProp,
   name,
-  calendarErrorLabel = 'The calendar could not load. Please type the date in the field.',
+  calendarErrorLabel,
+  openCalendarLabel,
   ref,
   'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
@@ -181,8 +192,11 @@ function DateTimePicker({
   const generatedId = useId();
   const id = idProp ?? generatedId;
 
-  const resolvedLocale = resolveLocale(locale);
+  // The UI language (ComponentLocaleProvider): same segments on the server and the client
+  const { language, translate } = useComponentLocale();
+  const resolvedLocale = locale ?? language;
   const { order: dateOrder, separator } = getLocaleInfo(resolvedLocale);
+  const segmentLabels = getSegmentLabels(resolvedLocale);
 
   // Full segment order: date segments + time segments
   const allSegments: SegmentType[] = [...dateOrder, 'hour', 'minute'];
@@ -236,10 +250,14 @@ function DateTimePicker({
   const currentYear = new Date().getFullYear();
 
   const segmentConfigs: SegmentConfig[] = allSegments.map((type) => {
-    if (type === 'hour') return { ...TIME_SEGMENT_BASE.hour, max: 23 };
-    if (type === 'minute') return { ...TIME_SEGMENT_BASE.minute, max: 59 };
+    if (type === 'hour') {
+      return { ...TIME_SEGMENT_BASE.hour, ...segmentLabels.hour, max: 23 };
+    }
+    if (type === 'minute') {
+      return { ...TIME_SEGMENT_BASE.minute, ...segmentLabels.minute, max: 59 };
+    }
 
-    const base = DATE_SEGMENT_BASE[type];
+    const base = { ...DATE_SEGMENT_BASE[type], ...segmentLabels[type] };
     let segMax: number;
     if (type === 'day') {
       segMax = getDaysInMonth(segments.month, segments.year);
@@ -265,16 +283,27 @@ function DateTimePicker({
     );
   }
 
+  // A wall time, announced as written (formatWallTime: never shifted by the machine's zone)
   function announceLive(date: Date) {
     setLiveText(
-      date.toLocaleString(resolvedLocale, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      formatWallTime(
+        {
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+          hour: date.getHours(),
+          minute: date.getMinutes(),
+        },
+        resolvedLocale,
+        {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }
+      )
     );
   }
 
@@ -638,7 +667,7 @@ function DateTimePicker({
         <div
           className="dndev-datepicker-field dndev-datetimepicker-field"
           role="group"
-          aria-label={label || 'Date et heure'}
+          aria-label={label || translate('datePicker.dateTime')}
           data-bare={label ? true : undefined}
           data-disabled={disabled || undefined}
           data-variant={dataVariant}
@@ -687,7 +716,11 @@ function DateTimePicker({
               onFocus={preloadCalendar}
               className="dndev-datepicker-calendar-btn dndev-inline-action-btn"
               disabled={disabled}
-              aria-label="Ouvrir le calendrier"
+              aria-label={componentLabel(
+                translate,
+                openCalendarLabel,
+                'datePicker.openCalendar'
+              )}
               tabIndex={disabled ? -1 : 0}
             >
               <Icon icon={CalendarDays} className="dndev-size-md" ariaHidden />
@@ -698,7 +731,7 @@ function DateTimePicker({
         <PopoverContent
           align="end"
           sideOffset={4}
-          className="dndev-floating dndev-datepicker-popover"
+          className="dndev-floating dndev-z-tooltip dndev-datepicker-popover"
           onCloseAutoFocus={(e: Event) => {
             e.preventDefault();
             segmentRefs.current[0]?.focus();

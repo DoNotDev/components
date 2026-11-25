@@ -149,14 +149,16 @@ export interface ButtonProps
    * Display - controls button presentation
    * - 'compact': Icon-only, no label
    * - 'full': Full button with icon + label
-   * - 'auto': Responsive based on breakpoint (default)
+   * - 'auto': Label shown, hidden where the layout has no room: collapsed sidebar,
+   *   landing header below 1440px, equal-width action bar on phones (default)
    * @default 'auto'
    */
   display?: (typeof DISPLAY)[keyof typeof DISPLAY];
   /**
    * What the button does: sets its icon (save, publish, delete…) and, for `delete`, the
    * destructive variant. An explicit `icon` or `variant` wins. With the default
-   * `display` (auto), phones show the icon only.
+   * `display` (auto), `fullWidth` buttons side by side in a Grid of 2+ cells (an
+   * equal-width action bar) show the icon only on phones (< 768px).
    */
   intent?: ButtonIntent;
   /** Icon - Lucide component, string name, or ReactNode */

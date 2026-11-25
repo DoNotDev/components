@@ -15,6 +15,7 @@ import { X } from 'lucide-react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import { cn } from '../../utils/helpers';
+import { componentLabel, useComponentTranslate } from '../../utils/translator';
 import Icon from '../Icons/Icon';
 import './Tag.css';
 
@@ -55,7 +56,7 @@ export interface TagProps
   onClick?: () => void;
   /** Callback when remove button is clicked */
   onRemove?: () => void;
-  /** Accessible label of the remove button (default: 'Remove') */
+  /** Accessible label of the remove button (default: `dndev` `form.remove`) */
   removeLabel?: string;
   /** Whether the tag is disabled */
   disabled?: boolean;
@@ -80,11 +81,13 @@ const Tag = ({
   interactive,
   onClick,
   onRemove,
-  removeLabel = 'Remove',
+  removeLabel: removeLabelProp,
   disabled,
   className,
   ...props
 }: TagProps) => {
+  const translate = useComponentTranslate();
+  const removeLabel = componentLabel(translate, removeLabelProp, 'form.remove');
   const isInteractive = interactive || !!onClick;
 
   return (

@@ -5,6 +5,7 @@ import { createRef, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { render as renderInLocale } from '../../../utils/__tests__/locale';
 import PinInput from '../index';
 import type { PinInputProps } from '../index';
 
@@ -155,7 +156,7 @@ describe('PinInput (single input, 6 slots)', () => {
   });
 
   it('masks characters with dots by default', () => {
-    render(<Controlled initial="12" mask />);
+    renderInLocale(<Controlled initial="12" mask />);
     expect(slots().slice(0, 2)).toEqual(['•', '•']);
     fireEvent.click(screen.getByRole('button', { name: 'Show PIN' }));
     expect(slots().slice(0, 2)).toEqual(['1', '2']);

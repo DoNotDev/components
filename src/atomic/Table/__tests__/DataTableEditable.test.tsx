@@ -1,9 +1,10 @@
 // packages/components/src/atomic/Table/__tests__/DataTableEditable.test.tsx
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, it, expect } from 'vitest';
 
+import { FR_LOCALE, render } from '../../../utils/__tests__/locale';
 import { parseCellText, parseClipboardGrid, setPendingCell } from '../editing';
 import type { TablePendingChanges } from '../editing';
 import { DataTable } from '../index';
@@ -113,27 +114,122 @@ describe('setPendingCell', () => {
   });
 });
 
+/** Focuses a cell: its editor opens in place of the text. */
+const edit = (row: number, col: number) => {
+  act(() => cell(row, col).focus());
+  return cell(row, col);
+};
+
 describe('DataTable editable', () => {
+  it('shows cells as text (render / option label) until focused, then the editor', () => {
+    render(<Harness />);
+    const brand = cell(0, 2);
+    expect(brand.tagName).toBe('DIV');
+    expect(brand.textContent).toBe('Brand One');
+    // No editor until focused (the texts carry the editor's role and name)
+    expect(document.querySelector('.dndev-table-cell-editor')).toBeNull();
+    const price = edit(0, 1);
+    expect(price.tagName).toBe('INPUT');
+    expect(document.activeElement).toBe(price);
+    expect(price.value).toBe('10');
+    // Text selected: typing replaces it, like a spreadsheet
+    expect(price.selectionStart).toBe(0);
+    expect(price.selectionEnd).toBe(2);
+    // Same cell, no own box: the editor sits where the text was
+    expect(price.closest('td')?.getAttribute('data-editable')).toBe('true');
+    fireEvent.blur(price);
+    expect(cell(0, 1).tagName).toBe('DIV');
+  });
+
+  it('names the focusable text after its column, with the role of its editor', () => {
+    render(<Harness />);
+    // Keyboard / screen-reader users hear which column the focus reached
+    const prices = screen.getAllByRole('textbox', { name: 'Price' });
+    expect(prices).toHaveLength(ROWS.length);
+    expect(prices[0]).toBe(cell(0, 1));
+    expect(prices[0]!.tagName).toBe('DIV');
+    expect(prices[0]!.getAttribute('tabindex')).toBe('0');
+    const brand = screen.getAllByRole('combobox', { name: 'Brand' })[0]!;
+    expect(brand).toBe(cell(0, 2));
+    expect(brand.getAttribute('aria-expanded')).toBe('false');
+    // Focus still opens the editor, same role and name
+    const editor = edit(0, 1);
+    expect(editor.tagName).toBe('INPUT');
+    expect(screen.getAllByRole('textbox', { name: 'Price' })[0]).toBe(editor);
+    expect(edit(0, 2).tagName).toBe('SELECT');
+  });
+
+  it('shows a number without render in the UI language; the editor keeps the stored text', () => {
+    render(
+      <DataTable
+        data={[{ id: 'a', price: 29.9 }, { id: 'b', price: 1234.5 }]}
+        columns={[{ key: 'price', title: 'Price', dataIndex: 'price', edit: { type: 'number' } }]}
+        editable
+        getRowId={(r) => r.id}
+        pendingChanges={{}}
+        onPendingChange={() => {}}
+        searchable={false}
+        pagination={false}
+      />,
+      FR_LOCALE
+    );
+    expect(cell(0, 0).textContent).toBe('29,9');
+    expect(cell(1, 0).textContent).toBe(new Intl.NumberFormat('fr').format(1234.5));
+    expect(edit(0, 0).value).toBe('29.9');
+  });
+
   it('stores a typed value on blur and marks the cell dirty', () => {
     render(<Harness />);
-    const price = cell(0, 1);
+    const price = edit(0, 1);
     fireEvent.change(price, { target: { value: '15' } });
     fireEvent.blur(price);
     expect(latest).toEqual({ a: { price: 15 } });
-    expect(price.closest('td')?.getAttribute('data-dirty')).toBe('true');
+    expect(cell(0, 1).closest('td')?.getAttribute('data-dirty')).toBe('true');
+    expect(cell(0, 1).textContent).toBe('15');
   });
 
-  it('Enter moves to the same column on the next row', () => {
+  it('Enter stores the value and opens the same column on the next row', () => {
     render(<Harness />);
-    const first = cell(0, 0);
-    first.focus();
-    fireEvent.keyDown(first, { key: 'Enter' });
-    expect(document.activeElement).toBe(cell(1, 0));
+    const first = edit(0, 0);
+    fireEvent.change(first, { target: { value: 'Alpha 2' } });
+    act(() => {
+      fireEvent.keyDown(first, { key: 'Enter' });
+    });
+    expect(latest).toEqual({ a: { name: 'Alpha 2' } });
+    const next = cell(1, 0);
+    expect(next.tagName).toBe('INPUT');
+    expect(document.activeElement).toBe(next);
+    // ArrowUp goes back
+    act(() => {
+      fireEvent.keyDown(next, { key: 'ArrowUp' });
+    });
+    expect(document.activeElement).toBe(cell(0, 0));
+  });
+
+  it('Esc restores the value and leaves the editor; typing a character edits again with it', () => {
+    render(<Harness />);
+    const name = edit(0, 0);
+    fireEvent.change(name, { target: { value: 'Typo' } });
+    act(() => {
+      fireEvent.keyDown(name, { key: 'Escape' });
+    });
+    const display = cell(0, 0);
+    expect(display.tagName).toBe('DIV');
+    expect(document.activeElement).toBe(display);
+    expect(latest).toEqual({});
+    act(() => {
+      fireEvent.keyDown(display, { key: 'Z' });
+    });
+    const editor = cell(0, 0);
+    expect(editor.tagName).toBe('INPUT');
+    expect(editor.value).toBe('Z');
+    fireEvent.blur(editor);
+    expect(latest).toEqual({ a: { name: 'Z' } });
   });
 
   it('pastes an Excel block across rows and columns', () => {
     render(<Harness />);
-    fireEvent.paste(cell(1, 1), {
+    fireEvent.paste(edit(1, 1), {
       clipboardData: { getData: () => '25\tBrand Two\n35,5\tb1\n' },
     });
     expect(latest).toEqual({
@@ -142,39 +238,87 @@ describe('DataTable editable', () => {
     });
   });
 
+  it('pastes a block on a focused cell shown as text (after Esc)', () => {
+    render(<Harness />);
+    act(() => {
+      fireEvent.keyDown(edit(0, 1), { key: 'Escape' });
+    });
+    fireEvent.paste(cell(0, 1), {
+      clipboardData: { getData: () => '11\n12' },
+    });
+    expect(latest).toEqual({ a: { price: 11 }, b: { price: 12 } });
+  });
+
   it('keeps a value that does not parse and flags its cell', () => {
     render(<Harness />);
-    const price = cell(0, 1);
+    const price = edit(0, 1);
     fireEvent.change(price, { target: { value: 'abc' } });
     fireEvent.blur(price);
     expect(latest).toEqual({ a: { price: 'abc' } });
     expect(cell(0, 1).closest('td')?.getAttribute('data-invalid')).toBe('true');
+    // Shown as typed (what the save will reject)
+    expect(cell(0, 1).textContent).toBe('abc');
   });
 
-  it('applies one value to every checked row from the bulk bar', () => {
+  it('a select cell shows its chevron, then the native select on focus', () => {
     render(<Harness />);
+    expect(cell(0, 2).querySelector('.dndev-table-cell-chevron')).toBeTruthy();
+    const brand = edit(0, 2);
+    expect(brand.tagName).toBe('SELECT');
+    fireEvent.change(brand, { target: { value: 'b2' } });
+    expect(latest).toEqual({ a: { brand: 'b2' } });
+  });
+
+  it('shows the selection bar in the bottom bar, not above the table', () => {
+    const { container } = render(<Harness />);
+    const before = container.querySelector('table')!.previousElementSibling;
     const boxes = screen.getAllByRole('checkbox');
     // [0] = select all, [1..] = rows
     fireEvent.click(boxes[1]!);
     fireEvent.click(boxes[3]!);
-    fireEvent.change(screen.getByLabelText('Field'), {
-      target: { value: 'brand' },
-    });
-    fireEvent.change(screen.getByLabelText('Value'), {
-      target: { value: 'b2' },
-    });
-    fireEvent.click(screen.getByText('Apply to selected'));
-    expect(latest).toEqual({ a: { brand: 'b2' } });
+    const bar = screen.getByRole('toolbar', { name: '2 selected' });
+    expect(bar.closest('.dndev-action-bar')).toBeTruthy();
+    expect(container.contains(bar)).toBe(false);
+    expect(container.querySelector('table')!.previousElementSibling).toBe(before);
+    // Apply is a labelled button (not an empty square)
+    expect(screen.getByRole('button', { name: 'Apply to selected' }).textContent).toContain(
+      'Apply to selected'
+    );
+    // Clear unchecks every row and hides the bar
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
+    expect(screen.queryByRole('toolbar')).toBeNull();
   });
 
-  it('Ctrl+Z undoes the last change and restores the editor', () => {
+  it('applies one typed value to every checked row from the selection bar', async () => {
     render(<Harness />);
-    const name = cell(0, 0);
-    fireEvent.change(name, { target: { value: 'Alpha 2' } });
-    fireEvent.blur(name);
-    expect(latest).toEqual({ a: { name: 'Alpha 2' } });
+    const boxes = screen.getAllByRole('checkbox');
+    fireEvent.click(boxes[1]!);
+    fireEvent.click(boxes[3]!);
+    // Framework Select (Radix): open the field picker, pick "Price"
+    const picker = screen.getByRole('combobox', { name: 'Field' });
     act(() => {
-      fireEvent.keyDown(name, { key: 'z', ctrlKey: true });
+      fireEvent.keyDown(picker, { key: 'Enter' });
+    });
+    fireEvent.click(await screen.findByRole('option', { name: 'Price' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Value' }), {
+      target: { value: '9,5' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply to selected' }));
+    expect(latest).toEqual({ a: { price: 9.5 }, c: { price: 9.5 } });
+  });
+
+  it('Ctrl+Z undoes the last change and restores the text', () => {
+    render(<Harness />);
+    const name = edit(0, 0);
+    fireEvent.change(name, { target: { value: 'Alpha 2' } });
+    // Enter + the blur that follows store one change (one undo step)
+    act(() => {
+      fireEvent.keyDown(name, { key: 'Enter' });
+    });
+    expect(latest).toEqual({ a: { name: 'Alpha 2' } });
+    const back = edit(0, 0);
+    act(() => {
+      fireEvent.keyDown(back, { key: 'z', ctrlKey: true });
     });
     expect(latest).toEqual({});
     expect(cell(0, 0).value).toBe('Alpha');

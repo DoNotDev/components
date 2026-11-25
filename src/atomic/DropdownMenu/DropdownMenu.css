@@ -20,15 +20,15 @@
   padding: var(--gap-sm);
 }
 
-/* Checked state styling */
+/* Checked state styling: text on the popover surface (the checkmark marks the state) */
 .dndev-interactive[data-role='menu-item'][data-state='checked'] {
-  color: var(--secondary-foreground);
+  color: var(--popover-foreground);
 }
 
-/* Checked + hover state */
+/* Checked + hover state: accent fill, its paired foreground */
 .dndev-interactive[data-role='menu-item'][data-state='checked']:hover,
 .dndev-interactive[data-role='menu-item'][data-state='checked']:focus-visible,
 .dndev-interactive[data-role='menu-item'][data-state='checked'][data-highlighted] {
   background-color: var(--accent);
-  color: var(--secondary-foreground);
+  color: var(--accent-foreground);
 }
