@@ -17,6 +17,7 @@ export * from './initRipple';
 export * from './intersectionObserver';
 export * from './isDark';
 export * from './linkComponent';
+export * from './translator';
 export * from './helpers';
 export * from './measurement';
 export * from './rtl';

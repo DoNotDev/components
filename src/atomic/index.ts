@@ -169,8 +169,21 @@ export type { InputProps } from './Input';
 
 export { default as Label, FloatingLabel } from './Label';
 export * from './Label/LabelPrimitive';
-export { FieldInfo } from './Label';
-export type { LabelProps, FloatingLabelProps, FieldInfoProps } from './Label';
+export {
+  FieldInfo,
+  FieldMessage,
+  fieldMessageAria,
+  fieldMessageState,
+} from './Label';
+export type {
+  LabelProps,
+  FloatingLabelProps,
+  FieldInfoProps,
+  FieldMessageProps,
+  FieldMessageAria,
+  FieldMessageAriaOptions,
+  FieldMessageState,
+} from './Label';
 
 export { default as List } from './List';
 export type { ListProps, ListItem } from './List';
@@ -178,6 +191,9 @@ export type { ListProps, ListItem } from './List';
 export { default as NavigationMenu } from './NavigationMenu';
 export * from './NavigationMenu/NavigationMenuPrimitive';
 export type { NavigationMenuItem, NavigationMenuProps } from './NavigationMenu';
+
+export { default as PageTitle } from './PageTitle';
+export type { PageTitleProps } from './PageTitle';
 
 export { default as Pagination } from './Pagination';
 export type { PaginationProps } from './Pagination';

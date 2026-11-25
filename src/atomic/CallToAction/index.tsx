@@ -9,7 +9,7 @@
  * Defaults to `section` for semantic HTML. Use `aside` for sidebar promotional CTAs.
  *
  * **Bleed mode:** When `bleed` is set, the CTA breaks out of `PageContainer`
- * content constraints to span the full viewport width — ideal for immersive CTAs.
+ * content constraints to span the page width (the layout's `<main>` content box, its scrollbar excluded) — ideal for immersive CTAs.
  *
  * **Background image:** When `backgroundImage` is set, a cover image fills the CTA
  * with a dark gradient overlay for text readability. Text automatically turns white.
@@ -121,7 +121,7 @@ export interface CallToActionOwnProps {
 
   /**
    * Full-width bleed — breaks out of content-width constraints
-   * to span the full viewport width
+   * to span the page width (the layout's `<main>` content box, its scrollbar excluded)
    * @default false
    */
   bleed?: boolean;

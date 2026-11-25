@@ -16,6 +16,7 @@
      Standard touch-friendly sizing for all interactive components
      =========================== */
   --touch-target: 48px;
+  --target-min: 24px; /* Minimum target size (WCAG 2.2 SC 2.5.8): text links (Button variant link) */
   --icon-sm: 16px; /* Nested icon size (inside inputs, action buttons, badges) */
   --icon-md: 24px; /* Standard standalone icon size */
   --icon-touch: 32px; /* Large icon size (reserved) */

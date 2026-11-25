@@ -4,11 +4,15 @@
    sits flush to the rounded corners. Padding is re-applied inside the body
    slot (which is the only thing that needs it). Non-cover cards keep the
    legacy layout so existing consumers render identically. */
+/* Flex column: the body grows into the height the card is given (a stretched grid or
+   flex item: equal-height cards in a row), so the footer can sit at the bottom. The
+   card takes no height of its own (no height: 100%): a parent aligned to the start
+   (Grid / Stack align="start") keeps it at its content height. */
 .dndev-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--gap-md);
   text-align: start;
-  align-content: start;
   position: relative;
 }
 
@@ -22,12 +26,20 @@
 }
 
 /* Body slot — the padded region that holds header/content/footer.
-   Only rendered when at least one body field is set (see renderCard logic). */
+   Only rendered when at least one body field is set (see renderCard logic).
+   Fills the card's remaining height; the footer sits at its bottom, so the footers
+   of a row of equal-height cards line up. */
 .dndev-card-body {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   gap: var(--gap-md);
   position: relative;
   z-index: 1;
+}
+
+.dndev-card-footer {
+  margin-block-start: auto;
 }
 
 .dndev-card[data-has-cover='true'] > .dndev-card-body {
@@ -130,7 +142,8 @@
   width: 100%;
 }
 
-/* Opt-in fill behind the media (coverBackground); transparent paints nothing. */
+/* Opt-in fill of the cover region (coverBackground), image or ReactNode cover;
+   transparent paints nothing. */
 .dndev-card-cover[data-background='muted'] {
   background: var(--muted);
 }

@@ -1,3 +1,4 @@
+'use client';
 // packages/components/src/advanced/Carousel/CarouselSkeleton.tsx
 
 /**
@@ -11,6 +12,7 @@
 
 import Stack from '../../atomic/Stack';
 import { cn } from '../../utils/helpers';
+import { useComponentTranslate } from '../../utils/translator';
 
 /** Props for the Carousel loading skeleton. */
 export type CarouselSkeletonProps = {
@@ -19,7 +21,7 @@ export type CarouselSkeletonProps = {
   showArrows?: boolean;
   showDots?: boolean;
   showProgress?: boolean;
-  /** Accessible name of the placeholder @default 'Loading carousel' */
+  /** Accessible name of the placeholder @default translated `carousel.loading` */
   loadingLabel?: string;
 };
 
@@ -29,13 +31,14 @@ function CarouselSkeleton({
   showArrows = true,
   showDots = false,
   showProgress = false,
-  loadingLabel = 'Loading carousel',
+  loadingLabel,
 }: CarouselSkeletonProps) {
+  const translate = useComponentTranslate();
   return (
     <div
       className={cn('dndev-relative dndev-overflow-hidden', className)}
       role="status"
-      aria-label={loadingLabel}
+      aria-label={loadingLabel ?? translate('carousel.loading')}
     >
       {/* Main carousel track skeleton */}
       <div className="dndev-overflow-hidden">

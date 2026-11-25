@@ -29,6 +29,7 @@ import Stack from '../../atomic/Stack';
 import { addEventListener } from '../../utils/eventListener';
 import { cn } from '../../utils/helpers';
 import { observeElement } from '../../utils/intersectionObserver';
+import { useComponentTranslate } from '../../utils/translator';
 import { isRTLLanguage } from '../../utils/rtl';
 import { withCssVars } from '../../utils/cssVars';
 
@@ -114,38 +115,38 @@ export interface CarouselProps<T = unknown> {
 
   /**
    * Accessible name of the carousel region (WAI-ARIA carousel pattern).
-   * @default 'Carousel'
+   * @default translated `carousel.label`
    */
   'aria-label'?: string;
 
-  /** Accessible name of the previous button @default 'Previous slide' */
+  /** Accessible name of the previous button @default translated `carousel.previous` */
   previousLabel?: string;
 
-  /** Accessible name of the next button @default 'Next slide' */
+  /** Accessible name of the next button @default translated `carousel.next` */
   nextLabel?: string;
 
-  /** Accessible name of the play button @default 'Play carousel' */
+  /** Accessible name of the play button @default translated `carousel.play` */
   playLabel?: string;
 
-  /** Accessible name of the pause button @default 'Pause carousel' */
+  /** Accessible name of the pause button @default translated `carousel.pause` */
   pauseLabel?: string;
 
   /**
    * Slide name, also announced on slide change (1-based).
-   * @default (current, total) => `Slide ${current} of ${total}`
+   * @default (current, total) => translated `carousel.slide`
    */
   slideLabel?: (current: number, total: number) => string;
 
   /**
    * Accessible name of a dot (1-based).
-   * @default (index) => `Go to slide ${index}`
+   * @default (index) => translated `carousel.goToSlide`
    */
   goToSlideLabel?: (index: number) => string;
 
-  /** Text shown when `items` is empty @default 'No items to display' */
+  /** Text shown when `items` is empty @default translated `carousel.empty` */
   emptyLabel?: string;
 
-  /** Accessible name of the loading placeholder @default 'Loading carousel' */
+  /** Accessible name of the loading placeholder @default translated `carousel.loading` */
   loadingLabel?: string;
 
   /** Whether to pause autoplay on hover */
@@ -174,10 +175,6 @@ export interface CarouselRef {
   getCurrentIndex: () => number;
 }
 
-const defaultSlideLabel = (current: number, total: number) =>
-  `Slide ${current} of ${total}`;
-const defaultGoToSlideLabel = (index: number) => `Go to slide ${index}`;
-
 /** Controls are hidden until hovered; keyboard focus reveals them too (WCAG 2.4.7). */
 const revealControl = (e: { currentTarget: HTMLElement }) => {
   e.currentTarget.style.opacity = '1';
@@ -202,20 +199,34 @@ function CarouselComponent<T = unknown>({
   onActiveChange,
   onSlideClick,
   keyExtractor,
-  'aria-label': ariaLabel = 'Carousel',
-  previousLabel = 'Previous slide',
-  nextLabel = 'Next slide',
-  playLabel = 'Play carousel',
-  pauseLabel = 'Pause carousel',
-  slideLabel = defaultSlideLabel,
-  goToSlideLabel = defaultGoToSlideLabel,
-  emptyLabel = 'No items to display',
+  'aria-label': ariaLabelProp,
+  previousLabel: previousLabelProp,
+  nextLabel: nextLabelProp,
+  playLabel: playLabelProp,
+  pauseLabel: pauseLabelProp,
+  slideLabel: slideLabelProp,
+  goToSlideLabel: goToSlideLabelProp,
+  emptyLabel: emptyLabelProp,
   pauseOnHover = true,
   pauseOnInvisible = true,
   showPlayPause = true,
   lazy = false,
   preloadDistance = 1,
 }: CarouselProps<T>) {
+  const translate = useComponentTranslate();
+  const ariaLabel = ariaLabelProp ?? translate('carousel.label');
+  const previousLabel = previousLabelProp ?? translate('carousel.previous');
+  const nextLabel = nextLabelProp ?? translate('carousel.next');
+  const playLabel = playLabelProp ?? translate('carousel.play');
+  const pauseLabel = pauseLabelProp ?? translate('carousel.pause');
+  const emptyLabel = emptyLabelProp ?? translate('carousel.empty');
+  const slideLabel =
+    slideLabelProp ??
+    ((current: number, total: number) =>
+      translate('carousel.slide', { current, total }));
+  const goToSlideLabel =
+    goToSlideLabelProp ??
+    ((index: number) => translate('carousel.goToSlide', { index }));
   // Normalize responsive slides — same pattern as Grid cols
   const slidesPerBreakpoint: [number, number, number, number] = Array.isArray(
     slidesToShow

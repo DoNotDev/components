@@ -253,11 +253,13 @@ export interface CardProps
    */
   coverFit?: CardCoverMedia['fit'];
   /**
-   * Opt-in background behind the cover media, visible where the image does not
-   * fill the frame (`coverFit="contain"`, transparent PNG/WebP cut-outs).
+   * Opt-in background of the cover region (the `coverAspect` frame), whatever the
+   * cover: visible where an image does not fill the frame (`coverFit="contain"`,
+   * transparent PNG/WebP cut-outs) and behind a ReactNode cover (e.g. an empty
+   * placeholder keeping the image slot of a record without a picture).
    * `'transparent'` paints nothing; `'muted'`, `'primary'`, `'secondary'` and
    * `'accent'` fill with the theme token of the same name. The reserved space
-   * (`coverAspect`) is unaffected. String / image covers only.
+   * (`coverAspect`) is unaffected.
    * @default 'transparent'
    */
   coverBackground?: MediaBackground;
@@ -478,13 +480,12 @@ const Card = ({
   };
 
   // When cover-only, the card itself owns the aspectRatio so the cover fills it.
-  // Drop `height: 100%` in cover-only mode so aspectRatio drives height from width.
+  // No height otherwise: a stretched grid / flex item fills its row (equal-height
+  // cards), a parent aligned to the start keeps the card at its content height.
   const isCoverOnly = Boolean(cover) && !hasBody;
   const rootStyle: CSSProperties = {
     width: '100%',
-    ...(isCoverOnly
-      ? { aspectRatio: coverAspect ?? '4 / 5' }
-      : { height: '100%' }),
+    ...(isCoverOnly && { aspectRatio: coverAspect ?? '4 / 5' }),
     ...style,
   };
 

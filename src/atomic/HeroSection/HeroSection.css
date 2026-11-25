@@ -66,11 +66,11 @@
   }
 }
 
-/* Bleed: full viewport width */
+/* Bleed: the page width (`100cqi`: the layout's <main> content box, see Section.css) */
 .dndev-hero-section--bleed {
-  width: 100vw;
+  width: 100cqi;
   max-width: none;
-  margin-inline: calc(50% - 50vw);
+  margin-inline: calc(50% - 50cqi);
 }
 
 /* Background image with overlay for text readability.

@@ -16,6 +16,10 @@ import type { ReactElement } from 'react';
 export interface GalleryArrowsProps {
   onPrev: () => void;
   onNext: () => void;
+  /** Accessible name of the previous button (translated by the caller) */
+  previousLabel: string;
+  /** Accessible name of the next button (translated by the caller) */
+  nextLabel: string;
   /** Extra class on both buttons */
   className?: string;
 }
@@ -47,6 +51,8 @@ const CHEVRON_NEXT = chevron('9 18 15 12 9 6');
 export function GalleryArrows({
   onPrev,
   onNext,
+  previousLabel,
+  nextLabel,
   className = '',
 }: GalleryArrowsProps): ReactElement {
   return (
@@ -55,7 +61,7 @@ export function GalleryArrows({
         type="button"
         className={`image-gallery__nav image-gallery__nav--prev ${className}`}
         onClick={onPrev}
-        aria-label="Previous image"
+        aria-label={previousLabel}
       >
         {CHEVRON_PREV}
       </button>
@@ -63,7 +69,7 @@ export function GalleryArrows({
         type="button"
         className={`image-gallery__nav image-gallery__nav--next ${className}`}
         onClick={onNext}
-        aria-label="Next image"
+        aria-label={nextLabel}
       >
         {CHEVRON_NEXT}
       </button>

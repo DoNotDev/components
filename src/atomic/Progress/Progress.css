@@ -37,3 +37,30 @@
     background-color: var(--destructive);
   }
 }
+
+/* Indeterminate (no `value`): a 40% segment travelling from before the inline start to
+   past the inline end (logical inset: mirrored in RTL); a still full bar under reduced
+   motion. Radix sets data-state="indeterminate" and leaves aria-valuenow out, so assistive
+   tech reads "busy", not "0%". */
+.dndev-progress > [data-state='indeterminate'] {
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  animation: dndev-progress-indeterminate 1.2s var(--ease-in-out) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    inset-inline-start: 0;
+    width: 100%;
+    animation: none;
+  }
+}
+
+@keyframes dndev-progress-indeterminate {
+  from {
+    inset-inline-start: -40%;
+  }
+
+  to {
+    inset-inline-start: 100%;
+  }
+}

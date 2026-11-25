@@ -4,7 +4,8 @@
 /**
  * @fileoverview Floating component
  * @description Container for one small control (a back link, a help button) that stays on
- * screen while the page scrolls, at a corner of the page content area.
+ * screen while the page scrolls, at a corner of the page content area. The control always
+ * carries the theme's medium shadow (`--shadow-md`, RTL twin), so it reads as above the page.
  *
  * @version 0.2.0
  * @since 0.3.5

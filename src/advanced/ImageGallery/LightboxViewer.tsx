@@ -88,8 +88,12 @@ export interface LightboxViewerProps {
   onIndexChange: (index: number) => void;
   /** Called when a gesture (swipe up/down, background tap) closes the viewer */
   onClose: () => void;
-  /** Alt text prefix for images */
-  altPrefix: string;
+  /** Alt text of an image (1-based position) */
+  imageAlt: (position: number) => string;
+  /** Accessible name of the previous button */
+  previousLabel: string;
+  /** Accessible name of the next button */
+  nextLabel: string;
   /** Set to the current image's frame (the open / close morph target) */
   frameRef: RefObject<HTMLDivElement | null>;
 }
@@ -109,7 +113,9 @@ export function LightboxViewer({
   index,
   onIndexChange,
   onClose,
-  altPrefix,
+  imageAlt,
+  previousLabel,
+  nextLabel,
   frameRef,
 }: LightboxViewerProps): ReactElement {
   const count = images.length;
@@ -210,7 +216,7 @@ export function LightboxViewer({
                 )}
                 <img
                   src={image.full}
-                  alt={`${altPrefix} ${i + 1} of ${count}`}
+                  alt={imageAlt(i + 1)}
                   className="image-gallery__lightbox-img"
                   decoding="async"
                   fetchPriority={i === index ? 'high' : 'low'}
@@ -231,6 +237,8 @@ export function LightboxViewer({
           </span>
           <GalleryArrows
             className="image-gallery__lightbox-nav"
+            previousLabel={previousLabel}
+            nextLabel={nextLabel}
             onPrev={() => go(-1)}
             onNext={() => go(1)}
           />

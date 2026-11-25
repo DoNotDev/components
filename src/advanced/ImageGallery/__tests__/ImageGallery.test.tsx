@@ -3,13 +3,28 @@
 import {
   act,
   fireEvent,
-  render,
+  render as rtlRender,
   screen,
   waitFor,
 } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 
+import { TranslatorProvider } from '../../../utils/translator';
 import { ImageGallery } from '../ImageGallery';
+
+/** Stand-in for the framework translation: the few English strings the tests read. */
+const english = (key: string, values?: Record<string, string | number>): string =>
+  key === 'gallery.viewImage' ? `View image ${values?.index}` : key;
+
+/** Renders inside an English translator; tests of the translator itself nest their own. */
+function render(ui: ReactElement): ReturnType<typeof rtlRender> {
+  return rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <TranslatorProvider value={english}>{children}</TranslatorProvider>
+    ),
+  });
+}
 
 const IMAGES = [
   { fullUrl: '/a-full.jpg', thumbUrl: '/a-thumb.jpg' },
@@ -337,5 +352,72 @@ describe('ImageGallery', () => {
     expect(scrollBy).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('tab', { name: 'View image 3' }));
     expect(scrollBy).toHaveBeenCalledWith({ left: 64, behavior: 'auto' });
+  });
+
+  it('without a translator provider, built-in labels are the keys', () => {
+    rtlRender(<ImageGallery images={IMAGES} />);
+    expect(screen.getByRole('region', { name: 'gallery.label' })).toBeTruthy();
+    expect(
+      screen.getByRole('tablist', { name: 'gallery.thumbnails' })
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'gallery.previous' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'gallery.next' })).toBeTruthy();
+    expect(screen.getAllByRole('tab', { name: 'gallery.viewImage' })).toHaveLength(3);
+  });
+
+  it('translates every built-in label through the translator provider', () => {
+    const translate = vi.fn(
+      (key: string, values?: Record<string, string | number>) =>
+        `${key}${values ? JSON.stringify(values) : ''}`
+    );
+    const { container } = render(
+      <TranslatorProvider value={translate}>
+        <ImageGallery images={IMAGES} />
+      </TranslatorProvider>
+    );
+    expect(screen.getByRole('region', { name: 'gallery.label' })).toBeTruthy();
+    expect(
+      screen.getByRole('tablist', { name: 'gallery.thumbnails' })
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'gallery.previous' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'gallery.next' })).toBeTruthy();
+    expect(
+      screen.getByRole('tab', { name: 'gallery.viewImage{"index":2}' })
+    ).toBeTruthy();
+    expect(
+      container
+        .querySelectorAll('.image-gallery__slide-img:not(.image-gallery__slide-placeholder)')[1]!
+        .getAttribute('alt')
+    ).toBe('gallery.imageOf{"prefix":"gallery.image","index":2,"total":3}');
+  });
+
+  it('names every control with the label props, which override the translation', () => {
+    const { container } = render(
+      <TranslatorProvider value={(key) => `T:${key}`}>
+        <ImageGallery
+          images={IMAGES}
+          label="Galerie"
+          thumbnailsLabel="Miniatures"
+          previousLabel="Précédente"
+          nextLabel="Suivante"
+          viewImageLabel={(index) => `Voir ${index}`}
+        />
+      </TranslatorProvider>
+    );
+    expect(screen.getByRole('region', { name: 'Galerie' })).toBeTruthy();
+    expect(screen.getByRole('tablist', { name: 'Miniatures' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Précédente' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Suivante' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Voir 2' })).toBeTruthy();
+    expect(screen.queryByRole('tab', { name: 'T:gallery.viewImage' })).toBeNull();
+
+    // The lightbox arrows take the same labels.
+    openLightbox(container);
+    expect(
+      document.querySelectorAll('.image-gallery__lightbox-nav[aria-label="Précédente"]')
+    ).toHaveLength(1);
+    expect(
+      document.querySelectorAll('.image-gallery__lightbox-nav[aria-label="Suivante"]')
+    ).toHaveLength(1);
   });
 });

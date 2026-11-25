@@ -32,6 +32,8 @@ export interface ProgressPrimitiveProps extends ComponentProps<
  * @example
  * ```tsx
  * <Progress value={50} variant="success" />
+ * // Unknown duration (indeterminate): no `value`
+ * <Progress aria-label="Loading" />
  * ```
  * @param {ProgressPrimitiveProps} props - The props for the progress bar
  * @returns {JSX.Element} The rendered progress bar
@@ -45,17 +47,14 @@ const ProgressPrimitiveComponent = ({
   const variantAttrs = getVariantDataAttrs({ variant });
 
   return (
-    <ProgressPrimitive.Root
-      value={value}
-      aria-valuenow={value ?? 0}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      className={cn(className)}
-      {...props}
-    >
+    <ProgressPrimitive.Root value={value} className={cn(className)} {...props}>
       <ProgressPrimitive.Indicator
         {...variantAttrs}
-        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+        style={
+          typeof value === 'number'
+            ? { transform: `translateX(-${100 - value}%)` }
+            : undefined
+        }
       />
     </ProgressPrimitive.Root>
   );

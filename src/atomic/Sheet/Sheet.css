@@ -16,9 +16,11 @@
   /* Motion Physics: Base state */
   will-change: transform, opacity;
 
-  /* Open state animation - "Heavy" ease for premium feel */
+  /* Open: --dur-slow (500ms, Material 3 long2; shadcn Sheet open 500ms) with the heavy
+     ease's soft landing. Close: --dur-normal (300ms). A screen-tall panel crosses more
+     distance than a menu (--dur-normal) but stays out of the 700ms+ "extra long" range. */
   &[data-state='open'] {
-    animation: sheet-slide-in var(--dur-heavy) var(--ease-heavy);
+    animation: sheet-slide-in var(--dur-slow) var(--ease-heavy);
   }
 
   /* Closed state animation */
@@ -144,11 +146,11 @@
   flex-shrink: 0;
   /* Never shrink */
   min-height: var(--touch-target);
-  /* No padding - tight layout: [ Title               X ] */
+  /* No block padding - tight layout: [ Title               X ] */
   padding-block: 0;
-  /* RTL-aware: padding on logical start only */
-  padding-inline-start: var(--gap-md);
-  padding-inline-end: 0; /* X button has its own spacing */
+  /* Same inline inset as the body (.dndev-sheet-body padding): the title starts and
+     the X button ends on the content's edges */
+  padding-inline: var(--gap-md);
   border-bottom: var(--border-hairline) solid var(--line-1);
   /* Separator */
 
@@ -212,9 +214,8 @@
   /* Position relative - flex handles alignment */
   position: relative;
   margin-inline-start: auto;
-  /* Push to end (RTL-aware: end = right in LTR, left in RTL) */
-  margin-inline-end: var(--gap-sm);
-  /* Spacing from edge - use margin not padding to keep icon centered */
+  /* Push to end (RTL-aware: end = right in LTR, left in RTL); the header's inline
+     padding is the inset from the edge */
   opacity: var(--opacity-muted);
 
   &:hover {

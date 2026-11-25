@@ -74,6 +74,10 @@ export interface SelectProps extends Omit<
   info?: string;
   /** Whether the field is required - shows asterisk indicator */
   required?: boolean;
+  /** Invalid state of the trigger (the focusable control), e.g. from `fieldMessageAria` */
+  'aria-invalid'?: boolean | 'true' | 'false';
+  /** Ids describing the trigger (the focusable control), e.g. a `FieldMessage` slot */
+  'aria-describedby'?: string;
 }
 
 /**
@@ -108,6 +112,8 @@ const Select = ({
   label,
   info,
   required,
+  'aria-invalid': ariaInvalid,
+  'aria-describedby': ariaDescribedBy,
   ...props
 }: SelectProps) => {
   const id = useId();
@@ -119,6 +125,8 @@ const Select = ({
       className="dndev-input dndev-select-trigger"
       disabled={disabled}
       data-bare={hasLabel || undefined}
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedBy}
     >
       {isLoading ? (
         <div className="dndev-select-loading-container">
@@ -139,6 +147,8 @@ const Select = ({
       asChild
       disabled={disabled}
       className="dndev-input dndev-select-trigger"
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedBy}
     >
       {trigger}
     </SelectTriggerPrimitive>

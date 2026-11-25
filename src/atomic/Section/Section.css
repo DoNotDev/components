@@ -5,10 +5,13 @@
   width: 100%;
 }
 
-/* Bleed: background spans full viewport width, content stays padded */
+/* Bleed: background spans the page width, content stays padded. `cqi`: the nearest
+   inline-size container, the layout's <main> (its content box, without the scrollbar
+   gutter; `100vw` includes it and overflowed main). Without a container (components
+   used without the UI layout) cqi resolves against the viewport. */
 .dndev-section-bleed {
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  width: 100cqi;
+  margin-inline: calc(50% - 50cqi);
 }
 
 .dndev-section-bleed > .dndev-section-content {
@@ -25,6 +28,18 @@
   padding-inline: var(--section-gutter);
   padding-top: var(--gap-lg);
   padding-bottom: var(--gap-lg);
+  /* Children stacked with the Stack default gap; `align` / `justify` (data-align /
+     data-justify below) set align-items / justify-content on this flex column. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+/* The content gap spaces the title (or title row) from the content: no margin of its
+   own here. Collapsible sections keep it (title and content sit in the disclosure). */
+.dndev-section-content > .dndev-section-title,
+.dndev-section-content > .dndev-section-header {
+  margin-block-end: 0;
 }
 
 /*

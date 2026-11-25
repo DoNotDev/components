@@ -33,7 +33,7 @@ const CarouselContent = lazy(() => import('./CarouselContent'));
  * - Lazy loading by default
  * - WAI-ARIA carousel pattern: labelled region, focusable controls, off-screen
  *   slides inert, polite announcements (silent while autoplay rotates)
- * - Translatable labels (`previousLabel`, `nextLabel`, `slideLabel`, ...; English defaults)
+ * - Labels translated by the component (`dndev:carousel.*`); `previousLabel`, `nextLabel`, `slideLabel`, ... override
  * - SSR/CSR compatible
  * - Responsive and RTL-aware
  *

@@ -23,7 +23,7 @@
  * </Section>
  *
  * // Full-width bleed — content breaks out of PageContainer constraints
- * // Use for hero images, maps, galleries, videos, or any full-viewport content
+ * // Use for hero images, maps, galleries, videos, or any full-page-width content
  * <Section bleed>
  *   <ImageGallery images={listing.images} />
  * </Section>
@@ -124,7 +124,8 @@ export interface SectionOwnProps {
   textAlign?: TextAlign;
 
   /**
-   * Item alignment (align-items on content container)
+   * Item alignment (align-items on the content container: a flex column whose
+   * children are spaced by `--gap-md`; absent: stretched)
    * When `gridCols` is set, also passed to the inner Grid
    */
   align?: 'start' | 'center' | 'end' | 'stretch';
@@ -156,7 +157,7 @@ export interface SectionOwnProps {
 
   /**
    * Full-width bleed — content breaks out of content-width constraints
-   * to span the full viewport width. Useful for hero images, maps, videos.
+   * to span the page width (the layout's `<main>` content box, its scrollbar excluded). Useful for hero images, maps, videos.
    * @default false
    */
   bleed?: boolean;
@@ -213,7 +214,7 @@ export type SectionProps<T extends ElementType = 'section'> = SectionOwnProps &
  * **Content width:** `contentWidth` constrains inner content independently of
  * PageContainer (`'standard'` / `'docs'` / `'narrow'`). Background stays full-width.
  *
- * **Bleed:** `bleed` breaks out of PageContainer to span full viewport width.
+ * **Bleed:** `bleed` breaks out of PageContainer to span the page width (the layout's `<main>` content box, its scrollbar excluded).
  *
  * **Nested:** a Section inside another Section's content is flush (no own padding, width or centring; a `tone` other than `ghost` keeps its padding).
  * **Consecutive:** a `ghost` Section directly after a `ghost` Section has no top padding, so the two share one gap (`--gap-lg`) instead of doubling it; a toned Section keeps its padding on both sides.

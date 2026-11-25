@@ -67,6 +67,10 @@ export interface ComboboxProps {
   createActionLabel?: string;
   /** Inline chips rendered inside the input area (for multiselect token fields) */
   chips?: React.ReactNode;
+  /** Invalid state of the input (the focusable control), e.g. from `fieldMessageAria` */
+  'aria-invalid'?: boolean | 'true' | 'false';
+  /** Ids describing the input (the focusable control), e.g. a `FieldMessage` slot */
+  'aria-describedby'?: string;
 }
 
 /**
@@ -109,6 +113,8 @@ const Combobox = ({
   onCreateClick,
   createActionLabel,
   chips,
+  'aria-invalid': ariaInvalid,
+  'aria-describedby': ariaDescribedBy,
 }: ComboboxProps) => {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -394,6 +400,8 @@ const Combobox = ({
               aria-controls={`${id}-listbox`}
               autoComplete="one-time-code"
               aria-autocomplete="list"
+              aria-invalid={ariaInvalid}
+              aria-describedby={ariaDescribedBy}
               data-variant={variant}
             />
             <div className="dndev-combobox-trailing">
@@ -475,6 +483,8 @@ const Combobox = ({
             aria-controls={`${id}-listbox`}
             autoComplete="one-time-code"
             aria-autocomplete="list"
+            aria-invalid={ariaInvalid}
+            aria-describedby={ariaDescribedBy}
             data-variant={variant}
           />
           <div className="dndev-combobox-trailing">

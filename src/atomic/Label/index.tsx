@@ -80,3 +80,12 @@ const Label = ({
 export default Label;
 export { FloatingLabel, type FloatingLabelProps };
 export { FieldInfo, type FieldInfoProps } from './FieldInfo';
+export {
+  FieldMessage,
+  fieldMessageAria,
+  fieldMessageState,
+  type FieldMessageProps,
+  type FieldMessageAria,
+  type FieldMessageAriaOptions,
+  type FieldMessageState,
+} from './FieldMessage';

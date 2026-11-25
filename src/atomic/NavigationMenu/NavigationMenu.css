@@ -78,8 +78,11 @@
   }
 }
 
-/* Active page: top-level links, overflow dropdown links, sub-menu links */
+/* Active page: top-level links, overflow dropdown links, sub-menu links, and a
+   single-route header Button link (HeaderNavigation `path`). Same tint everywhere. */
 .dndev-interactive[data-role='menu-item'][data-active='true'],
+.dndev-interactive.dndev-button[data-active='true'],
+.dndev-interactive.dndev-button[data-active='true']:hover,
 .dndev-nav-menu-item-container[data-active='true'] {
   background-color: rgb(from var(--accent) r g b / 0.5);
 }

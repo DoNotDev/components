@@ -73,6 +73,20 @@
   border-color: var(--ring);
 }
 
+/* Invalid control inside (aria-invalid, set by fieldMessageAria): the fieldset is the visible
+   border (the input's own border is transparent here), so it carries the error colour, at
+   rest, on hover and while focused; the legend too (colour + the FieldMessage icon and text,
+   never colour alone). */
+.dndev-floating-fieldset:has([aria-invalid='true']),
+.dndev-floating-fieldset:has([aria-invalid='true']):hover,
+.dndev-floating-fieldset:has([aria-invalid='true']):focus-within {
+  border-color: var(--destructive);
+}
+
+.dndev-floating-fieldset:has([aria-invalid='true']) .dndev-floating-legend {
+  color: var(--destructive);
+}
+
 .dndev-floating-fieldset[data-disabled='true'] {
   opacity: var(--opacity-muted);
   cursor: not-allowed;
@@ -170,4 +184,32 @@
   border: none;
   box-shadow: none;
   background: transparent;
+}
+
+/* FieldMessage: the one message slot under a form control (helper text, or the error in
+   its place). Empty, it also carries `dndev-sr-only` (out of the flow: no blank line, no
+   flex / grid gap under a field without a message) while its live region stays mounted
+   (ARIA19: present before the message is written into it). */
+.dndev-field-message {
+  display: block;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height);
+  color: var(--muted-foreground);
+  text-align: start;
+}
+
+.dndev-field-message[data-state='error'] {
+  color: var(--destructive);
+}
+
+.dndev-field-message-live {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-sm);
+}
+
+.dndev-field-message-icon {
+  flex-shrink: 0;
+  inline-size: 1.15em;
+  block-size: 1lh;
 }

@@ -8,7 +8,7 @@
  * **Polymorphic Component**: Can render as `section`, `header`, or `div` based on semantic needs.
  *
  * **Bleed mode:** When `bleed` is set, the hero breaks out of `PageContainer`
- * content constraints to span the full viewport width — ideal for immersive hero banners.
+ * content constraints to span the page width (the layout's `<main>` content box, its scrollbar excluded) — ideal for immersive hero banners.
  *
  * **Background image:** When `backgroundImage` is set, a cover image fills the hero
  * with a dark gradient overlay for text readability. Text automatically turns white.
@@ -107,7 +107,7 @@ export interface HeroSectionOwnProps extends VariantProps<
   tone?: Tone;
   /**
    * Full-width bleed — breaks out of content-width constraints
-   * to span the full viewport width
+   * to span the page width (the layout's `<main>` content box, its scrollbar excluded)
    * @default false
    */
   bleed?: boolean;
@@ -148,7 +148,7 @@ export type HeroSectionProps<T extends ElementType = 'section'> =
 
 /**
  * Hero section: title (div styled at h1 level, not an h1 element), subtitle, optional badge and children (actions).
- * `bleed` spans the viewport width; `backgroundImage` fills it with a cover photo
+ * `bleed` spans the page width (the layout's `<main>` content box); `backgroundImage` fills it with a cover photo
  * under a readability scrim (text turns white).
  *
  * @example

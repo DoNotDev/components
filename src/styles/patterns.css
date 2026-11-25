@@ -508,6 +508,21 @@
     transform var(--dur-normal) var(--ease-in-out),
     box-shadow var(--dur-normal) var(--ease-in-out);
 
+  /* Enter / exit: every floating surface (popover, dropdown, select, menu, date picker,
+     navigation viewport) opens and closes as the dialog does (dialog-in / dialog-out:
+     fade + slight scale, --dur-normal, --ease-in-out). Radix sets data-state and keeps
+     the closed surface mounted until floating-out ends. `scale`, not `transform`: the
+     surface's own transform (translateZ) stays. */
+  transform-origin: var(--radix-popper-transform-origin);
+
+  &[data-state='open'] {
+    animation: floating-in var(--dur-normal) var(--ease-in-out);
+  }
+
+  &[data-state='closed'] {
+    animation: floating-out var(--dur-normal) var(--ease-in-out);
+  }
+
   /* Override end for dark mode (color-mix with 0% doesn't work) */
   .dark & {
     --floating-glow-end: color-mix(
@@ -729,7 +744,8 @@
     --ripple-opacity: 0;
   }
 
-  &[data-display='compact'] {
+  /* Icon-only square. Not in menu panels: their labels are always visible (DropdownMenu.css) */
+  &[data-display='compact']:not(.dndev-menu-content *) {
     width: var(--touch-target);
     height: var(--touch-target);
     padding: 0;
@@ -845,13 +861,18 @@
     }
   }
 
-  /* Link variant — text-only, no background shift */
+  /* Link variant — a text link: no background shift; as wide as its text and in its
+     text's size (inline-flex + fit-content: never stretched to a column's width with the
+     label centred in it, so it starts where the column's text starts); at least the
+     minimum target height (WCAG 2.5.8), the label centred in it vertically. */
   &[data-variant='link'] {
+    display: inline-flex;
+    width: fit-content;
     background: transparent;
     color: var(--muted-foreground);
     padding: 0;
-    min-height: auto;
-    font-size: var(--font-size-base);
+    min-height: var(--target-min);
+    font-size: inherit;
     text-decoration: underline;
     text-underline-offset: 2px;
     transition: color var(--dur-fast) ease-out;
@@ -903,8 +924,8 @@
     position: relative;
     text-decoration: none;
 
-    /* Remove gap when compact (no label to space from) */
-    &[data-display='compact'] {
+    /* Remove gap when compact (no label to space from); menu panels always show the label */
+    &[data-display='compact']:not(.dndev-menu-content *) {
       gap: 0 !important;
     }
   }
@@ -1177,8 +1198,8 @@
     padding-inline-end: var(--gap-sm);
     color: var(--popover-foreground);
 
-    /* Remove padding if compact (icon alone) */
-    &[data-display='compact'] {
+    /* Remove padding if compact (icon alone); menu panels always show the label */
+    &[data-display='compact']:not(.dndev-menu-content *) {
       padding-inline-start: 0 !important;
       padding-inline-end: 0 !important;
     }
@@ -1346,6 +1367,28 @@
   to {
     opacity: 0;
     transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+@keyframes floating-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes floating-out {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.96;
   }
 }
 

@@ -69,3 +69,14 @@
 .dndev-floating-control[data-placement='bottom-end'] {
   inset-inline-end: var(--floating-control-fixed-gutter);
 }
+
+/* Floating = above the page at every placement: the control carries the theme's medium
+   elevation, always (not only once stuck), with its own radius. The RTL twin mirrors the
+   x-offset (same rule as [data-shadow='md'], utilities.css). */
+.dndev-floating-control > * {
+  box-shadow: var(--shadow-md);
+
+  &:dir(rtl) {
+    box-shadow: var(--shadow-md-rtl);
+  }
+}

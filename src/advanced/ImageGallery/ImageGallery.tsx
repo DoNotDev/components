@@ -20,6 +20,7 @@ import type { MediaBackground } from '../../types';
 import { withCssVars } from '../../utils/cssVars';
 import { handleImageError } from '../../utils/imageRetry';
 import { ResponsiveImg } from '../../utils/responsiveImage';
+import { useComponentTranslate } from '../../utils/translator';
 import { GalleryArrows } from './GalleryArrows';
 import { LightboxViewer, prepareFrame } from './LightboxViewer';
 import { blockContextMenu } from './protectImages';
@@ -53,7 +54,10 @@ export interface ImageGalleryProps {
    * @default '16/9'
    */
   aspectRatio?: string;
-  /** Alt text prefix for images */
+  /**
+   * Alt text prefix for images ("{prefix} 2 / 5", `gallery.imageOf`).
+   * @default translated `gallery.image`
+   */
   altPrefix?: string;
   /** Callback when image changes */
   onImageChange?: (index: number) => void;
@@ -81,6 +85,32 @@ export interface ImageGalleryProps {
    * slide), e.g. the source of a fly-to-cart ({@link flyTo}).
    */
   imageRef?: Ref<HTMLImageElement>;
+  /**
+   * Accessible name of the gallery region. Every built-in string is translated by the
+   * component (`dndev:gallery.*`); pass one to override it.
+   * @default translated `gallery.label`
+   */
+  label?: string;
+  /**
+   * Accessible name of the thumbnail strip.
+   * @default translated `gallery.thumbnails`
+   */
+  thumbnailsLabel?: string;
+  /**
+   * Accessible name of the previous button (inline and lightbox).
+   * @default translated `gallery.previous`
+   */
+  previousLabel?: string;
+  /**
+   * Accessible name of the next button (inline and lightbox).
+   * @default translated `gallery.next`
+   */
+  nextLabel?: string;
+  /**
+   * Accessible name of a thumbnail (1-based).
+   * @default (index) => translated `gallery.viewImage`
+   */
+  viewImageLabel?: (index: number) => string;
 }
 
 /** `view-transition-name` of the image morphing between the gallery and the lightbox. */
@@ -147,13 +177,34 @@ function normalizeImage(
 export function ImageGallery({
   images,
   aspectRatio = '16/9',
-  altPrefix = 'Image',
+  altPrefix: altPrefixProp,
   onImageChange,
   nobox,
   fit = 'cover',
   background = 'transparent',
   imageRef,
+  label: labelProp,
+  thumbnailsLabel: thumbnailsLabelProp,
+  previousLabel: previousLabelProp,
+  nextLabel: nextLabelProp,
+  viewImageLabel: viewImageLabelProp,
 }: ImageGalleryProps): ReactElement {
+  const translate = useComponentTranslate();
+  const label = labelProp ?? translate('gallery.label');
+  const thumbnailsLabel =
+    thumbnailsLabelProp ?? translate('gallery.thumbnails');
+  const previousLabel = previousLabelProp ?? translate('gallery.previous');
+  const nextLabel = nextLabelProp ?? translate('gallery.next');
+  const viewImageLabel =
+    viewImageLabelProp ??
+    ((index: number) => translate('gallery.viewImage', { index }));
+  const altPrefix = altPrefixProp ?? translate('gallery.image');
+  const imageAlt = (position: number) =>
+    translate('gallery.imageOf', {
+      prefix: altPrefix,
+      index: position,
+      total: images.length,
+    });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
@@ -261,7 +312,7 @@ export function ImageGallery({
         className="image-gallery image-gallery--empty"
         style={{ aspectRatio }}
       >
-        <span className="image-gallery__placeholder">No images</span>
+        <span className="image-gallery__placeholder">{translate('gallery.empty')}</span>
       </div>
     );
   }
@@ -274,7 +325,7 @@ export function ImageGallery({
       onContextMenu={blockContextMenu}
       tabIndex={0}
       role="region"
-      aria-label="Image gallery"
+      aria-label={label}
       aria-roledescription="carousel"
     >
       {/* Main view */}
@@ -316,7 +367,7 @@ export function ImageGallery({
                 <ResponsiveImg
                   ref={index === clampedIndex ? imageRef : undefined}
                   image={{ fullUrl: img.full, thumbUrl: img.thumb }}
-                  alt={`${altPrefix} ${index + 1} of ${count}`}
+                  alt={imageAlt(index + 1)}
                   className="image-gallery__slide-img"
                   data-fit={img.fit}
                   loading={loading}
@@ -334,6 +385,8 @@ export function ImageGallery({
           <GalleryArrows
             onPrev={() => goToImage(clampedIndex - 1)}
             onNext={() => goToImage(clampedIndex + 1)}
+            previousLabel={previousLabel}
+            nextLabel={nextLabel}
           />
         )}
       </div>
@@ -344,7 +397,7 @@ export function ImageGallery({
           ref={thumbnailsRef}
           className="image-gallery__thumbnails"
           role="tablist"
-          aria-label="Image thumbnails"
+          aria-label={thumbnailsLabel}
         >
           {normalizedImages.map((img, index) => (
             <button
@@ -352,7 +405,7 @@ export function ImageGallery({
               type="button"
               role="tab"
               aria-selected={index === clampedIndex}
-              aria-label={`View image ${index + 1}`}
+              aria-label={viewImageLabel(index + 1)}
               className={`image-gallery__thumbnail ${
                 index === clampedIndex
                   ? 'image-gallery__thumbnail--selected'
@@ -387,7 +440,9 @@ export function ImageGallery({
             index={clampedIndex}
             onIndexChange={(index) => goToImage(index, true)}
             onClose={() => setLightbox(false)}
-            altPrefix={altPrefix}
+            imageAlt={imageAlt}
+            previousLabel={previousLabel}
+            nextLabel={nextLabel}
             frameRef={lightboxFrameRef}
           />
         </Dialog>

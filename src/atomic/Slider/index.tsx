@@ -36,6 +36,10 @@ export interface SliderProps extends ComponentProps<typeof SliderRadix.Root> {
   'aria-label'?: string;
   /** Id of the element labelling the slider. Applied to each thumb. */
   'aria-labelledby'?: string;
+  /** Invalid state, e.g. from `fieldMessageAria`. Applied to each thumb. */
+  'aria-invalid'?: boolean | 'true' | 'false';
+  /** Ids describing the slider (a `FieldMessage` slot). Applied to each thumb. */
+  'aria-describedby'?: string;
 }
 
 const sliderVariants = cva('dndev-slider', {
@@ -77,6 +81,8 @@ const Slider = ({
   defaultValue,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  'aria-invalid': ariaInvalid,
+  'aria-describedby': ariaDescribedBy,
   ...props
 }: SliderProps) => {
   const variantAttrs = getVariantDataAttrs({ variant });
@@ -106,6 +112,8 @@ const Slider = ({
             className={cn('dndev-slider-thumb')}
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
+            aria-invalid={ariaInvalid}
+            aria-describedby={ariaDescribedBy}
           >
             {showValue && val !== undefined && (
               <span className="dndev-slider-value">{val}</span>
