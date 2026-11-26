@@ -20,6 +20,7 @@ import type {
   ReactNode,
   RefObject,
 } from 'react';
+import { flushSync } from 'react-dom';
 
 import {
   isoToZonedWallTime,
@@ -28,6 +29,7 @@ import {
 } from '../../utils/date';
 import DatePicker from '../DatePicker';
 import DateTimePicker from '../DateTimePicker';
+import Tooltip from '../Tooltip';
 
 /** One choice of a `select` cell editor. */
 export interface TableCellOption {
@@ -53,7 +55,8 @@ export interface TableCellOption {
  *
  * A value that does not parse (pasted `abc` in a number column, an unknown
  * option, `32/13/2026` in a date column) is kept as typed and its cell is flagged
- * `data-invalid`, so the save fails on it instead of dropping it silently.
+ * `data-invalid` (message `dndev:table.invalidValue`), so the save fails on it
+ * instead of dropping it silently.
  */
 export interface TableCellEdit {
   type: 'text' | 'number' | 'select' | 'date' | 'datetime';
@@ -333,8 +336,22 @@ export interface EditCellProps extends EditCellHandlers {
    * text shown before it (same role as the editor: `textbox`, `select` → `combobox`).
    */
   label: string;
-  /** Message of a rule the value breaks (`DataTable` `cellErrors`): marks it invalid. */
+  /**
+   * Why the value is rejected (`DataTable` `cellErrors`, or `dndev:table.invalidValue`
+   * for a value that does not parse): marks it invalid; shown in a `Tooltip` on the
+   * cell (hover, keyboard focus, open editor) and kept in the cell as visually hidden
+   * text, the `aria-describedby` target. Nothing is printed in the row.
+   */
   error?: string;
+}
+
+/**
+ * A coarse primary pointer (touch screen): no hover, so a `Tooltip` never opens on
+ * a tap. Client-only (`window.matchMedia`): call it from events, or behind a
+ * `typeof window` check in a render.
+ */
+export function isCoarsePointer(): boolean {
+  return window.matchMedia('(pointer: coarse)').matches;
 }
 
 /** A key that types a character (opens the editor with it, like a spreadsheet). */
@@ -345,8 +362,11 @@ function isTypingKey(e: KeyboardEvent<HTMLElement>): boolean {
 /**
  * Spreadsheet cell: shows the formatted value as text and swaps to its editor
  * (text input, or a native select) when focused (click, Tab, or the
- * keyboard moves of a neighbour editor); the editor sits where the text was,
- * so nothing shifts. Uncontrolled: the DOM holds the text while typing; the
+ * keyboard moves of a neighbour editor); the editor lays over the text: the text
+ * stays in the flow, invisible and `aria-hidden`, inside a positioned wrapper
+ * (`.dndev-table-cell-overlay`) that holds the cell's size, and the editor fills
+ * the wrapper out of the flow, so no column width or row height changes. Uncontrolled: the DOM holds the
+ * text while typing; the
  * value is stored on blur / Enter (`select`: on change). Editor keys: Enter /
  * ArrowDown next row, ArrowUp previous row (Shift+Enter previous row), Tab
  * native, Esc restores the stored value and leaves the editor (the cell stays
@@ -357,6 +377,15 @@ function isTypingKey(e: KeyboardEvent<HTMLElement>): boolean {
  * calendar, wall time in `edit.timeZone`): each complete value is stored at once,
  * Enter / Shift+Enter move a row, Esc closes, Ctrl/Cmd+Z undoes, ArrowUp / ArrowDown
  * change the focused segment; leaving the picker and its calendar closes the editor.
+ *
+ * Invalid value (AG Grid "block" mode): when this editing session stored a value the
+ * cell rejects (it does not parse, or `error` is set once it is stored), Enter,
+ * Shift+Enter, ArrowUp / ArrowDown and Tab (date: Enter) keep the editor open
+ * instead of leaving; the value is stored (the save stays blocked on it) and its
+ * message shows in the `Tooltip` of the open editor. Esc then restores the value the
+ * cell had when the editor opened and leaves the editor (WAI-ARIA APG grid). Leaving
+ * with the pointer (a click elsewhere) still closes the editor: the cell keeps its red
+ * border and its message. A cell passed through unchanged is never blocked.
  */
 export function EditCell({
   edit,
@@ -386,6 +415,10 @@ export function EditCell({
   const keepClosedRef = useRef(false);
   /** Last text this cell stored: blur after Enter does not store it twice (one undo step). */
   const committedRef = useRef(stored);
+  /** Value when the editor opened (Esc out of a blocked edit restores it). */
+  const openedValueRef = useRef<unknown>(value);
+  /** This editing session stored a value (block mode only blocks those). */
+  const changedRef = useRef(false);
 
   useEffect(() => {
     committedRef.current = stored;
@@ -445,12 +478,51 @@ export function EditCell({
   const store = (text: string) => {
     if (text === stored || text === committedRef.current) return;
     committedRef.current = text;
+    changedRef.current = true;
     commit(parseCellText(text, edit).value);
   };
 
+  /** Opens the editor: a new editing session from the current value. */
   const open = () => {
     keepClosedRef.current = false;
+    openedValueRef.current = value;
+    changedRef.current = false;
     setEditing(true);
+  };
+
+  /** The cell is flagged invalid now (its `<td>`, rendered by the table). */
+  const cellInvalid = (el: HTMLElement) =>
+    el.closest('td')?.getAttribute('data-invalid') === 'true';
+
+  /**
+   * Block mode: stores `text` (rendered at once, so the cell's `error` for it is
+   * known) and tells whether the editor must stay open: this session stored a value
+   * the cell rejects.
+   */
+  const blocked = (el: HTMLElement, text: string | null) => {
+    if (text !== null) flushSync(() => store(text));
+    return changedRef.current && cellInvalid(el);
+  };
+
+  /** Esc: out of a blocked edit, the value the cell had when the editor opened. */
+  const restoreOpened = (el: HTMLElement) => {
+    if (!changedRef.current || !cellInvalid(el)) return;
+    committedRef.current = cellText(openedValueRef.current);
+    commit(openedValueRef.current);
+  };
+
+  /**
+   * A change made on the focused text (paste, undo): the cell may gain or lose its
+   * error `Tooltip`, which remounts the text; focus stays on it.
+   */
+  const keepDisplayFocus = <R,>(change: () => R): R => {
+    const result = flushSync(change);
+    const el = displayRef.current;
+    if (el && document.activeElement !== el) {
+      keepClosedRef.current = true;
+      el.focus();
+    }
+    return result;
   };
 
   const onPaste = (e: ClipboardEvent<HTMLElement>) => {
@@ -458,13 +530,14 @@ export function EditCell({
     const grid = parseClipboardGrid(text);
     if (grid) {
       e.preventDefault();
-      pasteGrid(grid);
+      if (editing) pasteGrid(grid);
+      else keepDisplayFocus(() => pasteGrid(grid));
       return;
     }
     // A single value on the focused text replaces the value (the editor's own paste otherwise)
     if (!editing) {
       e.preventDefault();
-      store(text);
+      keepDisplayFocus(() => store(text));
     }
   };
 
@@ -477,15 +550,21 @@ export function EditCell({
       return;
     }
     if (e.key === 'Escape') {
+      restoreOpened(target);
       target.value = stored;
       keepClosedRef.current = true;
       setEditing(false);
       return;
     }
     const isSelect = edit.type === 'select';
+    // Tab: native move, unless the stored value is rejected (block mode)
+    if (e.key === 'Tab') {
+      if (blocked(target, isSelect ? null : target.value)) e.preventDefault();
+      return;
+    }
     if (e.key === 'Enter' || (!isSelect && e.key === 'ArrowDown')) {
       e.preventDefault();
-      store(target.value);
+      if (blocked(target, isSelect ? null : target.value)) return;
       focusCell({
         row: position.row + (e.shiftKey ? -1 : 1),
         col: position.col,
@@ -494,7 +573,7 @@ export function EditCell({
     }
     if (!isSelect && e.key === 'ArrowUp') {
       e.preventDefault();
-      store(target.value);
+      if (blocked(target, target.value)) return;
       focusCell({ row: position.row - 1, col: position.col });
     }
   };
@@ -502,7 +581,7 @@ export function EditCell({
   // Focused text (after Esc): typing, Enter or F2 edits; arrows move; Ctrl/Cmd+Z undoes.
   const onDisplayKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-      if (undo()) e.preventDefault();
+      if (keepDisplayFocus(undo)) e.preventDefault();
       return;
     }
     if (e.key === 'Enter' || e.key === 'F2') {
@@ -525,51 +604,108 @@ export function EditCell({
     }
   };
 
+  // The message stays in the cell as visually hidden text (the aria-describedby
+  // target); what shows is the Tooltip below. Nothing is printed in the row.
   const message = error ? (
-    <span id={errorId} className="dndev-table-cell-error">
+    <span id={errorId} className="dndev-sr-only">
       {error}
     </span>
   ) : null;
+
+  /**
+   * The message in a `Tooltip` on the cell: on hover and keyboard focus of an
+   * invalid cell, and open over the open editor of an invalid value. Never on a
+   * touch screen (no hover; the table's error list shows the message there).
+   * Mounted while the editor is open even without an error, so the editor is not
+   * remounted (focus kept) when a stored value turns out invalid. One instance per
+   * mode (`key`): a hover or focus seen while forced closed must not open it later.
+   */
+  const withTip = (trigger: ReactElement) =>
+    editing || error ? (
+      <Tooltip
+        key={editing ? 'editor' : 'text'}
+        content={error}
+        forceOpen={
+          // matchMedia on the client only (the server renders the tooltip closed)
+          !error || (typeof window !== 'undefined' && isCoarsePointer())
+            ? false
+            : editing
+              ? true
+              : undefined
+        }
+      >
+        {trigger}
+      </Tooltip>
+    ) : (
+      trigger
+    );
 
   const cellPosition = {
     'data-edit-row': position.row,
     'data-edit-col': position.col,
   };
 
+  const displayContent = (
+    <>
+      <span className="dndev-table-cell-text">{display}</span>
+      {edit.type === 'select' && (
+        <ChevronDown className="dndev-table-cell-chevron" aria-hidden="true" />
+      )}
+    </>
+  );
+
+  /**
+   * Editor laid over the text: the wrapper keeps the display content in the flow,
+   * invisible (non-interactive copy, hidden from assistive tech, no editor
+   * attributes), so the cell keeps exactly its display width and height; the
+   * editor fills the wrapper out of the flow (see Table.css).
+   */
+  const overlay = (editor: ReactElement) =>
+    withTip(
+      <span className="dndev-table-cell-overlay">
+        <span
+          className="dndev-table-cell-display dndev-table-cell-sizer"
+          aria-hidden="true"
+        >
+          {displayContent}
+        </span>
+        {editor}
+      </span>
+    );
+
   if (!editing) {
     return (
       <>
-        <div
-          ref={displayRef}
-          tabIndex={0}
-          className="dndev-table-cell-display"
-          data-edit-type={edit.type}
-          // Same role and name as its editor: a screen reader hears the column
-          // ("Price, edit text, 29.9"), not an anonymous focus stop
-          role={edit.type === 'select' ? 'combobox' : 'textbox'}
-          aria-expanded={edit.type === 'select' ? false : undefined}
-          aria-label={label}
-          aria-invalid={invalid || undefined}
-          aria-describedby={error ? errorId : undefined}
-          {...cellPosition}
-          onPointerDown={() => {
-            pointerRef.current = true;
-          }}
-          onFocus={() => {
-            if (keepClosedRef.current) {
-              keepClosedRef.current = false;
-              return;
-            }
-            setEditing(true);
-          }}
-          onKeyDown={onDisplayKeyDown}
-          onPaste={onPaste}
-        >
-          <span className="dndev-table-cell-text">{display}</span>
-          {edit.type === 'select' && (
-            <ChevronDown className="dndev-table-cell-chevron" aria-hidden="true" />
-          )}
-        </div>
+        {withTip(
+          <div
+            ref={displayRef}
+            tabIndex={0}
+            className="dndev-table-cell-display"
+            data-edit-type={edit.type}
+            // Same role and name as its editor: a screen reader hears the column
+            // ("Price, edit text, 29.9"), not an anonymous focus stop
+            role={edit.type === 'select' ? 'combobox' : 'textbox'}
+            aria-expanded={edit.type === 'select' ? false : undefined}
+            aria-label={label}
+            aria-invalid={invalid || undefined}
+            aria-describedby={error ? errorId : undefined}
+            {...cellPosition}
+            onPointerDown={() => {
+              pointerRef.current = true;
+            }}
+            onFocus={() => {
+              if (keepClosedRef.current) {
+                keepClosedRef.current = false;
+                return;
+              }
+              open();
+            }}
+            onKeyDown={onDisplayKeyDown}
+            onPaste={onPaste}
+          >
+            {displayContent}
+          </div>
+        )}
         {message}
       </>
     );
@@ -605,6 +741,7 @@ export function EditCell({
             : zonedWallTimeToISO(next, timeZone);
       if (sameDateValue(nextValue, value ?? null)) return;
       committedRef.current = cellText(nextValue);
+      changedRef.current = true;
       commit(nextValue);
     };
     // Focus left the picker and its calendar popover (portaled): close the editor.
@@ -625,12 +762,14 @@ export function EditCell({
         return;
       }
       if (e.key === 'Escape') {
+        restoreOpened(e.currentTarget);
         keepClosedRef.current = true;
         setEditing(false);
         return;
       }
       if (e.key === 'Enter') {
         e.preventDefault();
+        if (blocked(e.currentTarget, null)) return;
         focusCell({
           row: position.row + (e.shiftKey ? -1 : 1),
           col: position.col,
@@ -653,23 +792,25 @@ export function EditCell({
     };
     return (
       <>
-        <span
-          ref={dateRef}
-          className="dndev-table-cell-date"
-          role="group"
-          aria-label={label}
-          tabIndex={-1}
-          {...cellPosition}
-          onKeyDown={onDateKeyDown}
-          onBlur={onBlur}
-          onPasteCapture={onDatePaste}
-        >
-          {isDate ? (
-            <DatePicker {...pickerProps} />
-          ) : (
-            <DateTimePicker {...pickerProps} />
-          )}
-        </span>
+        {overlay(
+          <span
+            ref={dateRef}
+            className="dndev-table-cell-date"
+            role="group"
+            aria-label={label}
+            tabIndex={-1}
+            {...cellPosition}
+            onKeyDown={onDateKeyDown}
+            onBlur={onBlur}
+            onPasteCapture={onDatePaste}
+          >
+            {isDate ? (
+              <DatePicker {...pickerProps} />
+            ) : (
+              <DateTimePicker {...pickerProps} />
+            )}
+          </span>
+        )}
         {message}
       </>
     );
@@ -679,24 +820,31 @@ export function EditCell({
     const known = edit.options?.some((o) => o.value === stored);
     return (
       <>
-        <span className="dndev-table-cell-select">
-          <select
-            ref={ref}
-            {...common}
-            defaultValue={stored}
-            onChange={(e) => store(e.target.value)}
-            onBlur={() => setEditing(false)}
-          >
-            <option value="" />
-            {!known && stored !== '' && <option value={stored}>{stored}</option>}
-            {edit.options?.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="dndev-table-cell-chevron" aria-hidden="true" />
-        </span>
+        {overlay(
+          <span className="dndev-table-cell-select">
+            <select
+              ref={ref}
+              {...common}
+              defaultValue={stored}
+              onChange={(e) => store(e.target.value)}
+              onBlur={() => setEditing(false)}
+            >
+              <option value="" />
+              {!known && stored !== '' && (
+                <option value={stored}>{stored}</option>
+              )}
+              {edit.options?.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              className="dndev-table-cell-chevron"
+              aria-hidden="true"
+            />
+          </span>
+        )}
         {message}
       </>
     );
@@ -704,17 +852,19 @@ export function EditCell({
 
   return (
     <>
-      <input
-        ref={ref}
-        {...common}
-        type="text"
-        inputMode={edit.type === 'number' ? 'decimal' : undefined}
-        defaultValue={stored}
-        onBlur={(e) => {
-          store(e.target.value);
-          setEditing(false);
-        }}
-      />
+      {overlay(
+        <input
+          ref={ref}
+          {...common}
+          type="text"
+          inputMode={edit.type === 'number' ? 'decimal' : undefined}
+          defaultValue={stored}
+          onBlur={(e) => {
+            store(e.target.value);
+            setEditing(false);
+          }}
+        />
+      )}
       {message}
     </>
   );

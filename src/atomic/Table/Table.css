@@ -453,6 +453,36 @@
   opacity: 1;
 }
 
+/* Editing overlay: while a cell is edited its text stays in the flow, invisible
+   (the sizer: a non-interactive copy, aria-hidden), so the cell keeps exactly its
+   display width and height; the editor fills the wrapper out of the flow. Like the
+   sort arrow, it never changes a width: an editor's own intrinsic width would
+   reflow every column of the automatic table layout. The wrapper is the containing
+   block, not the cell (pinned cells are sticky and clip their overflow). */
+.dndev-table-cell-overlay {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.dndev-table-cell-sizer {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dndev-table-cell-overlay > .dndev-table-cell-editor,
+.dndev-table-cell-overlay > .dndev-table-cell-select,
+.dndev-table-cell-overlay > .dndev-table-cell-date {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dndev-table-cell-overlay > .dndev-table-cell-date {
+  overflow: hidden;
+}
+
 /* Editor: in place of the text, same padding and alignment, focus ring inside */
 .dndev-table-cell-editor {
   display: block;
@@ -537,28 +567,66 @@
   background-color: color-mix(in oklab, var(--primary) 12%, var(--background));
 }
 
-/* Value that does not parse, or breaks a rule (cellErrors): the save will reject it */
+/* Value that does not parse, or breaks a rule (cellErrors): the save will reject it.
+   Red inset border only: the message is a Tooltip (and visually hidden text), never
+   printed in the row, so an invalid cell changes no row height. */
 .dndev-table-cell[data-invalid='true'] .dndev-table-cell-display,
 .dndev-table-cell[data-invalid='true'] .dndev-table-cell-editor,
 .dndev-table-cell[data-invalid='true'] .dndev-table-cell-date .dndev-datepicker-field,
-.dndev-table-cell[data-invalid='true'] .dndev-table-cell-date .dndev-datepicker-native {
+.dndev-table-cell[data-invalid='true'] .dndev-table-cell-date .dndev-datepicker-native,
+.dndev-table-cell[data-invalid='true']:not([data-editable='true']) {
   box-shadow: inset 0 0 0 var(--border-hairline) var(--destructive);
 }
 
-/* Message of a rule the cell value breaks (cellErrors) */
-.dndev-table-cell-error {
+/* Read-only cell in error: the Tooltip trigger, the cell's text box ("…" kept) */
+.dndev-table-cell-tip {
   display: block;
-  margin-block-start: 0.125rem;
-  color: var(--destructive);
-  font-size: var(--font-size-xs);
-  line-height: 1.3;
-  white-space: normal;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dndev-table-cell[data-editable='true'] .dndev-table-cell-error {
-  margin-block-start: 0;
-  padding-inline: var(--table-cell-padding);
-  padding-block-end: 0.25rem;
+/* Error list (bottom bar "N errors" popover): one entry per invalid cell */
+.dndev-table-errors {
+  max-inline-size: min(28rem, calc(100vw - 2 * var(--gap-md)));
+  max-block-size: min(20rem, 50vh);
+  overflow-y: auto;
+  padding: var(--gap-sm);
+}
+
+.dndev-table-errors-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dndev-table-error-entry {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--touch-target);
+  padding-block: var(--gap-sm);
+  padding-inline: var(--gap-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.dndev-table-error-entry:hover,
+.dndev-table-error-entry[aria-current='true'] {
+  background-color: color-mix(in oklab, var(--destructive) 10%, transparent);
+}
+
+.dndev-table-error-entry:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
 }
 
 /* Open cell: icon link to the row's record, the cell's whole box */

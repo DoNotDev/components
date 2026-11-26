@@ -57,7 +57,9 @@ export interface ActionBarProps extends HTMLAttributes<HTMLDivElement> {
  *   `--action-bar-height` on `<html>`, removed when it hides, unmounts or is `display: none`
  *   (`hideFrom`). DnDevLayout pads its bottom with it, so the end of the page and the footer
  *   scroll above the bar instead of under it; content above the reading position does not
- *   move. A custom scroll container outside DnDevLayout reserves it the same way:
+ *   move. Its scroll container (`main`) gets the same `scroll-padding-block-end`, so a
+ *   focused element scrolls into view above the bar (WCAG 2.2 SC 2.4.11). A custom scroll
+ *   container outside DnDevLayout reserves it the same way:
  *   `padding-block-end: var(--action-bar-height, 0px)`. Above page chrome (`--z-header`),
  *   below sheets, modals, floating menus and toasts. Bottom safe area (iOS home indicator)
  *   is padded when the app sets `viewport-fit=cover`.

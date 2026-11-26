@@ -13,6 +13,7 @@
 import {
   ArrowUpRight,
   ChevronUp,
+  CircleAlert,
   ChevronDown,
   Search,
   Download,
@@ -42,9 +43,11 @@ import DatePicker from '../DatePicker';
 import DateTimePicker from '../DateTimePicker';
 import Input from '../Input';
 import Pagination, { DEFAULT_TABLE_PAGE_SIZE } from '../Pagination';
+import Popover from '../Popover';
 import Select from '../Select';
 import Stack from '../Stack';
 import Text from '../Text';
+import Tooltip from '../Tooltip';
 import {
   EDIT_LABEL_KEYS,
   EditCell,
@@ -52,6 +55,7 @@ import {
   focusEditor,
   formatCellNumber,
   isCellValueValid,
+  isCoarsePointer,
   parseCellText,
   setPendingCell,
 } from './editing';
@@ -355,9 +359,13 @@ export interface DataTableProps<T = unknown> {
   openLabel?: string;
   /**
    * Invalid cells: `cellErrors[rowId][columnKey]` = message (translated by the
-   * consumer), e.g. the rules a pending value breaks. Marked like a value that
-   * does not parse (`data-invalid`), editors get `aria-invalid` and the message
-   * (shown under the value, linked with `aria-describedby`). Requires `getRowId`.
+   * consumer), e.g. the rules a pending value breaks or the cells a save rejected.
+   * Marked like a value that does not parse (`data-invalid`, red inset border),
+   * editors get `aria-invalid` and `aria-describedby` to the message. Nothing is
+   * printed in the row (rows never change height): the message is a `Tooltip` on
+   * the cell (hover, keyboard focus, open editor) and visually hidden text in the
+   * cell. `editable` tables also list every invalid cell (these and the values that
+   * do not parse) behind an "N errors" button in the bottom bar. Requires `getRowId`.
    * @since 0.2.5
    */
   cellErrors?: Record<string, Record<string, string>>;
@@ -489,13 +497,28 @@ function showOverflowTitle(e: PointerEvent<HTMLDivElement>) {
   if (!cell) return;
   const box =
     cell.querySelector<HTMLElement>(
-      '.dndev-table-cell-clamp, .dndev-table-cell-text, .dndev-table-head-label'
+      '.dndev-table-cell-clamp, .dndev-table-cell-tip, .dndev-table-cell-text, .dndev-table-head-label'
     ) ?? cell;
   const cut =
     box.scrollWidth > box.clientWidth || box.scrollHeight > box.clientHeight;
   const text = cut ? (cell.textContent ?? '').trim() : '';
   if (text) cell.setAttribute('title', text);
   else cell.removeAttribute('title');
+}
+
+/** Key of a cell in the error list: row id + column key. */
+function errorKey(rowId: string, columnKey: string): string {
+  return `${rowId}\u0000${columnKey}`;
+}
+
+/**
+ * Error list opened on a tapped cell's entry: scrolls that entry into view in the
+ * list (mount of the list, keyed by the entry). Module-level: one stable ref.
+ */
+function scrollCurrentEntryIntoView(list: HTMLUListElement | null) {
+  list
+    ?.querySelector('[aria-current="true"]')
+    ?.scrollIntoView({ block: 'nearest' });
 }
 
 // Enhanced DataTable component
@@ -522,6 +545,20 @@ function showOverflowTitle(e: PointerEvent<HTMLDivElement>) {
  * `emptyState` row. Checked rows and `actionBarContent` show in one bottom
  * `ActionBar`; nothing is inserted above the table. Under 768px rows stack by CSS
  * (the `sticky` column as title, "label  value" lines, `hideOnPhone` left out).
+ *
+ * ## Invalid cells (editable)
+ *
+ * A cell in error (`cellErrors`, or a value that does not parse) has a red inset
+ * border and its message in a `Tooltip` (hover, keyboard focus, open editor);
+ * nothing is printed in the row. An invalid typed value keeps its editor open
+ * (block mode, see `EditCell`). The bottom bar shows an "N errors" button
+ * (`dndev:table.errors`) opening a non-modal list, one entry per invalid cell in
+ * the order shown ("Row 3 · Price: …", `dndev:table.errorEntry`); an entry closes the
+ * list and focuses its cell (on its page). Entries leave as cells are fixed, the
+ * button with the last one. On a touch screen (coarse pointer: no hover), tapping an
+ * invalid cell opens its editor and the list on its entry, focus kept in the editor.
+ * Screen readers: one polite announcement when the edited cell's error appears or
+ * changes, one when the count changes.
  *
  * ## Row clicks & native link affordances
  *
@@ -648,6 +685,16 @@ const DataTable = <T = unknown,>({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
   const [checkedRows, setCheckedRows] = useState<T[]>([]);
+  // Error list (bottom bar): open, the entry it was opened on (tap), the last edited cell
+  const [errorsOpen, setErrorsOpen] = useState(false);
+  const [activeError, setActiveError] = useState<string | null>(null);
+  const [lastEdited, setLastEdited] = useState<string | null>(null);
+  /** The list opens or closes from a tap on a cell: focus stays in that cell's editor. */
+  const errorsTapRef = useRef(false);
+  /** Cell an entry was activated for: focused once the list has closed. */
+  const errorTargetRef = useRef<{ index: number; columnIndex: number } | null>(
+    null
+  );
 
   // Page size state (for client-side pagination)
   const [internalPageSize, setInternalPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);
@@ -944,12 +991,113 @@ const DataTable = <T = unknown,>({
   );
   const columnCount = columns.length + utilityCount;
 
+  // --- Invalid cells: message per cell, and the error list in the order shown ---
+  const invalidText = translate('table.invalidValue');
+  /** Why a cell is invalid: `cellErrors`, else a value that does not parse. */
+  const cellMessage = (row: T, column: TableColumn<T>): string | undefined => {
+    const message = cellErrors?.[getRowId!(row)]?.[column.key];
+    if (message) return message;
+    if (!editable || !column.edit || !column.dataIndex) return undefined;
+    return isCellValueValid(currentValue(row, column), column.edit)
+      ? undefined
+      : invalidText;
+  };
+  const serverPaged = isControlledPagination && totalProp !== undefined;
+  const clientPaged = pagination && !isShowingAll && !serverPaged;
+  // Row numbers as the user sees them: across pages (server pages: this page's offset)
+  const rowOffset =
+    serverPaged && !isShowingAll ? (currentPage - 1) * pageSize : 0;
+  const errorEntries =
+    editable && !loading
+      ? processedData.flatMap((row, index) =>
+          columns.flatMap((column, columnIndex) => {
+            const message = cellMessage(row, column);
+            if (!message) return [];
+            return [
+              {
+                key: errorKey(getRowId!(row), column.key),
+                index,
+                columnIndex,
+                text: translate('table.errorEntry', {
+                  row: rowOffset + index + 1,
+                  column:
+                    typeof column.title === 'string'
+                      ? column.title
+                      : column.key,
+                  message,
+                }),
+              },
+            ];
+          })
+        )
+      : [];
+  type ErrorEntry = (typeof errorEntries)[number];
+  const errorCount = errorEntries.length;
+  // Nothing left to list: the list is closed (it does not reopen with the next error)
+  if (errorsOpen && errorCount === 0) setErrorsOpen(false);
+  const errorsLabel = translate('table.errors', { count: errorCount });
+  // Screen readers: the edited cell's error when it appears or changes (one entry text)
+  const editedError =
+    errorEntries.find((entry) => entry.key === lastEdited)?.text ?? '';
+
+  /** Focuses (editable) or scrolls to (read-only) the cell of an entry, on its page. */
+  const focusErrorCell = (target: { index: number; columnIndex: number }) => {
+    const position = clientPaged ? target.index % pageSize : target.index;
+    const column = columns[target.columnIndex]!;
+    const editCol = editColumns.indexOf(column);
+    if (editCol >= 0) {
+      focusEditor(tableRef, { row: position, col: editCol });
+      return;
+    }
+    tableRef.current
+      ?.querySelectorAll('tbody > tr')
+      [position]?.children[utilityCount + target.columnIndex]?.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+      });
+  };
+
+  /** An entry: its page, then the list closes and focus goes to the cell. */
+  const goToError = (entry: ErrorEntry) => {
+    if (clientPaged) {
+      const page = Math.floor(entry.index / pageSize) + 1;
+      if (page !== currentPage) handlePageChange(page);
+    }
+    errorTargetRef.current = entry;
+    setErrorsOpen(false);
+  };
+
+  /**
+   * Touch screens (no hover, the Tooltip does not open on a tap): a tap on an
+   * invalid cell opens the list on its entry, without moving focus (the cell's
+   * editor opens as usual); a tap on another cell closes it.
+   */
+  const openErrorOnTap = (e: PointerEvent<HTMLDivElement>) => {
+    if (errorCount === 0 || !isCoarsePointer()) return;
+    const td = (e.target as HTMLElement).closest('td');
+    if (!td) return;
+    const row =
+      displayData[(td.parentElement as HTMLTableRowElement).sectionRowIndex];
+    const column = columns[td.cellIndex - utilityCount];
+    const key = row && column ? errorKey(getRowId!(row), column.key) : null;
+    if (!key || !errorEntries.some((entry) => entry.key === key)) {
+      if (!errorsOpen) return;
+      errorsTapRef.current = true;
+      setErrorsOpen(false);
+      return;
+    }
+    if (!errorsOpen) errorsTapRef.current = true;
+    setActiveError(key);
+    setErrorsOpen(true);
+  };
+
   // Selection bar: count, bulk edit, app actions, clear; pending edits beside it
   const showSelectionBar =
     showSelection &&
     selectedRows.length > 0 &&
     (editColumns.length > 0 || !!selectionActions);
-  const showActionBar = showSelectionBar || actionBarContent != null;
+  const showActionBar =
+    showSelectionBar || actionBarContent != null || errorCount > 0;
 
   const hasToolbar =
     searchable || exportable || toolbarStart != null || toolbarEnd != null;
@@ -1019,6 +1167,7 @@ const DataTable = <T = unknown,>({
         ref={tableRef}
         className="dndev-table-edit-scope"
         onPointerOver={showOverflowTitle}
+        onPointerDown={editable ? openErrorOnTap : undefined}
       >
         <Table
           className={cn(gridLines && 'dndev-table-grid')}
@@ -1227,7 +1376,7 @@ const DataTable = <T = unknown,>({
                       const cellValue = column.dataIndex
                         ? row[column.dataIndex]
                         : null;
-                      cellError = cellErrors?.[getRowId!(row)]?.[column.key];
+                      cellError = cellMessage(row, column);
                       const editCol = column.edit
                         ? editColumns.indexOf(column)
                         : -1;
@@ -1251,9 +1400,12 @@ const DataTable = <T = unknown,>({
                                 ? column.title
                                 : column.key
                             }
-                            commit={(v) =>
-                              applyCells([{ row, column, value: v }])
-                            }
+                            commit={(v) => {
+                              setLastEdited(
+                                errorKey(getRowId!(row), column.key)
+                              );
+                              applyCells([{ row, column, value: v }]);
+                            }}
                             focusCell={(p) => focusEditor(tableRef, p)}
                             pasteGrid={(grid) =>
                               pasteGrid({ row: index, col: editCol }, grid)
@@ -1290,15 +1442,29 @@ const DataTable = <T = unknown,>({
                         data-invalid={invalid ?? (cellError ? 'true' : undefined)}
                         style={columnStyles[columnIndex]}
                       >
-                        {column.lines === 2 && !isEditable ? (
-                          <div className="dndev-table-cell-clamp">{content}</div>
+                        {cellError && !isEditable ? (
+                          // Read-only cell in error: its message on hover, visually
+                          // hidden in the cell (nothing printed in the row)
+                          <>
+                            <Tooltip content={cellError}>
+                              {column.lines === 2 ? (
+                                <div className="dndev-table-cell-clamp">
+                                  {content}
+                                </div>
+                              ) : (
+                                <span className="dndev-table-cell-tip">
+                                  {content}
+                                </span>
+                              )}
+                            </Tooltip>
+                            <span className="dndev-sr-only">{cellError}</span>
+                          </>
+                        ) : column.lines === 2 && !isEditable ? (
+                          <div className="dndev-table-cell-clamp">
+                            {content}
+                          </div>
                         ) : (
                           content
-                        )}
-                        {cellError && !isEditable && (
-                          <span className="dndev-table-cell-error" role="alert">
-                            {cellError}
-                          </span>
                         )}
                       </TableCell>
                     );
@@ -1309,6 +1475,19 @@ const DataTable = <T = unknown,>({
           </TableBody>
         </Table>
       </div>
+
+      {/* Polite live regions, in the DOM from the first render (WCAG ARIA19, as
+          FieldMessage): the edited cell's error, then the error count */}
+      {editable && (
+        <>
+          <span className="dndev-sr-only" aria-live="polite" aria-atomic="true">
+            {editedError}
+          </span>
+          <span className="dndev-sr-only" aria-live="polite" aria-atomic="true">
+            {errorCount > 0 ? errorsLabel : ''}
+          </span>
+        </>
+      )}
 
       {/* Pagination */}
       {pagination && totalPages > 1 && (
@@ -1339,8 +1518,93 @@ const DataTable = <T = unknown,>({
             gap="medium"
             wrap="wrap"
           >
-            {actionBarContent != null && (
+            {(actionBarContent != null || errorCount > 0) && (
               <Stack direction="row" align="center" gap="tight" wrap="wrap">
+                {errorCount > 0 && (
+                  // Error list (SAP UI5 MessagePopover): count button, non-modal popover
+                  <Popover.Root
+                    open={errorsOpen}
+                    onOpenChange={(open) => {
+                      if (open) setActiveError(null);
+                      setErrorsOpen(open);
+                    }}
+                    modal={false}
+                  >
+                    <Popover.Trigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        display="full"
+                        icon={CircleAlert}
+                        className="dndev-table-errors-button"
+                      >
+                        {errorsLabel}
+                      </Button>
+                    </Popover.Trigger>
+                    <Popover.Content
+                      side="top"
+                      align="start"
+                      className="dndev-floating dndev-z-tooltip dndev-table-errors"
+                      aria-label={errorsLabel}
+                      onOpenAutoFocus={(e) => {
+                        // Opened by a tap on a cell: its editor keeps focus
+                        if (errorsTapRef.current) e.preventDefault();
+                        errorsTapRef.current = false;
+                      }}
+                      onCloseAutoFocus={(e) => {
+                        // Closed by a tap on a cell: focus stays in its editor
+                        if (errorsTapRef.current) {
+                          errorsTapRef.current = false;
+                          e.preventDefault();
+                          return;
+                        }
+                        // Closed by an entry: focus goes to its cell, not the button
+                        const target = errorTargetRef.current;
+                        if (!target) return;
+                        errorTargetRef.current = null;
+                        e.preventDefault();
+                        focusErrorCell(target);
+                      }}
+                      onFocusOutside={(e) => {
+                        // Touch: the list closes on a tap outside it, not when focus
+                        // moves (the tapped cell's text, then its editor, take focus)
+                        if (isCoarsePointer()) e.preventDefault();
+                      }}
+                      onPointerDownOutside={(e) => {
+                        // Touch: a tap on another invalid cell moves the list to its entry
+                        const target = e.target as Element;
+                        if (
+                          isCoarsePointer() &&
+                          tableRef.current?.contains(target) &&
+                          target.closest('td[data-invalid="true"]')
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <ul
+                        key={activeError ?? ''}
+                        ref={scrollCurrentEntryIntoView}
+                        className="dndev-table-errors-list"
+                      >
+                        {errorEntries.map((entry) => (
+                          <li key={entry.key}>
+                            <button
+                              type="button"
+                              className="dndev-table-error-entry"
+                              aria-current={
+                                entry.key === activeError || undefined
+                              }
+                              onClick={() => goToError(entry)}
+                            >
+                              {entry.text}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </Popover.Content>
+                  </Popover.Root>
+                )}
                 {actionBarContent}
               </Stack>
             )}
