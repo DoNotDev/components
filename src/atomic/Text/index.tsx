@@ -96,7 +96,9 @@ export interface TextOwnProps {
 
   /**
    * Font weight
-   * @default Inherits from level (h1/h2=h3=bold/semibold, h4=medium, body=medium)
+   * @default From the level: h1 bold, h2 / h3 semibold, h4 medium, h5 / h6 semibold, body medium.
+   * A Text nested in another Text, with no `level` and no `weight`, keeps its parent's weight
+   * (a coloured phrase in a bold heading stays bold).
    * @example 'normal' | 'medium' | 'semibold' | 'bold'
    */
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';

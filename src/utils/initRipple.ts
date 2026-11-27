@@ -4,6 +4,8 @@
  * @fileoverview Ripple effect initialization
  * @description Event delegation for ripple effect on all .dndev-interactive elements.
  * Call once at app startup. Uses CSS variable --ripple-opacity (0 or unset = disabled).
+ * The circle starts at the press point and grows (scale 0 to 1, `--ease-heavy`,
+ * `--dur-slow`) until it reaches the element's farthest corner, fading out.
  *
  * @version 0.1.0
  * @since 0.1.0
@@ -56,8 +58,14 @@ function handleRipple(event: PointerEvent): void {
       : event.clientX - paddingBoxStart;
   const blockOffset = event.clientY - rect.top - target.clientTop;
 
-  // Base ripple size on the element's longest side
-  const size = Math.max(rect.width, rect.height);
+  // Diameter = twice the distance to the padding box's farthest corner, so at
+  // scale 1 the circle just covers the element and the wave travels the whole
+  // animation, whatever the element's width (a full-width row included)
+  const radius = Math.hypot(
+    Math.max(inlineOffset, target.clientWidth - inlineOffset),
+    Math.max(blockOffset, target.clientHeight - blockOffset)
+  );
+  const size = radius * 2;
 
   // Create ripple element
   const ripple = document.createElement('span');
@@ -65,8 +73,8 @@ function handleRipple(event: PointerEvent): void {
   ripple.style.cssText = `
     width: ${size}px;
     height: ${size}px;
-    inset-inline-start: ${inlineOffset - size / 2}px;
-    inset-block-start: ${blockOffset - size / 2}px;
+    inset-inline-start: ${inlineOffset - radius}px;
+    inset-block-start: ${blockOffset - radius}px;
   `;
 
   // Clip inside a dedicated layer: layout rules can override the target's overflow

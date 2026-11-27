@@ -74,9 +74,9 @@ export interface AccordionProps {
 /**
  * A vertically stacked set of interactive headings that each reveal a section of content.
  * Built on Radix UI Accordion. Closed items stay mounted (in the server HTML,
- * crawlable) and are hidden with `display: none` (not visible, focusable or
- * announced); their effects run while closed. Opening fades in (no height
- * slide); collapsing is instant.
+ * crawlable) and are `visibility: hidden` once collapsed (not visible,
+ * focusable or announced); their effects run while closed. Opening and
+ * closing animate the height and opacity (one grid row, `0fr` ↔ `1fr`).
  *
  * @component
  * @example
@@ -150,9 +150,7 @@ const Accordion = ({
               <ChevronDown className="dndev-accordion-trigger-icon" />
             </AccordionTriggerPrimitive>
             <AccordionContentPrimitive className="dndev-accordion-content">
-              <div className="dndev-accordion-content-inner">
-                {item.content}
-              </div>
+              {item.content}
             </AccordionContentPrimitive>
           </AccordionItemPrimitive>
         ))}
@@ -183,7 +181,7 @@ const Accordion = ({
             <ChevronDown className="dndev-accordion-trigger-icon" />
           </AccordionTriggerPrimitive>
           <AccordionContentPrimitive className="dndev-accordion-content">
-            <div className="dndev-accordion-content-inner">{item.content}</div>
+            {item.content}
           </AccordionContentPrimitive>
         </AccordionItemPrimitive>
       ))}

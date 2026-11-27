@@ -191,7 +191,7 @@ const renderMenuItem = (item: ContextMenuItemType, index: number) => {
  * @example
  * ```tsx
  * <ContextMenu
- *   trigger={<div className="h-32 w-32 border">Right click here</div>}
+ *   trigger={<Card>Right click here</Card>}
  *   items={[
  *     { label: 'Back', onSelect: handleBack },
  *     { type: 'separator' },

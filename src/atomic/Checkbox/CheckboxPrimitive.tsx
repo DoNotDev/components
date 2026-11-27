@@ -14,8 +14,6 @@ import * as CheckboxPrimitives from '@radix-ui/react-checkbox';
 import { Check } from 'lucide-react';
 import type { ComponentProps } from 'react';
 
-import { cn } from '../../utils/helpers';
-
 /**
  * Props for the Checkbox component.
  * Extends Radix UI Checkbox Root props.
@@ -37,7 +35,7 @@ export interface CheckboxProps extends ComponentProps<
  */
 const CheckboxPrimitive = ({ className, ...props }: CheckboxProps) => (
   <CheckboxPrimitives.Root
-    className={cn('peer', className)}
+    className={className}
     data-type="checkbox"
     {...props}
   >

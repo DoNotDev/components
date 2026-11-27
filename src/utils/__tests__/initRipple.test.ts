@@ -14,6 +14,7 @@ function pressInteractive(
   Object.defineProperty(target, 'clientLeft', { value: borderWidth });
   Object.defineProperty(target, 'clientTop', { value: borderWidth });
   Object.defineProperty(target, 'clientWidth', { value: 100 });
+  Object.defineProperty(target, 'clientHeight', { value: 32 });
   document.body.appendChild(target);
   target.dispatchEvent(
     new MouseEvent('pointerdown', { bubbles: true, clientX: 5, clientY: 5 })
@@ -62,18 +63,30 @@ describe('initRipple', () => {
     expect(target.children).toHaveLength(0);
   });
 
-  it('positions the ripple from the inline start of the padding box', () => {
+  // Press at (4, 4) in a 100x32 padding box: farthest corner (100, 32),
+  // radius hypot(96, 28) = 100
+  it('sizes the ripple to reach the farthest corner from the press point', () => {
     const target = pressInteractive('0.2', 1);
 
     const ripple = target.querySelector<HTMLElement>('.dndev-ripple');
-    expect(ripple?.style.getPropertyValue('inset-inline-start')).toBe('4px');
-    expect(ripple?.style.getPropertyValue('inset-block-start')).toBe('4px');
+    expect(ripple?.style.getPropertyValue('width')).toBe('200px');
+    expect(ripple?.style.getPropertyValue('height')).toBe('200px');
   });
 
+  it('centres the ripple on the press point, from the inline start of the padding box', () => {
+    const target = pressInteractive('0.2', 1);
+
+    const ripple = target.querySelector<HTMLElement>('.dndev-ripple');
+    expect(ripple?.style.getPropertyValue('inset-inline-start')).toBe('-96px');
+    expect(ripple?.style.getPropertyValue('inset-block-start')).toBe('-96px');
+  });
+
+  // RTL: inline offset 96 from the right edge, farthest corner still 100 away
   it('measures the inline offset from the right edge in RTL', () => {
     const target = pressInteractive('0.2', 1, 'rtl');
 
     const ripple = target.querySelector<HTMLElement>('.dndev-ripple');
-    expect(ripple?.style.getPropertyValue('inset-inline-start')).toBe('96px');
+    expect(ripple?.style.getPropertyValue('width')).toBe('200px');
+    expect(ripple?.style.getPropertyValue('inset-inline-start')).toBe('-4px');
   });
 });

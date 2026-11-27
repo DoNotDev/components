@@ -29,11 +29,13 @@ export type MarqueeProps<T = unknown> = {
   gap?: 'none' | 'tight' | 'medium' | 'large';
   speed?: number; // px per second
   direction?: 'left' | 'right' | 'up' | 'down' | 'auto';
+  /** Pause while the pointer is over the strip. @default true */
   pauseOnHover?: boolean;
   ariaLabel?: string;
   // Framework-quality additions
   reducedMotion?: 'respect' | 'ignore';
   behavior?: 'bounce' | 'infinite' | 'auto';
+  /** Pause while focus is inside the strip (keyboard users reading an item). @default true */
   pauseOnFocusWithin?: boolean;
   easing?: 'linear' | 'ease-in-out' | 'ease-out';
 };
@@ -254,12 +256,10 @@ function Marquee<T = unknown>({
   return (
     <div
       ref={containerRef}
-      className={cn(
-        'dndev-relative dndev-overflow-hidden',
-        pauseOnHover && 'group',
-        pauseOnFocusWithin && 'focus-within:group',
-        className
-      )}
+      className={cn('dndev-relative dndev-overflow-hidden', className)}
+      // Pause hooks read by Marquee.css, one per prop
+      data-marquee-pause-hover={pauseOnHover || undefined}
+      data-marquee-pause-focus={pauseOnFocusWithin || undefined}
       role="region"
       aria-label={
         ariaLabel ||

@@ -243,7 +243,9 @@
   /* Interactive shadows */
   --shadow-interactive: 0 0 0 3px
     color-mix(in oklab, var(--ring) 20%, transparent);
-  --shadow-focus: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+  /* Solid ring: WCAG 2.4.13 AAA needs a 3:1 change against the unfocused
+     state (a 50% mix gave 2.37:1 with the default blue on white) */
+  --shadow-focus: 0 0 0 3px var(--ring);
   --shadow-none: none;
 
   /* ===========================

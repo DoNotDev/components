@@ -37,6 +37,11 @@
   }
 }
 
+/* Field in error (ui FormLabel sets data-state, same hook as .dndev-field-message) */
+.dndev-label-base[data-state='error'] {
+  color: var(--destructive);
+}
+
 .dndev-label-icon {
   width: var(--icon-md);
   height: var(--icon-md);

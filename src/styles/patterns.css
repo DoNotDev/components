@@ -736,12 +736,19 @@
     border-radius: 50%;
     background: currentColor;
     pointer-events: none;
-    animation: dndev-ripple var(--dur-slow) var(--ease-in-out) forwards;
+    animation: dndev-ripple var(--dur-slow) var(--ease-heavy) forwards;
   }
 
+  /* No ripple on controls without a fill: it would paint a background they do not have */
   &[data-variant='ghost'],
-  &[data-variant='link'] {
+  &[data-variant='link'],
+  &[data-role='accordion-trigger'] {
     --ripple-opacity: 0;
+  }
+
+  /* No press shrink on the full-width accordion row: the chevron and the opening are its feedback */
+  &[data-role='accordion-trigger'] {
+    --click-scale: 1;
   }
 
   /* Icon-only square. Not in menu panels: their labels are always visible (DropdownMenu.css) */

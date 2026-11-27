@@ -58,10 +58,7 @@ export interface SeparatorProps extends ComponentProps<
  * <Separator orientation="horizontal" />
  *
  * // Vertical separator
- * <Separator orientation="vertical" className="h-10" />
- *
- * // Custom width (edge case - use className)
- * <Separator className="w-full" />
+ * <Separator orientation="vertical" />
  * ```
  * @param {SeparatorProps} props - The props for the separator
  * @returns {JSX.Element} The rendered separator

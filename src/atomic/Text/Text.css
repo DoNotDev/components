@@ -30,6 +30,13 @@
     text-decoration-line: line-through;
   }
 
+  /* A Text inside another Text, with no level and no weight of its own, is a run of
+     its parent's text (a coloured phrase in a heading): it keeps the parent's weight
+     instead of the medium default. `strong` keeps its semibold. */
+  & &:not([data-level], [data-font-weight], strong) {
+    font-weight: inherit;
+  }
+
   /* A link in running text must be told apart by more than colour (WCAG 1.4.1).
      base.css strips the underline from every anchor; framework controls
      (.dndev-interactive) keep their own look. Same values as Button variant="link".
@@ -121,6 +128,16 @@
   &[data-level='h4'] {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
+  }
+
+  &[data-level='h5'] {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  &[data-level='h6'] {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
   }
 
   &[data-level='body'] {

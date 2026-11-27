@@ -25,7 +25,7 @@ These are the only ways one should handle layout to get to quick results functio
 - **Card** - Premium card component with title, content, footer, and elevation variants.
   - **Navigation with middle-click support:** Wrap Card in Link component for navigation that supports middle-click (opens in new tab). See navigation section below.
 - **DualCard** - Side-by-side card layout for comparison or feature showcases.
-- **Text** - Typography component with semantic text variants. `<Text as="h2" level="body">` keeps the h2 element but renders as body text: body size and body font, no heading case or tracking (an explicit `level` always emits `data-level`; same for `small` / `caption`). `as="s"` renders a struck-through `<s>` (a former price beside the new one; no inline style).
+- **Text** - Typography component with semantic text variants. `<Text as="h2" level="body">` keeps the h2 element but renders as body text: body size and body font, no heading case or tracking (an explicit `level` always emits `data-level`; same for `small` / `caption`). `as="s"` renders a struck-through `<s>` (a former price beside the new one; no inline style). Levels h1-h6 each have their own size and weight (h5 `--font-size-sm`, h6 `--font-size-xs`, both semibold). A Text nested in another Text with no `level` / `weight` keeps its parent's weight.
 - **Blockquote** - Styled blockquote for citations and testimonials.
 - **List** - Bullet points, numbered lists, and feature lists with zero CSS. Use `icon` prop for custom icons, `icon={null}` for plain bullets. `ordered` numbers the items (`1.`, a CSS counter: items are flex rows, which have no native marker). Icon-less items of an unordered list draw their own bullet (`•`) for the same reason; items with an icon keep the icon.
 - **DescriptionList** - Key-value pairs and metadata using semantic HTML (dl, dt, dd).
@@ -80,7 +80,7 @@ These are the only ways one should handle layout to get to quick results functio
 ## Navigation Components
 
 - **Tabs** - Tabbed interface with props-based API and full keyboard navigation.
-- **Accordion** - Vertically stacked headings that reveal content sections. Closed items stay in the server HTML (crawlable), hidden with `display: none` (not focusable or announced; their effects run while closed). Opening fades in (no height slide); collapsing is instant.
+- **Accordion** - Vertically stacked headings that reveal content sections. Closed items stay in the server HTML (crawlable), hidden with `visibility: hidden` once collapsed (not focusable or announced; their effects run while closed). Opening and closing animate the height and opacity.
 - **NavigationMenu** - Props-based navigation menu with nested menus and rich content. Item `active: true` marks the current page (`aria-current="page"` + `data-active="true"` on its link, accent background). Sub-menu lists have no bullets.
 - **Pagination** - Accessible pagination with page number generation and ellipsis. Rows per page: 25 (`DEFAULT_TABLE_PAGE_SIZE`), 50, 100 below the total (`TABLE_PAGE_SIZES`), and "all"; the current size is always a choice. Labels default to `dndev:pagination.*` (previous, next, itemsPerPage, showing, all, pageNumber, label); props override.
 - **Command** - Command palette component for keyboard navigation and search.

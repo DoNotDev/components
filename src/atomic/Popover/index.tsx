@@ -68,7 +68,7 @@ export interface PopoverProps {
  * @example
  * ```tsx
  * <Popover trigger={<Button>Open</Button>}>
- *   <div className="p-4">Popover content</div>
+ *   <Text>Popover content</Text>
  * </Popover>
  * ```
  * @param {PopoverProps} props - The props for the popover

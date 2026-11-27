@@ -28,8 +28,8 @@
     transform: none !important;
   }
 
-  .group:hover &,
-  .group:focus-within & {
+  [data-marquee-pause-hover]:hover &,
+  [data-marquee-pause-focus]:focus-within & {
     animation-play-state: paused;
   }
 }

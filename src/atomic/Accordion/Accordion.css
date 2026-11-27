@@ -20,7 +20,6 @@
 .dndev-interactive[data-role='accordion-trigger'] {
   flex: 1;
   min-width: 0;
-  min-height: auto;
   padding: var(--gap-md) 0;
   justify-content: space-between;
   background: transparent;
@@ -53,19 +52,36 @@
   text-align: start;
 }
 
-.dndev-accordion-content[data-state='open'] {
-  /* Fade only (shared fade-in keyframes, animations.css): no height slide, no
-     measured height needed; base.css shortens it under prefers-reduced-motion */
-  animation: fade-in var(--dur-normal) var(--ease-in-out);
+/*
+ * Collapse layer. Closed content stays mounted (forceMount: in the server HTML
+ * for crawlers). The height animates with one grid row, 1fr (open) / 0fr
+ * (closed): no measured height. Closed = visibility:hidden (not visible,
+ * focusable or announced): a visibility transition stays visible until its end,
+ * so it hides once collapsed and shows at once on open. Browsers that cannot
+ * animate grid tracks open and close instantly; base.css makes it instant under
+ * prefers-reduced-motion. No data-state (asChild): open.
+ */
+.dndev-accordion-content-grid {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  transition:
+    grid-template-rows var(--dur-normal) var(--ease-in-out),
+    opacity var(--dur-normal) var(--ease-in-out),
+    visibility var(--dur-normal) var(--ease-in-out);
 }
 
-/*
- * Closed content stays mounted (forceMount: in the server HTML for crawlers)
- * and is hidden here: display:none = not visible, focusable or announced.
- * Opening fades in; closing is instant. Same as Tabs inactive panels.
- */
-.dndev-accordion-content[data-state='closed'] {
-  display: none;
+.dndev-accordion-content[data-state='closed'] > .dndev-accordion-content-grid {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* The grid item: shrinks to 0 in a 0fr row; padding lives inside it (inner) */
+.dndev-accordion-content-clip {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .dndev-accordion-content-inner {

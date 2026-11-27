@@ -63,10 +63,10 @@ const AccordionTriggerPrimitive = ({
 
 /**
  * Accordion item content. Always mounted (`forceMount`): closed content stays
- * in the server HTML (crawlable) and `.dndev-accordion-content[data-state='closed']`
- * hides it (`display: none`: not visible, focusable or announced). Children
- * mount (and run their effects) while closed. Opening fades in (no height
- * slide); closing is instant.
+ * in the server HTML (crawlable). Children mount (and run their effects) while
+ * closed. Opening and closing animate the height and opacity with one grid row
+ * (`0fr` ↔ `1fr`, Accordion.css: no measured height); closed content is
+ * `visibility: hidden` once collapsed (not visible, focusable or announced).
  */
 const AccordionContentPrimitive = ({
   className,
@@ -79,16 +79,19 @@ const AccordionContentPrimitive = ({
   const Comp = asChild ? Slot : RadixAccordion.Content;
   return (
     <Comp
-      className={cn(
-        'dndev-accordion-content',
-        'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
-        className
-      )}
+      className={cn('dndev-accordion-content', className)}
       {...rest}
       // asChild renders a bare Slot (no Radix Content): nothing to force-mount
       forceMount={asChild ? undefined : true}
     >
-      <div className="dndev-accordion-content-inner">{children}</div>
+      {/* Collapse layer (Accordion.css). On a child: Radix sets an inline
+          transition-duration: 0s on Content while measuring, which cancels a
+          transition on Content itself */}
+      <div className="dndev-accordion-content-grid">
+        <div className="dndev-accordion-content-clip">
+          <div className="dndev-accordion-content-inner">{children}</div>
+        </div>
+      </div>
     </Comp>
   );
 };

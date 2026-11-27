@@ -43,6 +43,12 @@ function mount() {
   return { contents, triggers };
 }
 
+/** Visibility of a region's collapse layer (the element the CSS hides). */
+const shown = (content: HTMLElement) =>
+  getComputedStyle(
+    content.querySelector<HTMLElement>(':scope > .dndev-accordion-content-grid')!
+  ).visibility;
+
 describe('Accordion closed content', () => {
   it.each(['single', 'multiple'] as const)('is in the server HTML (%s)', (type) => {
     const html = renderToString(<Accordion type={type} items={items} />);
@@ -51,12 +57,14 @@ describe('Accordion closed content', () => {
     expect(html.match(/data-state="closed"[^>]*role="region"/g)).toHaveLength(2);
   });
 
-  it('is hidden by CSS while closed (display:none: not focusable, not announced)', () => {
+  it('is collapsed and hidden by CSS while closed (visibility:hidden: not focusable, not announced)', () => {
     const { contents } = mount();
     expect(contents).toHaveLength(2);
     for (const content of contents) {
       expect(content.getAttribute('data-state')).toBe('closed');
-      expect(getComputedStyle(content).display).toBe('none');
+      const grid = content.querySelector<HTMLElement>(':scope > .dndev-accordion-content-grid')!;
+      expect(getComputedStyle(grid).visibility).toBe('hidden');
+      expect(getComputedStyle(grid).gridTemplateRows).toBe('0fr');
     }
   });
 
@@ -64,12 +72,12 @@ describe('Accordion closed content', () => {
     const { contents, triggers } = mount();
     act(() => triggers[0].click());
     expect(triggers[0].getAttribute('aria-expanded')).toBe('true');
-    expect(getComputedStyle(contents[0]).display).not.toBe('none');
-    expect(getComputedStyle(contents[1]).display).toBe('none');
+    expect(shown(contents[0])).not.toBe('hidden');
+    expect(shown(contents[1])).toBe('hidden');
     act(() => triggers[1].click());
-    expect(getComputedStyle(contents[0]).display).toBe('none');
-    expect(getComputedStyle(contents[1]).display).not.toBe('none');
+    expect(shown(contents[0])).toBe('hidden');
+    expect(shown(contents[1])).not.toBe('hidden');
     act(() => triggers[1].click());
-    expect(getComputedStyle(contents[1]).display).toBe('none');
+    expect(shown(contents[1])).toBe('hidden');
   });
 });

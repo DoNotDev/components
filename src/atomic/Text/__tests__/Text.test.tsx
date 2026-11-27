@@ -111,3 +111,38 @@ describe('Text underline / lines', () => {
     expect(css).toMatch(/&\[data-underline\]\s*\{\s*text-decoration-line: underline/);
   });
 });
+
+describe('Text h5 / h6 levels', () => {
+  it('CSS gives h5 and h6 their own size and weight (not the element reset size)', () => {
+    const css = readFileSync(resolve(__dirname, '../Text.css'), 'utf8');
+    expect(css).toMatch(
+      /&\[data-level='h5'\]\s*\{\s*font-size: var\(--font-size-sm\);\s*font-weight: var\(--font-weight-semibold\);/
+    );
+    expect(css).toMatch(
+      /&\[data-level='h6'\]\s*\{\s*font-size: var\(--font-size-xs\);\s*font-weight: var\(--font-weight-semibold\);/
+    );
+  });
+});
+
+describe('Text nested in Text', () => {
+  it('CSS keeps the parent weight for a nested Text with no level / weight (strong excepted)', () => {
+    const css = readFileSync(resolve(__dirname, '../Text.css'), 'utf8');
+    expect(css).toMatch(
+      /& &:not\(\[data-level\], \[data-font-weight\], strong\)\s*\{\s*font-weight: inherit;/
+    );
+  });
+
+  it('a nested span with no level / weight carries neither data-level nor data-font-weight', () => {
+    const { container } = render(
+      <Text as="h1">
+        a{' '}
+        <Text as="span" variant="accent">
+          b
+        </Text>
+      </Text>
+    );
+    const span = container.querySelector('h1 span');
+    expect(span?.hasAttribute('data-level')).toBe(false);
+    expect(span?.hasAttribute('data-font-weight')).toBe(false);
+  });
+});
