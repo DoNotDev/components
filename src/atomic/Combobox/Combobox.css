@@ -132,18 +132,31 @@
   cursor: not-allowed;
 }
 
+/* Three states, each told apart: under the pointer / keyboard = accent fill with its paired
+   foreground; selected = check, medium weight and a 10% accent tint, text on the surface's
+   foreground; selected and under the pointer = the fill, check in the paired foreground. */
 .dndev-combobox-option-highlighted:not(:disabled) {
   background-color: var(--accent);
-  opacity: var(--opacity-strong);
 }
 
 .dndev-combobox-option-selected {
   font-weight: var(--font-weight-medium);
-  background-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.dndev-combobox-option-selected.dndev-combobox-option-highlighted {
+.dndev-combobox-option-selected.dndev-combobox-option-highlighted:not(:disabled) {
   background-color: var(--accent);
+}
+
+/* Every text and the check on the accent fill take its paired foreground. */
+.dndev-combobox-option-highlighted:not(:disabled)
+  :is(
+    .dndev-combobox-option-label,
+    .dndev-combobox-option-description,
+    .dndev-combobox-option-count,
+    .dndev-combobox-option-check
+  ) {
+  color: var(--accent-foreground);
 }
 
 .dndev-combobox-option-content {

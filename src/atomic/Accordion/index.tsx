@@ -69,6 +69,8 @@ export interface AccordionProps {
   gridCols?: GridCols;
   /** Additional CSS classes */
   className?: string;
+  /** CSS class added to each item (`.dndev-accordion-item`) */
+  itemClassName?: string;
 }
 
 /**
@@ -105,6 +107,7 @@ const Accordion = ({
   titleAs = 'h3',
   gridCols,
   className,
+  itemClassName,
 }: AccordionProps) => {
   // gridCols: the root reuses Grid's class, attributes and column mapping
   // (Grid.css); absent = today's single column, same DOM.
@@ -125,6 +128,7 @@ const Accordion = ({
     gridCols && 'dndev-grid-component',
     className
   );
+  const itemClass = cn('dndev-accordion-item', itemClassName);
 
   // Handle type narrowing for Radix's union types
   if (type === 'multiple') {
@@ -141,7 +145,7 @@ const Accordion = ({
           <AccordionItemPrimitive
             key={item.value}
             value={item.value}
-            className="dndev-accordion-item"
+            className={itemClass}
           >
             <AccordionTriggerPrimitive
               titleAs={titleAs}
@@ -172,7 +176,7 @@ const Accordion = ({
         <AccordionItemPrimitive
           key={item.value}
           value={item.value}
-          className="dndev-accordion-item"
+          className={itemClass}
         >
           <AccordionTriggerPrimitive
               titleAs={titleAs}

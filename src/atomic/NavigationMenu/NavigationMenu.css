@@ -87,6 +87,38 @@
   background-color: rgb(from var(--accent) r g b / 0.5);
 }
 
+/* Active page in the header row: an `--accent` underline instead of the fill (the UnderlineNav pattern:
+   a bar across the item's width at its bottom edge, label in semibold so the state does not
+   rest on colour alone; `aria-current="page"` is set by the links). Only links inside the
+   header itself: the overflow dropdown, sub-menus and burger panels are portaled out of it and
+   keep the fill, as the sidebar does. */
+header[role='banner']
+  :is(
+    .dndev-interactive[data-role='menu-item'],
+    .dndev-interactive.dndev-button,
+    .dndev-nav-menu-item-container
+  )[data-active='true'],
+header[role='banner'] .dndev-interactive.dndev-button[data-active='true']:hover,
+header[role='banner'] .dndev-interactive[data-role='nav-trigger'][data-active='true'] {
+  background-color: transparent;
+  font-weight: var(--font-weight-semibold);
+}
+
+header[role='banner']
+  :is(
+    .dndev-interactive[data-role='menu-item'],
+    .dndev-interactive.dndev-button,
+    .dndev-interactive[data-role='nav-trigger']
+  )[data-active='true']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: var(--border-width);
+  background-color: var(--accent);
+  pointer-events: none;
+}
+
 .dndev-nav-menu-trigger-icon {
   position: relative;
   top: 1px;
